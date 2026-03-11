@@ -1,0 +1,497 @@
+# 7 Days to Minecraft — Complete Production-Ready Specification
+
+> **Mod ID**: `sevendaystominecraft` | **Loader**: NeoForge 1.21+ | **Single JAR, zero dependencies**
+
+---
+
+## Table of Contents (Full Spec)
+
+| Part | Sections | File |
+|------|----------|------|
+| **Part 1** | 1–7 (Core Survival, Worldgen, Zombies, Hordes, Skills, Crafting, Building) | This file |
+| **Part 2** | 8–15 (Loot, Traders, Vehicles, Electricity, Weapons, Farming, UI, Polish) | `7dtm_spec_part2.md` |
+| **Part 3** | 16–19 (Mixin Targets, Balancing Formulas, Code Snippets, Roadmap) | `7dtm_spec_part3.md` |
+
+---
+
+# PART 1 — CORE SYSTEMS (Sections 1–7)
+
+---
+
+## 1. Core Survival & Character Systems
+
+**Goal**: Completely replace vanilla hunger, health, and saturation with a 7DTD-style multi-resource survival system.
+
+### 1.1 Player Stats
+
+| Stat | Default Max | Regen Rate | Drain Conditions | Mixin Target |
+|------|------------|------------|------------------|--------------|
+| **Health** | 100 (+ 10/level to 200 cap) | 0.5/sec when Food>50% & Water>50% | Combat damage, fall, fire, infection, radiation | `LivingEntity.hurt()`, `Player.getFoodData()` |
+| **Stamina** | 100 (+ 5/perk) | 8/sec at rest; 4/sec while walking | Sprint (−10/s), melee swing (−8–25), mining (−5/swing), jump (−8) | New capability on `Player` |
+| **Food (Fullness)** | 100 | — | Passive drain −0.2/min + activity multiplier | Override `FoodData` entirely |
+| **Water (Hydration)** | 100 | — | Passive drain −0.3/min + heat biome multiplier (×1.5 desert) | New stat in custom `FoodData` |
+| **Core Temperature** | 70°F baseline | Adjusts ±2°F/sec toward ambient | Biome, altitude, time of day, clothing, fires, wetness | New system; no vanilla equivalent |
+
+**Starvation/Dehydration cascade:**
+- Food < 30 → stamina regen halved.
+- Food < 10 → health drains −0.5/sec.
+- Food = 0 → health drains −2/sec, movement −40%.
+- Water follows identical thresholds with separate tracking.
+
+### 1.2 Health Conditions & Debuffs
+
+| Condition | Trigger | Effect | Cure | Duration |
+|-----------|---------|--------|------|----------|
+| **Bleeding** | Melee hit (30% chance per zombie hit) | −1 HP/3sec | Bandage, First Aid Bandage | Until cured or death |
+| **Infection (Stage 1)** | Zombie hit (10% base, +5%/feral) | Stamina regen −25% | Honey, Herbal Antibiotics | 24h → Stage 2 |
+| **Infection (Stage 2)** | Untreated Stage 1 | −0.5 HP/sec, vision blur | Antibiotics only | 24h → death |
+| **Dysentery** | Drinking murky water (100%), raw meat (40%) | Water drains ×3, food drains ×2 | Goldenrod Tea + rest | 60 min |
+| **Sprain** | Fall 4–7 blocks | Movement −30% | Splint | 30 min after splint |
+| **Fracture** | Fall 8+ blocks | Movement −60%, no sprint | Plaster Cast (Splint + Duct Tape) | 60 min after cast |
+| **Concussion** | Explosion within 3 blocks | Screen shake, aim sway +50% | Time only | 45 sec |
+| **Burn** | Fire/lava contact, Molotov | −2 HP/sec while active, then −0.5/sec lingering | Aloe Cream | 10 sec active + 20 sec linger |
+| **Hypothermia** | Core Temp < 32°F for 120sec | Stamina drain ×2, movement −20% | Warm clothing, campfire proximity | Until temp > 50°F |
+| **Hyperthermia** | Core Temp > 110°F for 120sec | Water drain ×3, stamina drain ×1.5 | Shade, cold drinks, remove clothing layers | Until temp < 100°F |
+| **Radiation** | Wasteland biome exposure | −1 HP/5sec, max health reduces by 1/30sec | Rad-Away pills + leave zone | Until cured |
+| **Stunned** | Cop zombie bile, Demolisher blast | No movement 2sec | None | 2 sec |
+
+**Debuff stacking rules:**
+- Multiple bleeds: Damage stacks (max 3 stacks = −1 HP/sec).
+- Infection + Dysentery: Both apply independently.
+- Fracture overrides Sprain (worse replaces lesser on same limb).
+- All debuffs render as HUD icons with countdown timers.
+- Visual effects: Bleeding = red vignette pulse; Infection = green tint + cough particles; Dysentery = stomach gurgle audio; Fracture = limping animation override.
+
+### 1.3 Heatmap System
+
+The Heatmap is an invisible per-chunk value (0–100) that drives enemy spawns.
+
+**Heat sources:**
+
+| Activity | Heat/Event | Radius (chunks) | Decay Rate |
+|----------|-----------|-----------------|------------|
+| Gunshot | +15 | 6 | −2/min |
+| Forge running | +3/min (capped +30) | 4 | −1/min |
+| Campfire | +1/min (capped +10) | 2 | −1/min |
+| Mining (per block) | +0.5 | 3 | −2/min |
+| Sprinting | +0.2/sec | 2 | −3/min |
+| Torch placement | +2 (one-time) | 1 | −1/min |
+| Vehicle engine | +5/sec | 5 | −2/min |
+| Screamer scream | +40 (instant) | 8 | −1/min |
+| Explosion | +25 | 6 | −2/min |
+
+**Spawn thresholds:**
+- Heat 25+: Scout zombies begin investigating (1–2 wanderers).
+- Heat 50+: Screamer spawns guaranteed within 60 sec.
+- Heat 75+: Mini-horde (8–12 zombies) spawns from nearest dark area.
+- Heat 100: Continuous wave spawns every 90 sec until heat decays below 75.
+
+**Config**: `heatmap.enabled` (bool, default true), `heatmap.decayMultiplier` (float, 0.1–5.0, default 1.0), `heatmap.spawnThresholdMultiplier` (float, 0.5–3.0, default 1.0).
+
+### 1.4 Character Level & XP
+
+**XP Sources:**
+
+| Activity | Base XP | Multiplier |
+|----------|---------|------------|
+| Zombie kill | 150 | ×1.0 feral, ×1.5 radiated, ×3.0 demolisher |
+| Animal kill | 50–200 (by type) | — |
+| Block mined | 1–5 (by hardness) | — |
+| Item crafted | 5–50 (by complexity) | ×1.5 if first time |
+| Quest completed | 200–2000 | Tier multiplier |
+| Loot container opened (first time) | 10–30 | — |
+| POI cleared | 500–3000 | By tier |
+
+**Leveling formula:** `XP_to_next = floor(1000 × level ^ 1.05)` — Level 1→2 = 1000 XP, Level 50→51 = ~72,400 XP, soft cap at level 300 (XP still gained but marginal).
+
+Each level-up grants **1 perk point**. Every 10 levels grants **1 bonus attribute point**.
+
+---
+
+## 2. World Generation & Biomes
+
+**Goal**: Replace the entire Overworld with a post-apocalyptic 7DTD landscape. Disable Nether/End portals (config option to re-enable).
+
+### 2.1 Biome Definitions
+
+| Biome | Temperature | Zombie Density | Loot Tier | Special Features |
+|-------|------------|---------------|-----------|------------------|
+| **Pine Forest** | 50–70°F | Low (spawn rate ×0.6) | 1–3 | Starter-friendly, deer/rabbits, log cabins |
+| **Forest** | 55–75°F | Medium (×1.0) | 2–4 | Mixed POIs, small towns, varied wildlife |
+| **Plains** | 60–85°F | Medium (×1.0) | 2–4 | Wide open, farms, wind exposure (+cold at night) |
+| **Desert** | 85–130°F | Medium (×1.2) | 3–5 | Water scarcity, oil shale deposits, rattlesnake mobs |
+| **Snowy (Tundra)** | −10–32°F | Low-Med (×0.8) | 3–5 | Hypothermia risk, wolves, igloos/bunkers |
+| **Burned Forest** | 70–90°F | High (×1.5) | 3–5 | Ash particles, dead trees, charred buildings, embers deal damage |
+| **Wasteland** | 80–110°F + radiation | Extreme (×2.5) | 5–6 | Radiation zones, feral-only spawns, military POIs, best loot |
+
+### 2.2 City & POI Generation
+
+**City generation pipeline:**
+1. Voronoi partition world into "regions" (2048×2048 blocks).
+2. Each region rolls city density: 0 (wilderness), 1 (hamlet, 5–10 POIs), 2 (town, 20–50 POIs), 3 (city, 100–300 POIs).
+3. Generate road grid (main roads 5-wide asphalt, side streets 3-wide).
+4. Place POIs from template pool along roads with setback rules.
+5. Fill remaining lots with parking lots, parks, rubble.
+
+**POI template system:**
+- Templates stored as `.nbt` structure files in `/data/sevendaystominecraft/structures/pois/`.
+- Each template has metadata JSON: `tier` (1–5), `biomes` (allowed), `size` (footprint), `lootContainers` (list of positions + loot table IDs), `zombieSpawnPoints` (positions + variant weights), `questTarget` (bool — can be used in fetch/clear quests).
+- Templates are rotatable (0/90/180/270) and mirror-able.
+- ~300 templates at launch; framework supports data packs for community templates.
+
+**POI categories (minimum set):**
+
+| Category | Count | Examples |
+|----------|-------|---------|
+| Residential | 60+ | Suburban houses (10 variants), apartments, trailer parks, cabins |
+| Commercial | 50+ | Gas stations, grocery stores, pharmacies, bars, gun shops, hardware stores |
+| Industrial | 30+ | Factories, warehouses, water treatment, power plants |
+| Civic | 20+ | Police stations, fire departments, hospitals, schools, churches |
+| Military | 15+ | Army bases, bunkers, checkpoints, crashed helicopters |
+| Wilderness | 25+ | Caves, mineshafts, campgrounds, ranger stations, hunting blinds |
+| Special | 10+ | Trader compounds, quest-only POIs, boss lairs |
+
+### 2.3 Terrain & Block Palette
+
+- **Surface blocks**: Asphalt, concrete sidewalks, dirt road, gravel, sand, snow layer, ash.
+- **Building blocks**: Drywall, brick, commercial metal, corrugated iron, rebar concrete, bulletproof glass, steel plates.
+- **Decorative/loot**: Filing cabinets, desks, refrigerators, couches, beds, bookshelves, medicine cabinets, gun safes, car wrecks (all function as containers).
+- **Natural**: Ore nodes (iron, lead, nitrate, coal, oil shale, diamond/tungsten) replace vanilla ores with 7DTD equivalents.
+
+### 2.4 Structural Integrity (SI)
+
+Every block has a Structural Integrity value:
+
+| Material | SI (Max Support) | Weight | Horizontal Span |
+|----------|-----------------|--------|-----------------|
+| Wood Frame | 10 | 1 | 3 blocks |
+| Cobblestone | 30 | 3 | 5 blocks |
+| Concrete | 60 | 5 | 8 blocks |
+| Reinforced Concrete | 80 | 6 | 10 blocks |
+| Steel | 100 | 8 | 15 blocks |
+
+- Blocks not supported collapse after 0.5 sec delay (cascade possible).
+- SI checked on block break/place using BFS from ground-connected pillars.
+- **Config**: `structuralIntegrity.enabled` (bool, default true), `structuralIntegrity.collapseDelay` (ticks, default 10).
+
+### 2.5 Voxel Destruction
+
+- Every block is destructible (no bedrock except at y=−64).
+- Block HP by material tier: Wood 100 → Cobble 500 → Concrete 1500 → Reinforced 3000 → Steel 5000.
+- Explosions use spherical damage falloff: `damage = baseDamage × (1 − distance/radius)^2`.
+- Damage persists across sessions (no vanilla block regeneration).
+- **Mixin target**: `ServerLevel.destroyBlock()`, `Block.getDestroyProgress()`.
+
+---
+
+## 3. Mobs, Zombies & AI
+
+**Goal**: Replace ALL vanilla hostile mobs with 7DTD zombie variants. Vanilla animals partially replaced.
+
+### 3.1 Zombie Variants
+
+| Variant | HP | Damage | Speed (blocks/s) | Special | Spawn Day | Loot |
+|---------|-----|--------|-------------------|---------|-----------|------|
+| **Walker** | 100 | 8 | 1.0 | Basic, slow | 1+ | Rotten flesh, cloth |
+| **Crawler** | 60 | 10 | 0.8 | Low profile, hard to hit | 1+ | Cloth, bones |
+| **Frozen Lumberjack** | 150 | 12 | 0.9 | Snow biome exclusive | 1+ | Wood, nails |
+| **Bloated Walker** | 200 | 10 | 0.7 | Explodes on death (2-block radius) | 3+ | Rotten flesh, fat |
+| **Spider Zombie** | 120 | 14 | 1.8 | Climbs walls, jumps 3 blocks | 5+ | Acid, spider gland |
+| **Feral Wight** | 300 | 20 | 2.5 | Always sprints, glowing eyes | 7+ | Iron, mechanical parts |
+| **Cop** | 350 | 15 melee, 25 bile ranged | 1.2 | Acid spit (8-block range, 3sec CD), explodes at 20% HP | 14+ | Acid, pistol parts |
+| **Screamer** | 80 | 5 | 1.5 | Screams at heat>25 → spawns 4–8 zombies, flees player | 7+ | Cloth, antibiotics |
+| **Zombie Dog** | 80 | 18 | 3.5 | Pack spawns (3–5), fast, no climb | 3+ | Bones, animal fat |
+| **Vulture** | 60 | 12 | 4.0 (flying) | Dive attacks, hard to hit | 7+ | Feathers, rotten flesh |
+| **Demolisher** | 800 | 30 | 1.0 | C4 vest: explodes if chest hit (8-block radius); must headshot | 21+ | Mechanical parts, explosives |
+| **Radiated variants** | ×2 HP | ×1.5 dmg | ×1.3 speed | Green glow, regen 2 HP/sec, radiated loot table | 28+ | Rare schematics, advanced parts |
+| **Zombie Bear** | 600 | 35 | 2.0 | Charges, AoE swipe | 14+ | Animal fat, bones, meat |
+| **Nurse** | 120 | 10 | 1.0 | Heals nearby zombies 5 HP/sec in 5-block radius | 7+ | First aid, painkillers |
+| **Soldier** | 400 | 25 | 1.5 | Military loot, higher block damage | 14+ | Ammo, weapon parts |
+| **Behemoth** (Boss) | 2000 | 50 | 0.8 | Immune to knockback, AoE ground pound (6-block radius) | 35+ (rare) | Unique schematics, tier 6 items |
+
+### 3.2 Zombie AI System
+
+**Priority-based behavior tree:**
+```
+Root (Selector)
+├── [1] Flee → only Screamer when player within 5 blocks after screaming
+├── [2] Attack Target → if player/block in range
+│   ├── Melee attack (within 2 blocks)
+│   ├── Ranged attack (Cop bile, if >4 blocks)
+│   └── Block destruction (pathfind to player, destroy blocks in path)
+├── [3] Investigate → move toward heat source / last known player pos
+├── [4] Horde Path → during Blood Moon, path to player using A* with block-break cost
+└── [5] Wander → random movement within spawn chunk
+```
+
+**Pathfinding details:**
+- Custom A* implementation with block-break cost function: `cost = baseCost + (blockHP / zombieDamage) × timeMultiplier`.
+- Zombies prefer paths through weakest blocks (wood doors > windows > drywall > concrete).
+- During Blood Moon, zombies receive global pathing toward nearest player with 64-block scan radius, expanded to 128 on day 21+.
+- Spider Zombies add vertical edges (wall climb) to pathfinding graph.
+- Group coordination: When 3+ zombies target same block, damage stacks (simulating coordinated bashing).
+
+**Spawning rules:**
+- Day: Zombies spawn in dark areas, indoors POIs, underground. Outdoor spawns only biome wanderers (low density).
+- Night (18:00–06:00): Spawn rate ×3, all zombies sprint-capable gain +50% speed.
+- Blood Moon: Override all spawn rules. Dedicated horde spawner activates.
+- Spawn cap: `maxZombies = baseMax + (dayNumber × 2)` capped at config max (default 64 per player, configurable 16–256).
+
+### 3.3 Animals
+
+| Animal | HP | Behavior | Drops |
+|--------|-----|----------|-------|
+| **Deer** | 80 | Flees on sight (24-block range) | Raw Venison (×3), Bone (×2), Animal Hide (×2) |
+| **Rabbit** | 15 | Flees on sound | Raw Rabbit (×1), Bone (×1) |
+| **Chicken** | 10 | Wanders, farmable | Raw Chicken, Feather, Egg (if alive, 1/day) |
+| **Boar** | 150 | Neutral → hostile if hit | Raw Pork (×4), Animal Fat (×2), Bone (×3) |
+| **Wolf** | 120 | Hostile at night, neutral day | Raw Meat (×2), Animal Hide (×3), Bone (×2) |
+| **Bear** | 400 | Hostile at 12-block range | Raw Meat (×6), Animal Fat (×4), Bone (×5), Bear Hide |
+| **Snake** | 30 | Desert, attacks if stepped on | Venom Sac, Raw Meat (×1) |
+
+---
+
+## 4. Horde Nights / Blood Moon Events
+
+### 4.1 Blood Moon Mechanics
+
+**Trigger**: Every N days (config `hordeCycleLength`, default 7, range 1–30).
+
+**Timeline for a blood moon night:**
+
+| Time | Event |
+|------|-------|
+| 20:00 (day before) | "Horde Night Tomorrow" warning in chat + HUD icon |
+| 18:00 (horde day) | Sky turns red, fog thickens, ambient music shifts |
+| 18:30 | Warning siren sound effect |
+| 22:00 | **Horde spawning begins** — Wave 1 |
+| 22:00–04:00 | Waves every `waveInterval` minutes (default 10) |
+| 04:00 | Final wave (heaviest), spawning ends |
+| 06:00 | Dawn — sky clears, surviving zombies burn (configurable) or flee |
+
+### 4.2 Horde Scaling Formula
+
+```
+hordeSize = floor(baseCount × (1 + (dayNumber / hordeCycleLength) × difficultyMult) ^ 1.2)
+```
+
+| Config Key | Default | Range | Description |
+|------------|---------|-------|-------------|
+| `horde.baseCount` | 8 | 4–64 | Zombies in wave 1 on day 7 |
+| `horde.difficultyMultiplier` | 1.0 | 0.1–5.0 | Scales growth curve |
+| `horde.maxPerWave` | 64 | 16–256 | Hard cap per wave |
+| `horde.waveCount` | 4 | 1–12 | Number of waves per blood moon |
+| `horde.waveIntervalSec` | 600 | 120–1800 | Seconds between waves |
+| `horde.burnAtDawn` | true | bool | Surviving zombies burn at sunrise |
+| `horde.demolisherDay` | 21 | 7–100 | First day Demolishers appear in hordes |
+| `horde.feralDay` | 14 | 1–100 | First day Ferals appear in hordes |
+
+**Wave composition by day:**
+
+| Day | Walkers % | Crawlers % | Ferals % | Cops % | Demolishers % | Radiated % |
+|-----|-----------|------------|----------|--------|---------------|------------|
+| 7 | 70 | 20 | 10 | 0 | 0 | 0 |
+| 14 | 40 | 15 | 30 | 15 | 0 | 0 |
+| 21 | 20 | 10 | 30 | 20 | 15 | 5 |
+| 28+ | 10 | 5 | 25 | 20 | 15 | 25 |
+| 49+ | 5 | 5 | 20 | 15 | 20 | 35 |
+
+---
+
+## 5. Skills, Perks & Progression
+
+### 5.1 Attribute System
+
+5 attributes, each level 1–10. Cost: 1 attribute point per level. Points earned every 10 character levels + quest rewards.
+
+| Attribute | Governs | Key Unlocks |
+|-----------|---------|-------------|
+| **Strength** | Melee damage, carry weight, club/sledge proficiency | Tier 3: Steel tools, Tier 7: Machete master |
+| **Perception** | Ranged damage, awareness range, rifle/explosives | Tier 3: Scoped weapons, Tier 7: Sniper headshot bonus |
+| **Fortitude** | Health pool, disease resist, healing efficiency, fist/brawling | Tier 3: Iron Gut (no dysentery), Tier 7: Living Off the Land 3 |
+| **Agility** | Stamina pool, stealth, movement speed, knives/bows | Tier 3: Parkour (reduced fall dmg), Tier 7: Silent kill bonus |
+| **Intellect** | Crafting speed, XP gain, turret damage, better barter | Tier 3: Vehicles unlocked, Tier 7: Max-tier workstations |
+
+### 5.2 Perks (Full List — 100+ Perks)
+
+**Strength Tree:**
+
+| Perk | Max Rank | Requires | Effect per Rank |
+|------|----------|----------|-----------------|
+| Brawler | 5 | STR 1/2/3/5/7 | +10% fist/knuckle damage |
+| Pummel Pete | 5 | STR 1/2/4/6/8 | +10% club damage, rank 5: knockdown chance 25% |
+| Skull Crusher | 5 | STR 1/3/5/7/9 | +10% sledgehammer damage, +1 block damage |
+| Sexual Tyrannosaurus | 4 | STR 2/4/6/8 | −15% stamina cost on power attacks |
+| Master Chef | 4 | STR 1/3/5/7 | Unlock cooking recipes per rank |
+| Pack Mule | 4 | STR 1/3/5/7 | +10 slots carry capacity per rank |
+| Miner 69er | 5 | STR 1/2/4/6/8 | +15% mining speed, +1 block damage per rank |
+| Mother Lode | 3 | STR 3/5/7 | +20% ore yield per rank |
+
+**Perception Tree:**
+
+| Perk | Max Rank | Requires | Effect per Rank |
+|------|----------|----------|-----------------|
+| Archery | 5 | PER 1/2/3/5/7 | +10% bow/crossbow damage |
+| Gunslinger | 5 | PER 1/2/4/6/8 | +10% pistol damage, +5% reload speed |
+| Rifle Guy | 5 | PER 2/3/5/7/9 | +10% rifle/sniper damage |
+| Demolitions Expert | 5 | PER 1/3/5/7/9 | +20% explosive damage, +1 blast radius at rank 5 |
+| Lock Picking | 3 | PER 3/5/7 | Pick locks faster, higher tier locks |
+| Lucky Looter | 5 | PER 1/2/4/6/8 | +10% loot quality bonus per rank |
+| Treasure Hunter | 3 | PER 3/5/7 | Buried supply quests reward bonus loot |
+| Spear Master | 5 | PER 1/2/3/5/7 | +10% spear damage, +range at rank 5 |
+
+**Fortitude Tree:**
+
+| Perk | Max Rank | Requires | Effect per Rank |
+|------|----------|----------|-----------------|
+| Healing Factor | 5 | FOR 1/2/3/5/7 | +20% natural health regen |
+| Iron Gut | 3 | FOR 3/5/7 | Reduce food poisoning chance by 33% per rank |
+| Rule 1: Cardio | 3 | FOR 1/3/5 | +10% stamina regen, +5% sprint speed |
+| Living Off the Land | 3 | FOR 1/3/5 | +1 crop yield per rank from farming |
+| Pain Tolerance | 5 | FOR 1/2/4/6/8 | −10% damage taken per rank |
+| Heavy Armor | 5 | FOR 1/2/4/6/8 | −15% heavy armor movement penalty per rank |
+| Well Insulated | 3 | FOR 3/5/7 | ±10°F comfort zone expansion per rank |
+| Self-Medicated | 4 | FOR 2/4/6/8 | Medical items +25% effectiveness per rank |
+
+**Agility Tree:**
+
+| Perk | Max Rank | Requires | Effect per Rank |
+|------|----------|----------|-----------------|
+| Light Armor | 5 | AGI 1/2/4/6/8 | +10% light armor effectiveness |
+| Parkour | 4 | AGI 1/3/5/7 | −25% fall damage, +0.5 jump height at rank 4 |
+| Hidden Strike | 5 | AGI 1/2/4/6/8 | +20% sneak attack multiplier |
+| From the Shadows | 3 | AGI 3/5/7 | Reduce detection range by 20% per rank |
+| Deep Cuts | 5 | AGI 1/2/3/5/7 | +10% knife/blade damage |
+| Run and Gun | 3 | AGI 3/5/7 | −20% accuracy penalty while moving per rank |
+| Flurry of Blows | 5 | AGI 1/2/4/6/8 | +8% attack speed per rank |
+| Gunslinger (Agility) | 3 | AGI 3/5/7 | Dual-wield pistol accuracy bonus |
+
+**Intellect Tree:**
+
+| Perk | Max Rank | Requires | Effect per Rank |
+|------|----------|----------|-----------------|
+| Advanced Engineering | 5 | INT 1/2/4/6/8 | Unlock workstation tiers + craft quality bonus |
+| Grease Monkey | 5 | INT 1/3/5/7/9 | Unlock vehicle tiers: Bicycle→Minibike→Motorcycle→4x4→Gyrocopter |
+| Better Barter | 5 | INT 1/2/3/5/7 | −5% trader prices, +secret stock at rank 5 |
+| Daring Adventurer | 4 | INT 1/3/5/7 | Better quest rewards, +1 quest choice at rank 4 |
+| Physician | 4 | INT 2/4/6/8 | Craft advanced medical items (First Aid Kit, Antibiotics) |
+| Electrocutioner | 5 | INT 1/3/5/7/9 | +15% stun baton damage, +20% turret damage per rank |
+| Robotics Inventor | 5 | INT 3/5/7/8/10 | Junk turret/auto turret unlock + damage |
+| Charismatic Nature | 3 | INT 1/3/5 | +10% XP share range in multiplayer |
+
+### 5.3 Skill Books / Magazines
+
+- 120+ unique magazines grouped into 12 series (e.g., "Pistol Pete" issues #1–#7).
+- Each issue grants a permanent passive bonus (e.g., Pistol Pete #3: "+5% pistol reload speed").
+- Completing a full series grants a mastery bonus (e.g., all 7 Pistol Pete: "20% chance to not consume ammo").
+- Found as loot in mailboxes, bookshelves, POI desks, trader stock.
+- **Data format**: JSON registry per series with unlock effects.
+
+---
+
+## 6. Crafting, Scrapping & Workstations
+
+### 6.1 Crafting Grid
+
+Replace vanilla 3×3 with 4×4 crafting grid (crafting table and inventory both).
+
+**Mixin target**: `CraftingMenu`, `InventoryMenu` — expand `CraftingContainer` slot count from 9→16, adjust recipe matching.
+
+### 6.2 Quality Tiers
+
+| Tier | Color | Stat Multiplier | Craft Requirement |
+|------|-------|-----------------|-------------------|
+| 1 — Poor | Gray | ×0.7 | Any |
+| 2 — Good | Orange | ×0.85 | Skill 2+ |
+| 3 — Great | Yellow | ×1.0 | Skill 4+ | 
+| 4 — Superior | Green | ×1.15 | Skill 6+ + workstation |
+| 5 — Excellent | Blue | ×1.3 | Skill 8+ + advanced workstation |
+| 6 — Legendary | Purple | ×1.5 | Loot/quest only (not craftable) |
+
+**Quality affects**: damage, durability, armor rating, tool harvest amount, mod slot count (T1: 1 slot, T6: 4 slots).
+
+### 6.3 Workstations
+
+| Station | Unlock | Functions | Fuel |
+|---------|--------|-----------|------|
+| **Campfire** | Default | Cooking, boiling water, basic meds | Wood, coal |
+| **Grill** | Master Chef 2 | Advanced recipes (stews, grilled foods) | Wood, coal, gas |
+| **Workbench** | Default (basic), Adv Eng 3 (advanced) | Tools, weapons, armor, mods | — (hand-crafted) |
+| **Forge** | Adv Eng 1 | Smelt ores → ingots, forge items (anvil, nails, iron tools) | Wood, coal |
+| **Cement Mixer** | Adv Eng 2 | Cobblestone → concrete mix → concrete blocks | Electricity or fuel |
+| **Chemistry Station** | Physician 1 | Advanced meds, gunpowder, dyes, acid | — (chemistry) |
+| **Advanced Workbench** | Adv Eng 5 | Tier 5 weapons, turrets, vehicle parts | Electricity |
+
+### 6.4 Scrapping System
+
+Any item can be scrapped at a workbench or in-inventory (reduced yield):
+
+| Item Category | Scrap Output |
+|---------------|-------------|
+| Iron tool | Iron (×2–6), Mechanical Parts (×0–1) |
+| Gun | Gun parts (×1–3), Spring (×1), Scrap Iron (×2) |
+| Cloth armor | Cloth (×3–5), Leather (×1–2) |
+| Electronics | Electrical Parts (×1–3), Scrap Plastic (×1) |
+| Vehicles | Mechanical Parts (×5–15), Engine Parts (×1–3), Iron (×10+) |
+| Food (canned) | Empty Can (×1), Scrap Iron (×0–1) |
+
+### 6.5 Core Materials
+
+| Material | Source | Uses |
+|----------|--------|------|
+| Iron (Scrap/Ingot) | Mining, scrapping | Tools, weapons, building, forging |
+| Lead (Ore/Ingot) | Mining | Ammo (bullets) |
+| Nitrate (Ore) | Mining, desert surface | Gunpowder → ammo |
+| Coal | Mining, trees | Forge fuel, gunpowder |
+| Oil Shale | Desert mining | Gas (refined at chemistry station) |
+| Clay | Digging soil | Forge (crucible), cement |
+| Mechanical Parts | Scrapping, loot | Weapons, vehicles, workstations |
+| Electrical Parts | Scrapping electronics, loot | Electricity system, turrets |
+| Duct Tape | Craft (cloth + glue) or loot | Repairs, casts, crafting |
+| Forged Iron/Steel | Forge | Building upgrades, advanced tools |
+| Acid | Chemistry, cop zombies | Chemistry recipes, traps |
+| Polymer | Chemistry (oil shale) | Advanced weapons, vehicle parts |
+
+---
+
+## 7. Building, Traps & Base Defense
+
+### 7.1 Block Upgrade Paths
+
+```
+Wood Frame → Wood Block → Reinforced Wood
+  ↓
+Cobblestone Block → Concrete → Reinforced Concrete → Steel
+```
+
+| Block Stage | HP | Upgrade Material | Upgrade Time (sec) |
+|-------------|-----|-----------------|-------------------|
+| Wood Frame | 50 | — (placed) | — |
+| Wood Block | 200 | Wood (×4) | 2 |
+| Reinforced Wood | 400 | Nails (×4) + Wood (×2) | 3 |
+| Cobblestone | 500 | Cobblestone (×4) | 3 |
+| Concrete | 1500 | Concrete Mix (×4) | 5 |
+| Reinforced Concrete | 3000 | Rebar Frame(×1) + Concrete Mix (×4) | 8 |
+| Steel | 5000 | Forged Steel (×6) | 12 |
+
+**Repair**: Use a Repair Hammer (or Nailgun for faster repair) + matching material. Cost = 25% of upgrade cost per 50% HP restored.
+
+### 7.2 Traps
+
+| Trap | Damage | Trigger | Power? | Durability | Unlock |
+|------|--------|---------|--------|------------|--------|
+| **Wood Spikes** | 15/step | Pressure | No | 5 hits → break | Default |
+| **Iron Spikes** | 30/step | Pressure | No | 15 hits | Adv Eng 1 |
+| **Blade Trap** | 40/0.5sec (continuous) | Proximity | Yes (5W) | 500 uses → repair | Adv Eng 3 |
+| **Electric Fence Post** | 10 + 3sec stun | Touch wire | Yes (1W per post) | Unlimited | Adv Eng 2 |
+| **Dart Trap** | 25/dart, 1 dart/sec | Redstone/motion sensor | Yes (2W) | 100 darts → reload | Adv Eng 2 |
+| **Shotgun Trap** | 50/shell, 1 shot/2sec | Motion sensor | Yes (3W) | Reloads from inventory | Adv Eng 3 |
+| **Auto Turret** | 15/bullet, 5 rounds/sec | Target acquisition (20-block range) | Yes (15W) | Reloads from inventory | Robotics 3 |
+| **SMG Turret** | 10/bullet, 10 rounds/sec | Target acquisition (25-block) | Yes (20W) | Reloads from inventory | Robotics 5 |
+| **Junk Turret** | 8/dart | Placed by player (portable) | Battery (2hr) | 200 darts → reload | Robotics 1 |
+
+### 7.3 Land Claim Blocks
+
+- **Server config**: `landClaimEnabled` (bool, default true), `landClaimSize` (int, 7–41, default 21 radius), `landClaimMaxPerPlayer` (1–5, default 1).
+- Within claim: ×4 block durability, only owner can build/break (server option).
+- Offline raid protection: Blocks in claim take ×0.25 damage when owner offline (config toggle).

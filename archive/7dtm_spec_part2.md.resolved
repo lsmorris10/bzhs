@@ -1,0 +1,520 @@
+# 7 Days to Minecraft — Specification Part 2
+
+> **Sections 8–15**: Loot, Traders, Vehicles, Electricity, Weapons, Farming, UI, Additional Systems
+
+---
+
+## 8. Loot, Containers & Economy
+
+### 8.1 Loot Stage System
+
+**Loot Stage** determines the quality/tier of items found, calculated per player:
+
+```
+lootStage = floor((playerLevel × 0.5) + (daysSurvived × 0.3) + (biomeBonus) + (looterPerkBonus))
+```
+
+| Loot Stage | Typical Items | Quality Range |
+|------------|--------------|---------------|
+| 1–10 | Stone tools, primitive bows, cloth armor, basic food | T1–T2 |
+| 11–25 | Iron tools, pistol, leather armor, antibiotics | T2–T3 |
+| 26–50 | Steel tools, rifles, military armor, vehicles parts | T3–T4 |
+| 51–100 | Automatic weapons, power armor, rare schematics | T4–T5 |
+| 100+ | Legendary items, full schematic sets | T5–T6 |
+
+**Biome bonus**: Pine Forest +0, Forest +5, Desert +10, Snow +10, Burned +15, Wasteland +25.
+
+### 8.2 Container Types
+
+| Container | Found In | Loot Table | Respawn |
+|-----------|----------|------------|---------|
+| **Trash Pile** | Everywhere | Junk, cloth, bones | 5 real days (config) |
+| **Cardboard Box** | Houses, stores | General supplies | 5 days |
+| **Mailbox** | Residential | Magazines, schematics | 5 days |
+| **Kitchen Cabinet** | Houses | Food, cooking supplies | 5 days |
+| **Medicine Cabinet** | Bathrooms | Meds, first aid | 5 days |
+| **Gun Safe** | Houses, police stations | Firearms, ammo | 7 days |
+| **Wall Safe** | Commercial | Cash (Dukes), jewelry, valuables | 7 days |
+| **Munitions Box** | Military POIs | Ammo, explosives, weapon mods | 7 days |
+| **Supply Crate (air drop)** | Random event every 24–72h | High-tier mixed loot | One-time |
+| **Zombie Corpse** | After kill | Rotten flesh, cloth, random pocket loot | One-time |
+| **Car Wreck** | Roads | Mechanical parts, gas, engine parts | One-time |
+| **Bookshelf** | Libraries, houses | Skill books, schematics | 5 days |
+| **Working Stiff Crate** | Hardware stores | Tools, building materials | 5 days |
+| **Shotgun Messiah Crate** | Gun stores, military | Weapons, weapon parts | 7 days |
+| **Shamway Crate** | Grocery stores | Canned food, drinks | 5 days |
+| **Pop-N-Pills Crate** | Pharmacies, hospitals | Advanced medicine | 7 days |
+
+**Config**: `loot.respawnDays` (int, 0=no respawn, default 5), `loot.abundanceMultiplier` (float, 0.25–4.0, default 1.0), `loot.qualityScaling` (bool, default true).
+
+### 8.3 Currency
+
+- **Dukes Casino Tokens** — primary currency. Found in safes, quest rewards, sold items.
+- No bartering without Dukes (traders only accept Dukes).
+- Dukes are a physical item (stackable to 50,000). Can be dropped, stored, traded player-to-player.
+- Selling items to traders returns Dukes at `baseValue × (1 + betterBarterRank × 0.1)`.
+
+---
+
+## 9. Traders, NPCs & Quests
+
+### 9.1 Trader Types
+
+| Trader | Specialty Stock | Location |
+|--------|----------------|----------|
+| **Trader Joel** | General goods, food, basic weapons | Forest/Plains compounds |
+| **Trader Rekt** | Advanced weapons, ammo, military gear | Desert/Wasteland compounds |
+| **Trader Jen** | Medicine, chemistry supplies, books | Snow/Forest compounds |
+| **Trader Bob** | Tools, building materials, vehicles parts | Industrial area compounds |
+| **Trader Hugh** | Armor, clothing, survival gear | Any biome |
+
+**Trader compound layout**: 16×16 block fenced area with:
+- Central building with trader NPC and vending machines.
+- Protection zone: No zombie spawns within 50-block radius. No PvP.
+- Working vending machines for 24/7 access to basic stock.
+- Open hours: 06:00–22:00 (trader NPC). Closed at night (metal shutters).
+
+### 9.2 Trader Stock & Economy
+
+- Stock refreshes every 3 in-game days (config `trader.restockDays`).
+- Stock influenced by trader type + loot stage + Better Barter perk.
+- **Secret Stash**: Better Barter rank 5 unlocks hidden inventory with rare items.
+- **Price formula**: `finalPrice = basePrice × (1 + (6 - betterBarterRank) × 0.1) × difficultyMult`.
+
+### 9.3 Quest System
+
+**Quest types:**
+
+| Type | Description | Reward Tier | Difficulty |
+|------|-------------|-------------|------------|
+| **Fetch** | Retrieve item from marked POI container | Low | ★ |
+| **Clear** | Kill all zombies in marked POI | Medium | ★★ |
+| **Buried Treasure** | Dig up supply at GPS coordinates | Low-Med | ★ |
+| **Restore Power** | Repair generator in POI (place parts) | Medium | ★★ |
+| **Escort** (future) | Protect NPC traveling between traders | High | ★★★ |
+| **Infested Clear** | Clear POI with 2× zombie density | High | ★★★ |
+| **Horde Defense** | Survive 5-min horde at designated spot | Very High | ★★★★ |
+
+**Quest flow:**
+1. Talk to trader → choose from 2–4 available quests (refreshes on restock).
+2. Quest marks POI on compass/map. POI "resets" (restores zombies + loot for quest).
+3. Complete objective → return to trader → collect reward (Dukes + XP + choice of item rewards).
+4. Quest tier scales with Daring Adventurer perk + loot stage.
+
+**Config**: `quest.poiResetEnabled` (bool, default true), `quest.rewardMultiplier` (float, 0.5–3.0, default 1.0).
+
+---
+
+## 10. Vehicles
+
+### 10.1 Vehicle Progression
+
+| Vehicle | Speed (b/s) | Storage | Fuel/Unit | Unlock Perk | Parts Needed |
+|---------|------------|---------|-----------|-------------|--------------|
+| **Bicycle** | 6 | 9 slots | None | Default | Handlebars, Seat, Wheels (×2) |
+| **Minibike** | 10 | 18 slots | Gas: 0.5/sec | Grease Monkey 1 | Small Engine, Chassis, Seat, Wheels (×2), Battery, Headlight |
+| **Motorcycle** | 14 | 27 slots | Gas: 0.8/sec | Grease Monkey 3 | Medium Engine, Chassis, Seat, Wheels (×2), Battery, Handlebars |
+| **4×4 Truck** | 12 | 81 slots | Gas: 1.5/sec | Grease Monkey 5 | V8 Engine, Truck Chassis, Wheels (×4), Battery, Accessories |
+| **Gyrocopter** | 16 (air) | 36 slots | Gas: 2.0/sec | Grease Monkey 5 + schematic | Gyrocopter Chassis, Engine, Rotor, Accessories |
+
+### 10.2 Vehicle Physics
+
+- Custom entity type extending `Entity` with:
+  - Velocity vector, angular velocity (yaw only for ground; yaw+pitch for gyro).
+  - Surface friction calculation (asphalt ×1.0, dirt ×0.8, sand ×0.6, water ×0.0 = sink).
+  - Collision damage: `damage = speed² × 0.3` to both vehicle and hit mob/player.
+  - Fuel as `float` in compound tag; drains per-tick based on throttle.
+- **Ground vehicles**: Raycasting 4 wheel contact points for terrain following.
+- **Gyrocopter**: Lift = throttle × 0.4; gravity = 0.08/tick; pitch controls forward vector.
+- Vehicle takes damage from collisions, zombies, weapons. Repairable with repair kits.
+- Vehicle HP: Bicycle 200, Minibike 500, Motorcycle 800, 4x4 1200, Gyro 1000.
+
+### 10.3 Fuel System
+
+- **Gas Can**: Crafted from Oil Shale at chemistry station (5 shale → 1 gas can = 100 units).
+- **Ethanol**: Corn (×5) at chemistry station → 1 ethanol can (80 units, less efficient).
+- Refuel by interacting with vehicle + gas can in hand.
+- Fuel gauge on HUD while driving.
+
+**Config**: `vehicle.fuelConsumptionMult` (float, 0.1–5.0, default 1.0), `vehicle.speedMult` (float, 0.5–2.0, default 1.0), `vehicle.enabled` (bool, default true).
+
+---
+
+## 11. Electricity & Power Systems
+
+### 11.1 Power Sources
+
+| Source | Output (Watts) | Fuel | Noise/Heat | Unlock |
+|--------|---------------|------|------------|--------|
+| **Generator Bank** | 100W | Gas (1 unit/min) | High heat (+8/min) | Adv Eng 2 |
+| **Solar Panel** | 30W (day only) | None | None | Adv Eng 3 |
+| **Battery Bank** | Stores 1000 Wh | Charged by sources | None | Adv Eng 2 |
+| **Wind Turbine** | 20W (variable by altitude/biome) | None | Minimal | Adv Eng 4 |
+
+### 11.2 Power Consumers
+
+| Device | Draw (Watts) | Function |
+|--------|-------------|----------|
+| Electric Fence Post | 1W per post | Stuns zombies on contact |
+| Blade Trap | 5W | Continuous damage in area |
+| Dart Trap | 2W | Fires projectiles on trigger |
+| Shotgun Trap | 3W | Fires shotgun shells on trigger |
+| Auto Turret | 15W | Autonomous ranged defense |
+| SMG Turret | 20W | High-ROF autonomous defense |
+| Powered Door | 1W | Opens/closes via switch/sensor |
+| Spotlight | 2W | Illumination (40-block beam) |
+| Speaker | 1W | Plays alarm on trigger (attracts zombies on purpose) |
+| Motion Sensor | 0.5W | Detects entities → sends signal |
+| Trip Wire | 0.5W | Triggers on entity crossing |
+| Pressure Plate | 0W (passive) | Triggers on weight |
+
+### 11.3 Wiring System
+
+- **Wire Tool**: Right-click source → right-click consumer to create wire.
+- Maximum wire length: 10 blocks (upgradable to 20 with perk).
+- Relay blocks extend range (input → relay → output chain).
+- Switches (on/off), timers (configurable interval), logic gates (AND/OR).
+- Wire rendered as thin catenary line (client-side only; server tracks connections as block entity data).
+
+**Power grid resolution**: Tick-based (every 20 ticks = 1 sec). Source distributes watts to consumers in connection order. Surplus charges batteries. Deficit drains batteries → then shuts off lowest-priority consumers.
+
+**Config**: `electricity.enabled` (bool, default true), `electricity.wireMaxLength` (int, 5–50, default 10).
+
+---
+
+## 12. Weapons, Armor & Combat
+
+### 12.1 Melee Weapons
+
+| Weapon | Base Damage | Speed | Stamina Cost | Special | Material |
+|--------|------------|-------|-------------|---------|----------|
+| Fists | 5 | Fast | 3 | Always available | — |
+| Stone Axe | 11 | Medium | 6 | Also harvests | Stone, Wood |
+| Wooden Club | 13 | Medium | 7 | Knockback chance | Wood |
+| Sledgehammer | 35 | Slow | 18 | AoE (2-block arc), high knockback | Iron, Wood |
+| Baseball Bat | 18 | Medium | 9 | Knockback focus | Wood, Tape |
+| Machete | 22 | Fast | 8 | Bleed chance 30% | Iron |
+| Hunting Knife | 15 | Very Fast | 5 | 2× harvest from animals | Iron |
+| Iron Spear | 20 | Medium | 10 | Throwable (right-click) | Iron |
+| Stun Baton | 12 + stun | Medium | 10 | 40% stun chance (3 sec), needs battery | Electrical Parts |
+| Steel Knuckles | 18 | Very Fast | 6 | Ignores 20% armor | Steel |
+
+**Power attacks**: Hold attack (1 sec charge) → ×2 damage, ×1.8 stamina cost, guaranteed knockback.
+
+### 12.2 Ranged Weapons
+
+| Weapon | Base Damage | ROF (shots/sec) | Magazine | Range (blocks) | Ammo |
+|--------|------------|-----------------|---------|----------------|------|
+| Primitive Bow | 15 | 0.8 (draw) | 1 | 40 | Stone/Iron Arrows |
+| Wooden Bow | 22 | 1.0 | 1 | 50 | Arrows |
+| Compound Bow | 35 | 1.2 | 1 | 60 | Arrows, Explosive/Fire Arrows |
+| Compound Crossbow | 45 | 0.5 | 1 | 55 | Bolts |
+| Blunderbuss | 40 (spread) | 0.3 | 1 | 15 | Blunderbuss Ammo |
+| Pistol | 25 | 2.5 | 15 | 35 | 9mm |
+| SMG | 18 | 6.0 | 30 | 30 | 9mm |
+| Shotgun | 15×8 pellets | 1.0 | 8 | 15 | Shotgun Shells |
+| Hunting Rifle | 55 | 0.8 | 5 | 80 | 7.62mm |
+| Sniper Rifle | 85 | 0.5 | 5 | 120 | 7.62mm |
+| AK-47 | 32 | 4.0 | 30 | 50 | 7.62mm |
+| M60 | 28 | 8.0 | 60 | 50 | 7.62mm |
+| Rocket Launcher | 200 (AoE 5-block) | 0.2 | 1 | 60 | Rockets |
+| Junk Turret (placed) | 8/dart | 3.0 | 200 | 20 | Junk Turret Darts |
+| Pipe Pistol | 18 | 1.5 | 8 | 25 | 9mm |
+| Pipe Rifle | 35 | 0.6 | 1 | 50 | 7.62mm |
+| Pipe Shotgun | 12×6 | 0.5 | 1 | 12 | Shotgun Shells |
+
+### 12.3 Weapon Mods
+
+| Mod | Effect | Applies To | Slot Type |
+|-----|--------|-----------|-----------|
+| **Barrel Extender** | +15% range, −5% spread | Guns | Barrel |
+| **Silencer** | −80% noise (heatmap), −10% damage | Guns | Barrel |
+| **Reflex Sight** | +10% hip-fire accuracy | Guns | Scope |
+| **4× Scope** | 4× zoom ADS | Rifles | Scope |
+| **8× Scope** | 8× zoom ADS | Sniper | Scope |
+| **Extended Magazine** | +50% magazine capacity | Guns | Magazine |
+| **Drum Magazine** | +100% capacity, −10% reload speed | SMG/AK | Magazine |
+| **Laser Sight** | +15% accuracy | Guns | Accessory |
+| **Flashlight** | Directional light | Any weapon | Accessory |
+| **Weighted Head** | +15% damage, −10% speed | Melee | Head |
+| **Spiked Mod** | +bleed chance 20% | Melee | Head |
+| **Burning Shaft** | +fire damage (5/sec, 3sec) | Melee | Shaft |
+| **Ergonomic Grip** | −15% stamina cost | Melee/Guns | Grip |
+| **Structural Brace** | +30% durability | Any | Frame |
+
+### 12.4 Ammo Crafting
+
+| Ammo | Materials | Craft Station | Yield |
+|------|-----------|--------------|-------|
+| 9mm Round | Bullet Casing + Bullet Tip (lead) + Gunpowder | Workbench | ×8 |
+| 7.62mm Round | Casing + Tip + Gunpowder (×2) | Workbench | ×6 |
+| Shotgun Shell | Casing+ Buckshot (lead) + Gunpowder | Workbench | ×4 |
+| Arrow | Arrow Shaft (wood) + Arrow Head (stone/iron) + Feather | Inventory | ×5 |
+| Bolt | Bolt Shaft + Iron Tip + Feather | Inventory | ×3 |
+| Rocket | Pipe + Gunpowder (×5) + Duct Tape + Chemistry Materials | Chemistry Station | ×1 |
+| .44 Magnum Round | Casing + Large Tip + Gunpowder (×2) | Workbench | ×4 |
+| AP (Armor Piercing) variant | Standard + Steel Tip | Workbench | ×4 |
+| HP (Hollow Point) variant | Standard + Soft Lead Tip | Workbench | ×4 |
+| Blunderbuss Ammo | Gunpowder + Small Stones + Paper | Inventory | ×1 |
+
+### 12.5 Armor System
+
+**Slots**: Head, Chest, Legs, Boots, Gloves (5 independent)
+
+| Armor Set | Armor Rating (full) | Movement Penalty | Mod Slots | Material |
+|-----------|--------------------|--------------------|-----------|----------|
+| **Cloth** | 5 | 0% | 0 | Cloth |
+| **Scrap** | 12 | −5% | 1 | Scrap Iron |
+| **Leather** | 18 | −3% | 1 | Leather |
+| **Iron** | 30 | −12% | 2 | Forged Iron |
+| **Military** | 40 | −10% | 3 | Kevlar + Military Fiber |
+| **Steel** | 50 | −15% | 3 | Forged Steel |
+| **Power Armor** (T6 loot) | 65 | −5% (powered) / −30% (no power) | 4 | Requires battery |
+
+**Armor mods**: Pocket Mod (+3 inventory slots), Padded Mod (−15% fall damage), Cooling Mesh (−10°F core temp), Insulation (−10°F cold resist), Plating (+5 armor rating), Mobility (+3% movement).
+
+**Damage reduction formula**: `damageReduction = armorRating × 0.01 × (1 + armorSkillBonus)`, capped at 85%.
+
+### 12.6 Combat Mechanics
+
+- **Headshots**: ×2.5 damage (×3.0 with sniper perk).
+- **Dismemberment**: Limbs can be destroyed — arms (no grab attack), legs (crawl only), head (death). Each limb has independent HP = 30% of body HP.
+- **Knockback**: Based on weapon knockback stat vs mob mass. Light zombies fly; demolishers barely flinch.
+- **Ragdoll on death**: Client-side ragdoll physics for killed entities (4-sec display then fade).
+- **Friendly fire**: Configurable (default ON in multiplayer).
+- **Block penetration**: Some rounds penetrate thin blocks (wood walls: 9mm passes through with −40% damage).
+
+---
+
+## 13. Farming, Food & Cooking
+
+### 13.1 Crops
+
+| Crop | Grow Time (min) | Yield | Seed Source | Biome Bonus |
+|------|----------------|-------|-------------|-------------|
+| Corn | 120 | 2–5 ears | Loot, foraging | Plains ×1.5 |
+| Potato | 90 | 3–6 | Loot | Forest ×1.3 |
+| Blueberry | 80 | 4–8 | Foraging wild bushes | Forest ×1.5 |
+| Mushroom | 60 | 2–4 | Caves, dark areas | Underground ×2.0 |
+| Coffee | 150 | 1–3 beans | Trader/loot only | Plains ×1.2 |
+| Aloe | 100 | 2–4 | Desert foraging | Desert ×2.0 |
+| Chrysanthemum | 90 | 2–4 | Forest foraging | Forest ×1.3 |
+| Goldenrod | 90 | 2–4 | Plains foraging | Plains ×1.5 |
+| Hops | 120 | 2–5 | Trader | Plains ×1.3 |
+| Super Corn (perk gated) | 180 | 8–12 | Living Off the Land 3 | Any |
+| Pumpkin | 150 | 1–2 | Loot | Forest ×1.5 |
+
+**Farm plot block**: Crafted with wood + rotting flesh + clay + nitrate. Crops only grow on farm plots. Fertilizer (nitrate + rotting flesh) adds ×1.5 growth speed.
+
+**Indoor farming**: Requires light level 10+. No biome bonus. Possible with powered grow lights (Electricity system, 3W each).
+
+### 13.2 Cooking Recipes (Campfire / Grill)
+
+| Recipe | Ingredients | Fullness | Hydration | Special Effect |
+|--------|-------------|----------|-----------|----------------|
+| **Boiled Water** | Murky Water + Jar | — | +20 | Safe to drink |
+| **Grilled Meat** | Raw Meat (any) | +20 | −3 | — |
+| **Charred Meat** | Raw Meat (quick cook) | +12 | −5 | 10% food poisoning |
+| **Corn Bread** | Corn Meal + Egg + Water | +25 | +5 | — |
+| **Vegetable Stew** | Potato + Corn + Mushroom + Boiled Water | +35 | +15 | Stamina regen +20% for 5 min |
+| **Meat Stew** | Raw Meat + Potato + Corn + Boiled Water | +45 | +15 | Health regen +1/sec for 5 min |
+| **Blueberry Pie** | Blueberry + Corn Meal + Egg + Animal Fat | +30 | +5 | +10% XP for 10 min |
+| **Chili Dog** | Grilled Meat + Corn Bread + Canned Chili | +50 | +5 | Stamina regen +30% |
+| **Sham Sandwich** | Sham (canned) + Corn Bread + Mushroom | +35 | +5 | — |
+| **Coffee** | Coffee Beans + Boiled Water | +2 | +10 | +50% stamina regen for 5 min |
+| **Beer** | Hops + Corn Meal + Boiled Water (ferment 30 min) | +5 | +15 | +10% melee damage, −5% accuracy for 5 min |
+| **Goldenrod Tea** | Goldenrod + Boiled Water | +2 | +25 | Cures Dysentery |
+| **Red Tea** | Chrysanthemum + Boiled Water | +2 | +20 | +1HP/sec for 60 sec |
+
+### 13.3 Animal Husbandry
+
+- **Chicken Coop** block: Place with chickens nearby → eggs produced every 20 min (real time).
+- **Animal Pen**: Fenced area with trough block. Place raw corn → attracts nearby wild chickens/rabbits.
+- Animals breed if 2+ same type in pen with food. Baby → adult in 60 min.
+- Not a major food source — supplements farming/hunting.
+
+---
+
+## 14. UI, HUD & Visual/Audio Overhaul
+
+### 14.1 Custom HUD Elements
+
+| Element | Position | Description |
+|---------|----------|-------------|
+| **Health Bar** | Bottom-center left | Red bar, shows current/max + condition icons |
+| **Stamina Bar** | Below health | Yellow bar, drains/regens visually |
+| **Food Meter** | Bottom-right | Drumstick icon + percentage |
+| **Water Meter** | Next to food | Water drop icon + percentage |
+| **Temperature** | Right of water | Thermometer icon + °F value, color-coded |
+| **Day Counter** | Top-center | "Day 7 — 14:32" with time-of-day |
+| **Horde Timer** | Below day counter | Appears on blood moon day: "BLOOD MOON — 3:45:21" countdown |
+| **Active Debuffs** | Left of health | Row of icons with countdown timers |
+| **Compass** | Top-center | 360° compass strip with POI markers, quest markers |
+| **Heat Indicator** | Near compass (subtle) | Flame icon pulses when chunk heat >25 |
+| **Toolbar** | Bottom-center | 10 slots (unchanged from vanilla, re-skinned) |
+| **XP Bar** | Above toolbar | Shows current XP / next level |
+| **Ammo Counter** | Bottom-right (when gun equipped) | "15/120" (magazine/reserve) |
+| **Vehicle HUD** | Center-bottom (when driving) | Speedometer, fuel gauge, vehicle HP |
+
+### 14.2 Inventory Redesign
+
+- Replace vanilla inventory with 7DTD-style tabbed interface.
+- **Tabs**: Inventory (grid), Crafting (4x4 + recipe browser), Skills (perk tree), Map, Quests, Players (multiplayer).
+- **Weight system**: Each item has weight (grams). Total carry = base 50kg + Pack Mule perk + backpack mods.
+- Over-encumbered at >100%: Movement −50%, no sprint, stamina drain ×2.
+- **Mixin targets**: `InventoryScreen`, `AbstractContainerMenu`, rendering hooks.
+
+### 14.3 Crafting UI
+
+- Left panel: Recipe list (filterable by category: Tools, Weapons, Ammo, Building, Food, Medical, Resources).
+- Search bar at top.
+- Center: 4×4 crafting grid + output slot.
+- Right panel: Selected recipe details (ingredients, workstation required, craft time, quality preview based on skill).
+- Queue system: Queue up to 10 crafts. Progress bar per item.
+
+### 14.4 Map System
+
+- Full-screen map (press M) showing explored terrain as top-down render.
+- Fog of war: Unexplored areas dark.
+- Waypoints: Player-placed markers (up to 20) with custom colors/icons/names.
+- Quest markers shown on map.
+- Trader locations marked after first discovery.
+- **Mixin target**: Replace vanilla `MapRenderer` or overlay custom GUI.
+
+### 14.5 Visual Effects
+
+| Effect | Trigger | Implementation |
+|--------|---------|----------------|
+| Red sky / fog | Blood Moon active | Custom `DimensionSpecialEffects` + fog shader |
+| Green radiation tint | In Wasteland biome | Screen overlay shader |
+| Bleeding vignette | Bleeding debuff active | Red pulsing edge overlay |
+| Infection filter | Infection stage 2 | Green-tinted, slight blur |
+| Screen shake | Explosions, concussion | Camera offset oscillation |
+| Breath particles | Cold biome | Client-side particle emitter |
+| Heat shimmer | Desert (>110°F) | Post-process distortion shader |
+
+### 14.6 Audio
+
+| Audio | Context | Notes |
+|-------|---------|-------|
+| Zombie groans (6+ variants) | Ambient when zombies nearby | Distance-attenuated, directional |
+| Screamer shriek | Screamer spawn/scream | Global within 100 blocks |
+| Blood Moon siren | 18:00 on horde night | 5-second crescendo |
+| Blood Moon ambient loop | During horde | Intense percussion/drone music |
+| Gunshots (per weapon type) | Weapon fire | Unique per weapon, echo in caves |
+| Vehicle engines | Driving | RPM-based pitch variation |
+| Building/repair hammering | Upgrading blocks | Rhythmic hammer sounds |
+| Ambient biome sounds | Always | Crickets (forest), wind (snow), embers (burned) |
+
+---
+
+## 15. Additional Systems & Polish
+
+### 15.1 Temperature System
+
+```
+feelsLikeTemp = biomeBaseTemp 
+  + altitudeModifier        // −1°F per 10 blocks above y=64
+  + timeOfDayModifier       // Night = −15°F
+  + wetModifier             // Rain/swim = −20°F
+  + clothingInsulation      // Sum of equipped clothing insulation values
+  + nearFireBonus           // +30°F within 5 blocks of fire
+  + shelterBonus            // +10°F if enclosed (roof check)
+```
+
+- Comfortable range: 50–90°F (no effects).
+- <50°F: Increasing cold debuffs. <32°F for 120sec = Hypothermia.
+- \>90°F: Increasing heat debuffs. >110°F for 120sec = Hyperthermia.
+- Clothing has insulation values: Cloth ±2°F, Leather ±5°F, Military ±8°F, Parka +20°F, Poncho +15°F rain protection.
+
+### 15.2 Stealth System
+
+- Crouch activates stealth mode. Detection based on:
+  - **Noise**: Each action has a noise value (walking = 5, sprinting = 30, gunshot = 80+, silenced gun = 15).
+  - **Light level**: Standing in light level >10 = easier detection.
+  - **Distance**: Base detection radius = 15 blocks. Modified by zombie type.
+  - **Movement**: Moving while crouched = 2× detection chance vs standing still.
+- Stealth kill: Hit unaware zombie from behind = ×3.0 damage multiplier (+ Hidden Strike perk bonus).
+- Detection states: **Unaware** → **Suspicious** (? icon) → **Alert** (! icon, runs at player).
+- HUD stealth indicator: Eye icon, closed (hidden) → half-open (suspicious) → open (detected).
+
+### 15.3 Forging System
+
+Forge workstation UI:
+- **Input slots**: Raw materials (iron, lead, clay, stone, brass).
+- **Fuel slot**: Wood, coal.
+- **Tool slot**: Anvil (for iron items), Crucible (for steel, requires clay + forged iron).
+- **Smelt output**: Ingots/molten metal stored in forge internal buffer.
+- **Crafting output**: Select recipe → consumes from internal buffer.
+
+| Forge Recipe | Input | Output | Time (sec) |
+|-------------|-------|--------|-----------|
+| Iron Ingot | Scrap Iron ×3 | Iron Ingot ×1 | 20 |
+| Steel Ingot | Iron Ingot ×1 + Clay ×1 (in Crucible) | Forged Steel ×1 | 40 |
+| Lead Ingot | Raw Lead ×3 | Lead Ingot ×1 | 15 |
+| Bullet Casing | Brass ×1 | Casing ×6 | 10 |
+| Iron Arrow Head | Iron Ingot ×1 | Arrow Head ×10 | 15 |
+| Forged Iron Blade | Iron Ingot ×3 | Blade ×1 | 30 |
+| Nails | Iron Ingot ×1 | Nails ×12 | 10 |
+| Anvil | Forged Iron ×10 | Anvil ×1 (tool) | 120 |
+
+### 15.4 Commands (OP/Admin Only)
+
+| Command | Arguments | Effect |
+|---------|-----------|--------|
+| `/7dtm day set <N>` | N = day number | Set current game day |
+| `/7dtm bloodmoon start` | — | Force immediate blood moon |
+| `/7dtm bloodmoon skip` | — | Skip next blood moon |
+| `/7dtm heat set <0-100>` | Chunk heat override | Set heatmap value |
+| `/7dtm spawner clear <radius>` | Blocks radius | Kill all zombies in area |
+| `/7dtm level <player> <N>` | Player, level | Set player level |
+| `/7dtm give <player> <item> [qty] [quality]` | Item registry name | Give item with quality |
+| `/7dtm trader reset` | — | Force all trader restocks |
+| `/7dtm poi regen <radius>` | Blocks | Regenerate POIs in radius |
+| `/7dtm debug heatmap` | — | Toggle heatmap visualization |
+| `/7dtm debug spawns` | — | Toggle spawn point visualization |
+| `/7dtm config reload` | — | Hot-reload config files |
+
+### 15.5 Multiplayer Sync
+
+- **Per-player heatmap contributions**: Each player adds to shared chunk heatmap; blood moon calculates per-player or worst-player (config).
+- **Shared POI state**: Block damage, looted containers synced globally.
+- **Party/Alliance system**: Share XP (15% to nearby party members), shared land claims.
+- **PvP toggleable**: Config `pvp.enabled`, per-player `/pvp toggle`.
+- **Loot sharing**: First-touch ownership on containers (30-sec lockout, config).
+
+### 15.6 Performance Targets
+
+| Metric | Target | Strategy |
+|--------|--------|----------|
+| TPS (server) | ≥18 TPS with 64 zombies per player | Async AI ticking, LOD pathfinding |
+| Client FPS | ≥60 FPS (mid-range GPU) | Chunk-based mob culling, LOD models |
+| Zombie pathfinding | <2ms per zombie per tick | Cached paths, hierarchical A*, spatial hashing |
+| Heatmap updates | <0.5ms per tick | Chunk-level data, lazy evaluation |
+| World gen | <500ms per chunk | Threaded structure placement, cached templates |
+| Network | <100 KB/s per player | Delta sync, batched updates, compressed packets |
+
+**Optimization strategies:**
+- Zombie AI: Only full pathfind every 60 ticks (3 sec). Between: follow cached path + local obstacle avoidance.
+- LOD entities: Beyond 64 blocks, zombies render as billboarded sprites.
+- Async world gen: Structure placement on worker threads, merged into main thread on completion.
+- Spatial hash grid for collision/proximity queries (O(1) average per query).
+- Chunk-based heatmap: Only recalculate on player action events, not per-tick.
+
+### 15.7 Configuration File Structure
+
+All config in `config/sevendaystominecraft/`:
+
+| File | Contents |
+|------|----------|
+| `main.toml` | Master toggles (enable/disable systems), difficulty presets |
+| `survival.toml` | Stat rates, debuff chances, temperature ranges |
+| `horde.toml` | Blood moon tuning (cycle, size, composition, scaling) |
+| `zombies.toml` | Per-variant HP/damage/speed overrides, spawn caps |
+| `loot.toml` | Loot stage formula weights, respawn times, abundance |
+| `crafting.toml` | Quality tier thresholds, craft time multiplier |
+| `vehicles.toml` | Speed, fuel, enabled vehicle types |
+| `electricity.toml` | Power values, wire length, enabled |
+| `worldgen.toml` | Biome weights, city density, POI count targets |
+| `traders.toml` | Restock cycle, price multipliers, types enabled |
+| `performance.toml` | Spawn caps, AI tick rates, LOD distances |

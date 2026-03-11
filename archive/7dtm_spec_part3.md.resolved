@@ -1,0 +1,678 @@
+# 7 Days to Minecraft — Specification Part 3
+
+> **Sections 16–19**: Mixin/ASM Targets, Balancing Formulas, Code Snippet Placeholders, Implementation Roadmap
+
+---
+
+## 16. Mixin / ASM Override Targets (NeoForge 1.21+)
+
+All overrides use NeoForge Access Transformer + Mixin. No coremod ASM needed on NeoForge 1.21+.
+
+### 16.1 Mandatory Overrides
+
+| System | Target Class(es) | Method(s) | Override Type | Purpose |
+|--------|-----------------|-----------|---------------|---------|
+| **Health/Hunger** | `net.minecraft.world.food.FoodData` | `tick()`, `eat()`, `setSaturation()` | `@Redirect` / `@Overwrite` | Replace vanilla hunger with Food+Water+Stamina |
+| **Health Regen** | `net.minecraft.world.entity.player.Player` | `actuallyHurt()`, `heal()` | `@Inject(HEAD)` | Custom regen rules tied to food/water |
+| **Natural Regen** | `net.minecraft.server.level.ServerPlayer` | `doTick()` (food regen check) | `@Redirect` | Gate regen behind custom conditions |
+| **Mob Spawning** | `net.minecraft.world.level.NaturalSpawner` | `spawnForChunk()`, `isValidSpawnPostitionForType()` | `@Overwrite` | Replace all hostile spawns with zombie variants |
+| **Mob Registry** | NeoForge `EntityType.Builder` | Registration event | Event hook | Register all custom zombie/animal entities |
+| **World Gen** | `net.minecraft.world.level.levelgen.NoiseBasedChunkGenerator` | `fillFromNoise()`, `buildSurface()` | `@Inject` | Override biome placement, surface blocks |
+| **Structure Gen** | `net.minecraft.world.level.levelgen.structure.StructureSet` | Registration | Data-driven JSON + event | Replace villages with POI/city generation |
+| **Crafting Grid** | `net.minecraft.world.inventory.CraftingMenu` | `<init>()`, slot setup | `@Inject` + custom Container | Expand 3×3 → 4×4 |
+| **Crafting Recipes** | `net.minecraft.world.item.crafting.RecipeManager` | `getRecipeFor()` | `@Inject` | Add quality-aware recipe resolution |
+| **Enchanting** | `net.minecraft.world.inventory.EnchantmentMenu` | `<init>()` | `@Overwrite` | Disable or repurpose enchanting table |
+| **Villages** | `net.minecraft.world.entity.npc.Villager` + structure pools | Spawn events | Event cancel + replacement | Replace villagers with Trader NPCs |
+| **Nether Portal** | `net.minecraft.world.level.block.NetherPortalBlock` | `use()`, `randomTick()` | `@Overwrite` → no-op | Disable Nether portal creation |
+| **End Portal** | `net.minecraft.world.level.block.EndPortalBlock` | `entityInside()` | `@Overwrite` → no-op | Disable End dimension |
+| **Rendering** | `net.minecraft.client.gui.Gui` | `renderHotbar()`, `renderHeart()` | `@Inject(RETURN)` + custom renderer | Custom HUD overlay |
+| **Death Screen** | `net.minecraft.client.gui.screens.DeathScreen` | `init()` | `@Inject` | Custom death screen with stats |
+| **Dimension Effects** | `net.minecraft.client.renderer.DimensionSpecialEffects` | `getSunriseColor()`, `tick()` | `@Inject` | Blood Moon sky tint |
+| **Block Breaking** | `net.minecraft.world.level.block.state.BlockBehaviour` | `getDestroyProgress()` | `@Redirect` | Custom block HP system |
+| **Item Durability** | `net.minecraft.world.item.ItemStack` | `hurt()`, `getMaxDamage()` | `@Inject` | Quality-tier durability scaling |
+| **Inventory Screen** | `net.minecraft.client.gui.screens.inventory.InventoryScreen` | `render()`, `init()` | `@Overwrite` | Complete inventory UI replacement |
+
+### 16.2 NeoForge Event Hooks (No Mixin Needed)
+
+| Event | Use |
+|-------|-----|
+| `LivingHurtEvent` | Apply armor reduction, headshot detection, debuff application |
+| `LivingDeathEvent` | Custom death handling, XP drops, loot tables |
+| `PlayerTickEvent` | Stat drain (food, water, stamina), temperature calc, debuff ticking |
+| `EntityJoinLevelEvent` | Cancel vanilla mob spawns, inject custom spawns |
+| `BlockEvent.BreakEvent` | Heatmap noise, XP gain, structural integrity check |
+| `RenderGuiLayerEvent` | Render custom HUD |
+| `ServerStartingEvent` | Load config, initialize heatmap data, register commands |
+| `RegisterCommandsEvent` | Register `/7dtm` command tree |
+| `GatherDataEvent` | Generate loot tables, recipes, structures via datagen |
+| `FMLClientSetupEvent` | Register custom screens, keybinds, renderers |
+| `RegisterEvent` (items/blocks/entities) | Register all custom content |
+| `BiomeModificationEvent` | Inject custom spawns and features per biome |
+
+---
+
+## 17. Balancing Formulas Reference
+
+### 17.1 Core Formulas
+
+```java
+// XP to next level
+int xpToNext(int level) {
+    return (int) Math.floor(1000 * Math.pow(level, 1.05));
+}
+
+// Horde size per wave
+int hordeWaveSize(int dayNumber, int cycleLength, float diffMult, int baseCount) {
+    float cycle = (float) dayNumber / cycleLength;
+    return (int) Math.floor(baseCount * Math.pow(1 + cycle * diffMult, 1.2));
+}
+
+// Loot stage
+int lootStage(int playerLevel, int daysSurvived, int biomeBonus, int perkBonus) {
+    return (int) Math.floor(playerLevel * 0.5 + daysSurvived * 0.3 + biomeBonus + perkBonus);
+}
+
+// Damage reduction from armor
+float damageReduction(float armorRating, float skillBonus) {
+    return Math.min(0.85f, armorRating * 0.01f * (1 + skillBonus));
+}
+
+// Structural Integrity (block support check)
+float blockSI(Block block, int distFromGround) {
+    float maxSpan = block.getMaxHorizontalSpan();
+    return Math.max(0, 1.0f - (distFromGround / maxSpan));
+    // SI <= 0 → block collapses
+}
+
+// Temperature
+float feelsLikeTemp(float biomeBase, float altitude, float timeOfDay, 
+                     boolean wet, float clothingInsul, float nearFire, boolean sheltered) {
+    return biomeBase
+        + (altitude - 64) * -0.1f     // -1°F per 10 blocks above 64
+        + timeOfDay                     // -15°F at midnight, 0 at noon
+        + (wet ? -20f : 0f)
+        + clothingInsul
+        + nearFire
+        + (sheltered ? 10f : 0f);
+}
+
+// Zombie pathfinding block-break cost
+float pathCost(float blockHP, float zombieDamage, float baseCost) {
+    return baseCost + (blockHP / zombieDamage) * 0.5f;
+}
+
+// Vehicle collision damage
+float collisionDamage(float speedBPS) {
+    return speedBPS * speedBPS * 0.3f;
+}
+
+// Craft quality roll
+int qualityTier(int skillLevel, int stationTier, float randomRoll) {
+    float base = skillLevel * 0.4f + stationTier * 0.3f + randomRoll * 2f;
+    if (base >= 9.0f) return 5;  // Excellent
+    if (base >= 7.0f) return 4;  // Superior
+    if (base >= 5.0f) return 3;  // Great
+    if (base >= 3.0f) return 2;  // Good
+    return 1;                     // Poor
+}
+
+// Heatmap decay per tick
+void decayHeat(ChunkHeatData data, float decayMultiplier) {
+    data.heat = Math.max(0, data.heat - data.decayRate * decayMultiplier / 20f); // per tick
+}
+```
+
+---
+
+## 18. Code Snippet Placeholders (Critical Subsystems)
+
+### 18.1 Custom World Generation — City Pipeline
+
+```java
+public class CityChunkGenerator extends NoiseBasedChunkGenerator {
+    
+    private final CityPlanner cityPlanner;
+    private final POITemplatePool templatePool;
+    
+    @Override
+    public CompletableFuture<ChunkAccess> fillFromNoise(Executor executor, 
+            Blender blender, RandomState random, StructureManager structures,
+            ChunkAccess chunk) {
+        // 1. Base terrain (vanilla noise or custom heightmap)
+        CompletableFuture<ChunkAccess> base = super.fillFromNoise(...);
+        
+        return base.thenApplyAsync(chunkAccess -> {
+            ChunkPos pos = chunkAccess.getPos();
+            
+            // 2. Check city plan for this chunk
+            CityPlan plan = cityPlanner.getPlanForChunk(pos);
+            if (plan != null) {
+                // Place roads
+                plan.getRoads().forEach(road -> placeRoadBlocks(chunkAccess, road));
+                
+                // Place POIs
+                plan.getPOIs().forEach(poi -> {
+                    StructureTemplate template = templatePool.get(poi.templateId());
+                    placePOI(chunkAccess, template, poi.position(), poi.rotation());
+                });
+                
+                // Place decorations (cars, debris, lamp posts)
+                plan.getDecorations().forEach(dec -> placeDecoration(chunkAccess, dec));
+            }
+            
+            // 3. Apply biome-specific surface (ash, sand, snow overlay)
+            applySurfaceOverlay(chunkAccess, getBiomeAt(pos));
+            
+            return chunkAccess;
+        }, executor);
+    }
+    
+    // City planning: deterministic from world seed
+    public class CityPlanner {
+        private final Long2ObjectMap<CityPlan> cache = new Long2ObjectOpenHashMap<>();
+        
+        public CityPlan getPlanForChunk(ChunkPos pos) {
+            long regionKey = getRegionKey(pos); // 128×128 chunk regions
+            return cache.computeIfAbsent(regionKey, k -> {
+                Random rng = new Random(worldSeed ^ k);
+                int density = rng.nextInt(4); // 0=wild, 1=hamlet, 2=town, 3=city
+                return generateCityPlan(pos, density, rng);
+            });
+        }
+        
+        private CityPlan generateCityPlan(ChunkPos center, int density, Random rng) {
+            // Voronoi-based lot subdivision
+            // Road network generation (grid + organic edges)
+            // POI placement with setback rules + biome filters
+            // Return immutable CityPlan
+        }
+    }
+}
+```
+
+### 18.2 Zombie AI — Behavior Tree
+
+```java
+public class ZombieAI {
+    
+    private final BehaviorTree<ZombieEntity> tree;
+    
+    public ZombieAI(ZombieEntity zombie) {
+        this.tree = BehaviorTree.selector(
+            // Priority 1: Flee (Screamer only, after screaming)
+            BehaviorTree.sequence(
+                Conditions.isScreamer(),
+                Conditions.hasScreamedRecently(),
+                Conditions.playerWithin(5),
+                Actions.fleeFromPlayer(20)
+            ),
+            
+            // Priority 2: Attack (player or block in path)
+            BehaviorTree.selector(
+                // Melee range
+                BehaviorTree.sequence(
+                    Conditions.targetInMeleeRange(2.0),
+                    Actions.meleeAttack()
+                ),
+                // Ranged (Cop zombie only)
+                BehaviorTree.sequence(
+                    Conditions.hasRangedAttack(),
+                    Conditions.targetInRange(8.0),
+                    Conditions.rangedCooldownReady(),
+                    Actions.rangedAttack()
+                ),
+                // Break blocks in path
+                BehaviorTree.sequence(
+                    Conditions.pathBlockedByBlock(),
+                    Actions.attackBlock()
+                )
+            ),
+            
+            // Priority 3: Path to target
+            BehaviorTree.sequence(
+                Conditions.hasTarget(),
+                Actions.pathToTarget()
+            ),
+            
+            // Priority 4: Investigate heat/noise
+            BehaviorTree.sequence(
+                Conditions.heatSourceDetected(),
+                Actions.moveToHeatSource()
+            ),
+            
+            // Priority 5: Wander
+            Actions.randomWander(16)
+        );
+    }
+    
+    // Custom A* with block-break cost
+    public static class DestructivePathfinder extends PathFinder {
+        @Override
+        protected float getBlockCost(BlockPos pos, BlockState state) {
+            if (state.isAir()) return 1.0f;
+            if (!state.getBlock().canEntityDestroy(state, level, pos, entity)) 
+                return Float.MAX_VALUE; // Impassable
+            float blockHP = getBlockHP(state);
+            float zombieDPS = entity.getAttackDamage();
+            return 1.0f + (blockHP / zombieDPS) * PATH_BREAK_WEIGHT;
+        }
+        
+        @Override
+        protected void addNeighbors(Node current) {
+            super.addNeighbors(current); // Horizontal + vertical
+            if (entity instanceof SpiderZombie) {
+                addWallClimbNeighbors(current); // Vertical wall traversal
+            }
+        }
+    }
+}
+```
+
+### 18.3 Electricity Grid Solver
+
+```java
+public class ElectricityGrid {
+    
+    private final Map<BlockPos, PowerNode> nodes = new HashMap<>();
+    private final List<Wire> wires = new ArrayList<>();
+    private boolean dirty = true;
+    
+    // Called every 20 ticks (1 second)
+    public void tick() {
+        if (!dirty) return;
+        dirty = false;
+        
+        // 1. Collect total generation
+        float totalGeneration = nodes.values().stream()
+            .filter(n -> n.type() == NodeType.GENERATOR)
+            .map(PowerNode::currentOutput)
+            .reduce(0f, Float::sum);
+        
+        // 2. Collect total demand
+        float totalDemand = nodes.values().stream()
+            .filter(n -> n.type() == NodeType.CONSUMER)
+            .map(PowerNode::powerDraw)
+            .reduce(0f, Float::sum);
+        
+        // 3. Battery handling
+        float batteryCapacity = nodes.values().stream()
+            .filter(n -> n.type() == NodeType.BATTERY)
+            .map(PowerNode::remainingCapacity)
+            .reduce(0f, Float::sum);
+        
+        float available = totalGeneration;
+        
+        // Surplus → charge batteries
+        if (available > totalDemand) {
+            float surplus = available - totalDemand;
+            chargeBatteries(surplus);
+            available = totalDemand;
+        }
+        // Deficit → drain batteries
+        else if (available < totalDemand) {
+            float deficit = totalDemand - available;
+            float fromBatteries = drainBatteries(deficit);
+            available += fromBatteries;
+        }
+        
+        // 4. Distribute power to consumers (priority-ordered)
+        List<PowerNode> consumers = nodes.values().stream()
+            .filter(n -> n.type() == NodeType.CONSUMER)
+            .sorted(Comparator.comparingInt(PowerNode::priority).reversed())
+            .toList();
+        
+        for (PowerNode consumer : consumers) {
+            if (available >= consumer.powerDraw()) {
+                consumer.setPowered(true);
+                available -= consumer.powerDraw();
+            } else {
+                consumer.setPowered(false); // Not enough power
+            }
+        }
+    }
+    
+    // Wire connection validation
+    public boolean canConnect(BlockPos from, BlockPos to) {
+        double distance = Math.sqrt(from.distSqr(to));
+        int maxLength = ConfigHolder.ELECTRICITY.wireMaxLength.get();
+        return distance <= maxLength 
+            && nodes.containsKey(from) 
+            && nodes.containsKey(to)
+            && !hasWire(from, to);
+    }
+    
+    public void markDirty() { this.dirty = true; }
+}
+```
+
+### 18.4 Perk System — Data-Driven Registry
+
+```java
+// Perk definition (JSON-driven, loaded from data pack)
+// data/sevendaystominecraft/perks/strength/miner69er.json
+/*
+{
+  "id": "sevendaystominecraft:miner69er",
+  "attribute": "strength",
+  "maxRank": 5,
+  "attributeRequirements": [1, 2, 4, 6, 8],
+  "effects": [
+    { "type": "mining_speed_bonus", "valuePerRank": 0.15 },
+    { "type": "block_damage_bonus", "valuePerRank": 1.0 }
+  ],
+  "icon": "sevendaystominecraft:textures/perks/miner69er.png",
+  "description": "perks.sevendaystominecraft.miner69er"
+}
+*/
+
+public class PerkRegistry {
+    private static final Map<ResourceLocation, PerkDefinition> PERKS = new HashMap<>();
+    
+    public static void loadFromDataPack(ResourceManager manager) {
+        manager.listResources("perks", loc -> loc.getPath().endsWith(".json"))
+            .forEach((loc, resource) -> {
+                PerkDefinition perk = GSON.fromJson(
+                    resource.openAsReader(), PerkDefinition.class);
+                PERKS.put(perk.id(), perk);
+            });
+    }
+    
+    public record PerkDefinition(
+        ResourceLocation id,
+        String attribute,
+        int maxRank,
+        int[] attributeRequirements,
+        List<PerkEffect> effects,
+        ResourceLocation icon,
+        String descriptionKey
+    ) {}
+    
+    public record PerkEffect(String type, float valuePerRank) {
+        public float getValue(int rank) { return valuePerRank * rank; }
+    }
+}
+
+// Player perk data (saved to player capabilities)
+public class PlayerPerkData implements INBTSerializable<CompoundTag> {
+    private final Map<ResourceLocation, Integer> perkRanks = new HashMap<>();
+    private final int[] attributes = new int[5]; // STR, PER, FOR, AGI, INT
+    private int availablePerkPoints = 0;
+    private int availableAttributePoints = 0;
+    
+    public boolean canUnlock(PerkDefinition perk) {
+        int currentRank = perkRanks.getOrDefault(perk.id(), 0);
+        if (currentRank >= perk.maxRank()) return false;
+        int attrIndex = getAttributeIndex(perk.attribute());
+        int required = perk.attributeRequirements()[currentRank];
+        return attributes[attrIndex] >= required && availablePerkPoints > 0;
+    }
+    
+    public void unlock(PerkDefinition perk) {
+        int newRank = perkRanks.merge(perk.id(), 1, Integer::sum);
+        availablePerkPoints--;
+        // Apply effects
+        perk.effects().forEach(fx -> applyEffect(fx, newRank));
+    }
+}
+```
+
+### 18.5 Heatmap — Chunk Capability
+
+```java
+@AutoRegister // NeoForge capability auto-registration
+public class HeatmapCapability implements ICapabilityProvider {
+    
+    // Stored per-chunk in saved data
+    private float heat = 0f;
+    private float decayRate = 1.0f; // per second
+    private long lastUpdateTick = 0;
+    
+    public void addHeat(float amount, ServerLevel level) {
+        // Apply with configurable multiplier
+        heat = Math.min(100f, heat + amount * ConfigHolder.HEATMAP.multiplier.get());
+        lastUpdateTick = level.getGameTime();
+        
+        // Check spawn thresholds
+        if (heat >= 50f) {
+            trySpawnScreamer(level);
+        }
+        if (heat >= 75f) {
+            triggerMiniHorde(level);
+        }
+    }
+    
+    public void tick(ServerLevel level) {
+        long currentTick = level.getGameTime();
+        float elapsed = (currentTick - lastUpdateTick) / 20f; // seconds
+        heat = Math.max(0f, heat - decayRate * elapsed 
+            * ConfigHolder.HEATMAP.decayMultiplier.get());
+        lastUpdateTick = currentTick;
+    }
+    
+    // Serialize to chunk NBT
+    @Override
+    public CompoundTag serializeNBT() {
+        CompoundTag tag = new CompoundTag();
+        tag.putFloat("Heat", heat);
+        tag.putFloat("DecayRate", decayRate);
+        return tag;
+    }
+}
+```
+
+### 18.6 Vehicle Entity
+
+```java
+public class MineBikeEntity extends Entity {
+    
+    private float speed = 0f;
+    private float fuel = 0f;  // units
+    private float maxFuel = 100f;
+    private float fuelConsumption = 0.5f; // units/sec at full throttle
+    private int vehicleHP = 500;
+    
+    @Override
+    public void tick() {
+        super.tick();
+        if (!level().isClientSide) {
+            Player driver = getControllingPassenger();
+            if (driver == null) return;
+            
+            // Input: W/S = throttle/brake, A/D = steer
+            float throttle = getThrottle(driver);
+            float steer = getSteering(driver);
+            
+            // Fuel check
+            if (fuel <= 0) { throttle = 0; }
+            else { fuel -= fuelConsumption * throttle / 20f; } // per tick
+            
+            // Physics
+            float friction = getSurfaceFriction();
+            float acceleration = throttle * 0.05f * friction;
+            speed = Math.max(0, Math.min(getMaxSpeed(), speed + acceleration));
+            if (throttle == 0) speed *= 0.95f; // deceleration
+            
+            // Steering (yaw)
+            float yawDelta = steer * speed * 2.0f;
+            setYRot(getYRot() + yawDelta);
+            
+            // Movement vector
+            Vec3 forward = Vec3.directionFromRotation(0, getYRot());
+            setDeltaMovement(forward.scale(speed / 20f)); // blocks per tick
+            move(MoverType.SELF, getDeltaMovement());
+            
+            // Collision damage
+            if (horizontalCollision) {
+                float collisionDmg = speed * speed * 0.3f;
+                vehicleHP -= collisionDmg;
+                hurt(level().damageSources().generic(), collisionDmg * 0.5f);
+                speed = 0;
+            }
+            
+            // Ground contact (4 wheel raycasts)
+            adjustToTerrain();
+            
+            // Heatmap
+            if (speed > 0.1f) {
+                addHeatToChunk(5f / 20f); // 5 heat/sec
+            }
+        }
+    }
+    
+    private float getSurfaceFriction() {
+        BlockState below = level().getBlockState(blockPosition().below());
+        if (below.is(ModBlocks.ASPHALT)) return 1.0f;
+        if (below.is(Blocks.DIRT_PATH)) return 0.9f;
+        if (below.is(Blocks.SAND)) return 0.6f;
+        if (below.is(Blocks.GRASS_BLOCK)) return 0.8f;
+        return 0.7f; // default
+    }
+}
+```
+
+### 18.7 Quality-Tier Crafting Resolution
+
+```java
+public class QualityAwareCraftingManager {
+    
+    // Hook into recipe resolution
+    public static ItemStack resolveWithQuality(Recipe<?> recipe, 
+            CraftingContainer container, Player player) {
+        ItemStack result = recipe.assemble(container, player.level().registryAccess());
+        
+        if (result.getItem() instanceof QualityItem qualityItem) {
+            // Calculate quality tier
+            int skillLevel = getRelevantSkillLevel(player, recipe);
+            int stationTier = getWorkstationTier(player);
+            float roll = player.getRandom().nextFloat();
+            
+            int quality = calculateQuality(skillLevel, stationTier, roll);
+            
+            // Apply quality to result
+            CompoundTag tag = result.getOrCreateTag();
+            tag.putInt("QualityTier", quality);
+            
+            // Scale stats by quality
+            float multiplier = getQualityMultiplier(quality);
+            if (result.getItem() instanceof WeaponItem) {
+                tag.putFloat("DamageMultiplier", multiplier);
+            }
+            tag.putInt("MaxDurability", 
+                (int)(result.getMaxDamage() * multiplier));
+            tag.putInt("ModSlots", getModSlotCount(quality));
+            
+            // Set display name color
+            result.setRarity(getQualityRarity(quality));
+        }
+        
+        return result;
+    }
+    
+    private static float getQualityMultiplier(int tier) {
+        return switch (tier) {
+            case 1 -> 0.7f;   // Poor (Gray)
+            case 2 -> 0.85f;  // Good (Orange) 
+            case 3 -> 1.0f;   // Great (Yellow)
+            case 4 -> 1.15f;  // Superior (Green)
+            case 5 -> 1.3f;   // Excellent (Blue)
+            case 6 -> 1.5f;   // Legendary (Purple) - loot only
+            default -> 1.0f;
+        };
+    }
+}
+```
+
+---
+
+## 19. Implementation Roadmap
+
+### Phase Overview
+
+| Phase | Focus | Duration (est.) | Deliverable |
+|-------|-------|-----------------|-------------|
+| **Phase 1** | Core Foundation | 12–16 weeks | Playable alpha with survival, zombies, basic crafting |
+| **Phase 2** | Content & Systems | 16–24 weeks | Feature-complete beta |
+| **Phase 3** | Polish & Optimization | 8–12 weeks | Release candidate |
+
+### Detailed Milestone Table
+
+| # | Milestone | Phase | Priority | Complexity | Dependencies | Est. Weeks | Notes |
+|---|-----------|-------|----------|------------|--------------|-----------|-------|
+| 1 | **Project scaffold + Mixin setup** | 1 | Critical | ★★ | None | 1 | NeoForge MDK, Mixin config, build pipeline |
+| 2 | **Custom player stats (HP/Stamina/Food/Water)** | 1 | Critical | ★★★ | #1 | 2 | Override FoodData, add Stamina/Water capabilities |
+| 3 | **Health conditions & debuff system** | 1 | Critical | ★★★ | #2 | 2 | Bleeding, infection, fracture with HUD icons |
+| 4 | **Temperature system** | 1 | High | ★★★ | #2 | 1.5 | Biome/altitude/clothing calculations |
+| 5 | **Vanilla mob removal + base zombie entity** | 1 | Critical | ★★★ | #1 | 2 | Cancel vanilla spawns, register Walker/Crawler |
+| 6 | **Zombie AI (behavior tree + destructive pathfinding)** | 1 | Critical | ★★★★★ | #5 | 4 | Custom A*, block-break pathing, group coordination |
+| 7 | **Heatmap system** | 1 | High | ★★★ | #5, #6 | 2 | Per-chunk heat, spawn triggers, Screamer logic |
+| 8 | **Blood Moon / Horde Night** | 1 | Critical | ★★★★ | #5, #6, #7 | 3 | Wave spawner, scaling formula, sky/audio effects |
+| 9 | **Custom HUD** | 1 | Critical | ★★★ | #2, #3 | 2 | Stat bars, debuff icons, day counter, compass |
+| 10 | **4×4 crafting + quality tiers** | 1 | Critical | ★★★★ | #1 | 3 | Expand grid, quality system, recipe framework |
+| 11 | **Workstations (Forge, Workbench, Chemistry, Campfire)** | 2 | Critical | ★★★ | #10 | 3 | Custom block entities, GUIs, fuel systems |
+| 12 | **XP/Level + Perk system** | 2 | Critical | ★★★★ | #2 | 3 | Data-driven perks, attribute tree, perk UI |
+| 13 | **Melee + ranged weapons (all)** | 2 | Critical | ★★★ | #10, #12 | 3 | Weapon items, mods, ammo crafting |
+| 14 | **Armor system + clothing** | 2 | High | ★★★ | #10, #4 | 2 | 5-slot armor, mod slots, temperature effects |
+| 15 | **World gen (biomes + city/POI)** | 2 | Critical | ★★★★★ | #1 | 6 | Custom chunk gen, Voronoi cities, POI templates |
+| 16 | **All zombie variants** | 2 | High | ★★★★ | #5, #6 | 3 | 16+ types with unique abilities |
+| 17 | **Building + block upgrades + traps** | 2 | High | ★★★ | #10, #11 | 3 | Upgrade paths, SI, 9 trap types |
+| 18 | **Loot tables + containers** | 2 | High | ★★★ | #10, #15 | 2 | Loot stage scaling, 16+ container types |
+| 19 | **Traders + quests** | 2 | High | ★★★★ | #15, #18 | 3 | 5 traders, quest framework, POI reset |
+| 20 | **Vehicles** | 2 | Medium | ★★★★★ | #10, #11, #12 | 4 | 5 vehicle types, physics, fuel, parts crafting |
+| 21 | **Electricity system** | 2 | Medium | ★★★★ | #11, #17 | 3 | Grid solver, wiring, all powered devices |
+| 22 | **Farming + cooking** | 2 | Medium | ★★ | #10, #11 | 2 | Crops, farm plots, cooking recipes |
+| 23 | **Skill book / magazine system** | 2 | Medium | ★★ | #12, #18 | 1.5 | 120+ books, series completion bonuses |
+| 24 | **Stealth system** | 2 | Medium | ★★★ | #6 | 1.5 | Noise model, detection states, stealth kills |
+| 25 | **Inventory UI overhaul** | 2 | High | ★★★★ | #9, #10, #12 | 3 | Tabbed UI, weight system, recipe browser |
+| 26 | **Map system** | 2 | Medium | ★★★ | #9, #15 | 2 | Fog of war, waypoints, quest markers |
+| 27 | **Multiplayer sync + balancing** | 3 | Critical | ★★★★ | All | 3 | Per-player heat, party XP, PvP toggle, netcode |
+| 28 | **Performance optimization** | 3 | Critical | ★★★★★ | All | 3 | Async AI, LOD entities, spatial hashing, profiling |
+| 29 | **Audio overhaul** | 3 | Medium | ★★ | #8, #16 | 1.5 | Zombie sounds, ambient biome audio, blood moon music |
+| 30 | **Config GUI (Mod Menu compat)** | 3 | Medium | ★★ | All | 1 | In-game config editor for all TOML options |
+| 31 | **Admin commands** | 3 | Medium | ★ | All | 1 | `/7dtm` command tree |
+| 32 | **QA, bug fixing, balancing pass** | 3 | Critical | ★★★ | All | 3 | Playtest, balance tuning, crash fixes |
+
+### Dependency Graph (Simplified)
+
+```mermaid
+graph TD
+    A[1. Scaffold] --> B[2. Player Stats]
+    A --> E[5. Base Zombie]
+    B --> C[3. Debuffs]
+    B --> D[4. Temperature]
+    B --> H[9. HUD]
+    E --> F[6. Zombie AI]
+    F --> G[7. Heatmap]
+    F --> K[8. Blood Moon]
+    G --> K
+    A --> J[10. Crafting 4x4]
+    J --> L[11. Workstations]
+    J --> M[13. Weapons]
+    B --> N[12. Perks/XP]
+    J --> N
+    L --> O[17. Building/Traps]
+    A --> P[15. World Gen]
+    J --> Q[18. Loot Tables]
+    P --> Q
+    Q --> R[19. Traders/Quests]
+    L --> S[20. Vehicles]
+    N --> S
+    L --> T[21. Electricity]
+    O --> T
+    E --> U[16. All Zombies]
+    F --> U
+```
+
+### Risk Assessment
+
+| Risk | Impact | Mitigation |
+|------|--------|------------|
+| World gen performance | High — slow chunk gen kills playability | Async generation, LOD, template caching, limit city density |
+| Zombie AI TPS cost | High — 64+ pathfinding zombies per player | Hierarchical A*, cached paths, tick budget per entity |
+| Mixin compatibility | Medium — breaking changes across MC versions | Pin to 1.21.x LTS, abstract Mixin targets behind interface |
+| Content volume | High — 500+ recipes, 300+ POIs, 100+ perks | Data-driven JSON, community data pack support, template tools |
+| Vehicle physics | Medium — MC engine not designed for vehicles | Keep physics simple, raycast-based, no true rigid body |
+| Multiplayer desync | Medium — custom systems need robust netcode | Delta sync protocol, authoritative server for all game state |
+
+---
+
+> **End of Specification** — Parts 1–3 together constitute the complete production-ready reference for the "7 Days to Minecraft" total-conversion mod. A developer can begin implementation at Milestone #1 with zero additional research.
