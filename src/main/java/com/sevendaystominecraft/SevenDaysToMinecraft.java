@@ -2,6 +2,7 @@ package com.sevendaystominecraft;
 
 import com.mojang.logging.LogUtils;
 import com.sevendaystominecraft.capability.ModAttachments;
+import com.sevendaystominecraft.config.HeatmapConfig;
 import com.sevendaystominecraft.config.HordeConfig;
 import com.sevendaystominecraft.config.SurvivalConfig;
 import com.sevendaystominecraft.config.ZombieConfig;
@@ -47,6 +48,9 @@ public class SevenDaysToMinecraft {
 
         // ── Milestone #4: Register Zombie Config (zombies.toml) ──────
         modContainer.registerConfig(ModConfig.Type.SERVER, ZombieConfig.SPEC, "zombies.toml");
+
+        // ── Milestone #5: Register Heatmap Config (heatmap.toml) ──────
+        modContainer.registerConfig(ModConfig.Type.SERVER, HeatmapConfig.SPEC, "heatmap.toml");
 
         // ── Milestone #4: Register Custom Entities ──────────────────
         ModEntities.ENTITY_TYPES.register(modEventBus);

@@ -103,7 +103,7 @@ BUILD SUCCESSFUL — 0 errors, only deprecation warnings on `@EventBusSubscriber
 
 5. **TODO — HUD polish**: Compass/minimap not yet started.
 
-6. **TODO — Heatmap**: Stub exists but needs actual chunk data for noise events.
+6. **DONE — Heatmap**: Implemented in Milestone 5 (see below).
 
 ### HP Display and Zombie Size Fixes (Task #3)
 
@@ -134,6 +134,66 @@ BUILD SUCCESSFUL — 0 errors, only deprecation warnings on `@EventBusSubscriber
 
 5. **Zombie guide updated** — Added Size (W × H) row to every zombie's stat table in `docs/zombie_guide.md`.
 
+---
+
+## Session — March 12, 2026 (continued)
+
+### What was done
+**Milestone 5 — Heatmap System (Spec §1.3): COMPLETE**
+
+Built the full per-chunk heatmap system that drives ambient zombie spawns outside of blood moon nights.
+
+1. **HeatSource** (`heatmap/HeatSource.java`)
+   - Individual heat source object with amount (float), decay rate (per minute), and chunk radius.
+   - NBT serialization for persistence.
+
+2. **HeatmapData** (`heatmap/HeatmapData.java`)
+   - SavedData storing all active heat sources keyed by chunk position (long).
+   - Heat capped at 100 per chunk (spec-accurate).
+   - Additive heat with overflow protection — new sources are clamped to remaining capacity.
+   - Full NBT save/load for persistence across server restarts.
+
+3. **HeatmapManager** (`heatmap/HeatmapManager.java`)
+   - Server-side tick handler running every 20 ticks (1 second).
+   - Decays all heat sources using per-second math: `decayPerMinute * decayMultiplier / 60`.
+   - Removes depleted sources and empty chunks automatically.
+   - Marks data dirty every decay pass for reliable persistence.
+   - Invokes HeatmapSpawner.tick() after decay processing.
+
+4. **HeatEventHandler** (`heatmap/HeatEventHandler.java`)
+   - Block break: +0.5 heat, 3-chunk radius, -2/min decay
+   - Torch placement: +2 heat, 1-chunk radius, -1/min decay (detects TorchBlock and WallTorchBlock)
+   - Explosion: +25 heat, 6-chunk radius, -2/min decay
+   - Sprint: +0.2/sec, 2-chunk radius, -3/min decay (wired up from PlayerStatsHandler stub)
+   - Heat radiates to neighboring chunks within radius with distance-based falloff (50% × linear falloff).
+
+5. **HeatmapSpawner** (`heatmap/HeatmapSpawner.java`)
+   - Threshold-based spawning with per-chunk cooldowns:
+     - Heat 25+: 1-2 scout Walkers (30s cooldown)
+     - Heat 50+: Screamer guaranteed (60s cooldown)
+     - Heat 75+: Mini-horde of 8-12 mixed zombies from nearest dark area (90s cooldown)
+     - Heat 100: Enters "wave mode" — continuous waves every 90s until heat drops below 75
+   - Wave mode: tracked via `waveActiveChunks` set; chunk enters wave mode at heat ≥ 100, exits when heat < 75 (75% of wave threshold × threshold multiplier).
+   - Dark area preference: mini-horde and wave spawns try 20 attempts for blocks with light level ≤ 7; falls back to any valid position.
+   - Spawning disabled during active blood moon.
+   - All cooldowns and wave state cleared by `/7dtm heat_clear`.
+
+6. **HeatmapCommand** (`heatmap/HeatmapCommand.java`)
+   - `/7dtm heat`: Shows current chunk heat value with color coding + effective spawn thresholds.
+   - `/7dtm heat_clear`: Op-only (permission level 2) — resets all heat data and cooldowns.
+
+7. **HeatmapConfig** (`config/HeatmapConfig.java`)
+   - `heatmap.toml` with: `enabled` (bool), `decayMultiplier` (0.1-5.0), `spawnThresholdMultiplier` (0.5-3.0).
+   - Registered in main mod class constructor.
+
+### Build status
+BUILD SUCCESSFUL — 0 errors.
+
+### Out of scope (stubs only)
+- Gunshot heat (no custom weapons yet)
+- Forge/campfire/vehicle heat (no custom blocks/vehicles yet)
+- Screamer scream heat (already partially handled in ScreamerZombie)
+
 ## Next Up
 - Sprint bug fix (Mixin approach).
-- Loot/crafting system (Spec §5-6) or heatmap system (§1.3) depending on priority.
+- Loot/crafting system (Spec §5-6).

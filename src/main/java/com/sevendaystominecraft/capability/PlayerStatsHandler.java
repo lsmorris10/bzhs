@@ -185,13 +185,10 @@ public class PlayerStatsHandler {
         applyDebuffEffects(player, stats);
 
         // ── 7. Heatmap Noise (§1.3) ─────────────────────────────────────
-        // Sprinting adds +0.2/sec heatmap noise (stub — actual heatmap not yet implemented)
-        // This is a placeholder for future heatmap chunk capability
+        // Sprinting adds +0.2/sec heatmap noise
         if (player.isSprinting()) {
-            // TODO: When HeatmapCapability is implemented:
-            // ChunkAccess chunk = player.level().getChunk(player.blockPosition());
-            // HeatmapCapability heatmap = chunk.getData(ModAttachments.HEATMAP.get());
-            // heatmap.addHeat(0.2f / 20f, (ServerLevel) player.level());
+            com.sevendaystominecraft.heatmap.HeatEventHandler.onPlayerSprint(
+                    serverPlayer.serverLevel(), player);
         }
 
         // ── 8. Sync to Client (throttled) ───────────────────────────────

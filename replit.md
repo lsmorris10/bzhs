@@ -34,7 +34,8 @@ src/main/java/com/sevendaystominecraft/
 ├── config/
 │   ├── SurvivalConfig.java         — Server-side survival config (survival.toml)
 │   ├── HordeConfig.java            — Server-side horde/blood moon config (horde.toml)
-│   └── ZombieConfig.java           — Zombie variant stats/modifiers config (zombies.toml)
+│   ├── ZombieConfig.java           — Zombie variant stats/modifiers config (zombies.toml)
+│   └── HeatmapConfig.java          — Heatmap config (heatmap.toml): enabled, decay/spawn multipliers
 ├── entity/
 │   ├── ModEntities.java            — DeferredRegister for all custom entity types + attribute events
 │   └── zombie/
@@ -56,6 +57,13 @@ src/main/java/com/sevendaystominecraft/
 │       ├── VultureEntity.java       — Flying dive attacks (Phantom base)
 │       ├── ZombieBearEntity.java    — Charge + AoE swipe
 │       └── ZombieDogEntity.java     — Pack spawns, fast (Wolf base)
+├── heatmap/
+│   ├── HeatSource.java             — Individual heat source with amount, decay rate, radius
+│   ├── HeatmapData.java            — SavedData storing per-chunk heat sources, persisted via NBT
+│   ├── HeatmapManager.java         — Server tick handler for heat decay + spawner integration
+│   ├── HeatEventHandler.java       — Event hooks: block break, torch place, explosion, sprint
+│   ├── HeatmapSpawner.java         — Threshold-based zombie spawning (scouts/screamer/mini-horde/waves)
+│   └── HeatmapCommand.java         — /7dtm heat debug command + /7dtm heat_clear admin command
 ├── horde/
 │   ├── BloodMoonTracker.java       — SavedData for day tracking & blood moon phase state
 │   ├── BloodMoonEventHandler.java  — Server tick handler for blood moon timeline + sleep prevention
@@ -117,6 +125,22 @@ src/main/java/com/sevendaystominecraft/
 - **ZombieConfig** (`zombies.toml`): Per-variant HP/damage/speed overrides, all special mechanic tuning values, modifier multipliers
 - **ModEntities**: Registration with `EntityAttributeCreationEvent` for all 18 types
 
+#### Heatmap System — Milestone 5 (Spec §1.3)
+- **HeatmapData**: Per-chunk SavedData storing heat sources with individual decay rates, persisted to NBT
+- **HeatmapManager**: Server-side tick handler (1-second intervals) processing heat decay with configurable multiplier
+- **HeatEventHandler**: Hooks into block break (+0.5, 3-chunk radius), torch placement (+2, 1-chunk), sprint (+0.2/sec, 2-chunk), explosions (+25, 6-chunk)
+- **HeatmapSpawner**: Threshold-based spawning with cooldowns:
+  - Heat 25+: 1-2 scout Walkers (30s cooldown)
+  - Heat 50+: Screamer guaranteed (60s cooldown)
+  - Heat 75+: Mini-horde of 8-12 mixed zombies from nearest dark area (90s cooldown)
+  - Heat 100: Enters "wave mode" — continuous waves every 90s until heat drops below 75
+  - Mini-horde and wave spawns prefer dark areas (light level ≤ 7); falls back to any valid position
+  - Skips spawning during active blood moon
+- **Heat radiation**: Sources radiate to neighboring chunks with distance-based falloff (50% at center, less at edges)
+- **Heat cap**: 100 per chunk (spec-accurate); threshold multiplier scales spawn thresholds only
+- **HeatmapConfig**: `heatmap.toml` with enabled toggle, decayMultiplier (0.1-5.0), spawnThresholdMultiplier (0.5-3.0)
+- **Debug commands**: `/7dtm heat` shows current chunk heat + effective thresholds, `/7dtm heat_clear` (op-only) resets all heat data
+
 ## Known Bugs / Issues
 1. **Sprint bug (known, unresolved)**: Sprint can get stuck — holding W alone gives infinite sprint (stamina drains but sprint doesn't cancel). Simplified from speed-heuristic approach to direct `isSprinting()` checks. Likely needs a client-side Mixin on `LocalPlayer.aiStep()` for proper fix.
 2. **Temperature**: Adjustment rate changed to 0.3°F/s — needs long-term gameplay verification
@@ -161,4 +185,4 @@ src/main/java/com/sevendaystominecraft/
 
 ## Spec / Roadmap
 The full implementation is tracked in `docs/7dtm_final_spec.md` with 19 phases.
-Milestones 1-4 complete. Next priorities: sprint bug fix, loot/crafting system (§5-6), heatmap system (§1.3).
+Milestones 1-5 complete. Next priorities: sprint bug fix, loot/crafting system (§5-6).
