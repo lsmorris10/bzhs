@@ -31,11 +31,33 @@ src/main/java/com/sevendaystominecraft/
 │   └── BloodMoonSkyRenderer.java   — Red sky/fog tint during blood moon
 ├── config/
 │   ├── SurvivalConfig.java         — Server-side survival config (survival.toml)
-│   └── HordeConfig.java            — Server-side horde/blood moon config (horde.toml)
+│   ├── HordeConfig.java            — Server-side horde/blood moon config (horde.toml)
+│   └── ZombieConfig.java           — Zombie variant stats/modifiers config (zombies.toml)
+├── entity/
+│   ├── ModEntities.java            — DeferredRegister for all custom entity types + attribute events
+│   └── zombie/
+│       ├── BaseSevenDaysZombie.java — Base zombie entity with variant stats, modifiers, night speed bonus, radiated regen
+│       ├── ZombieVariant.java       — Enum of all 18 zombie variants with base stats
+│       ├── BehemothZombie.java      — Boss: knockback immune, ground pound AoE
+│       ├── BloatedWalkerZombie.java — Explodes on death (2-block radius)
+│       ├── ChargedZombie.java       — Chain lightning on hit
+│       ├── CopZombie.java           — Acid spit projectile, explodes at 20% HP
+│       ├── DemolisherZombie.java    — Chest-hit explosion, headshot mechanic
+│       ├── FeralWightZombie.java    — Always sprints, glowing eyes
+│       ├── FrozenLumberjackZombie.java — Cold-resistant Walker variant
+│       ├── InfernalZombie.java      — Fire trail, burn debuff on melee
+│       ├── MutatedChuckZombie.java  — Ranged vomit attack
+│       ├── NurseZombie.java         — Heals nearby zombies
+│       ├── ScreamerZombie.java      — Screams to spawn more zombies, flees
+│       ├── SoldierZombie.java       — Armored Walker variant
+│       ├── SpiderZombie.java        — Wall climbing, jump boost
+│       ├── VultureEntity.java       — Flying dive attacks (Phantom base)
+│       ├── ZombieBearEntity.java    — Charge + AoE swipe
+│       └── ZombieDogEntity.java     — Pack spawns, fast (Wolf base)
 ├── horde/
 │   ├── BloodMoonTracker.java       — SavedData for day tracking & blood moon phase state
 │   ├── BloodMoonEventHandler.java  — Server tick handler for blood moon timeline + sleep prevention
-│   └── HordeSpawner.java           — Wave spawning logic with scaling formula
+│   └── HordeSpawner.java           — Wave spawning with composition table, config day thresholds
 ├── mixin/
 │   ├── FoodDataMixin.java          — Cancels vanilla food saturation
 │   ├── LivingEntityHurtMixin.java  — Custom damage handling
@@ -69,13 +91,29 @@ src/main/java/com/sevendaystominecraft/
   - **Late-join sync**: Syncs blood moon state to players on login
 - **HordeSpawner**: Wave spawning with spec §4.2 scaling formula:
   `floor(baseCount × (1 + (dayNumber / cycleLength) × diffMult) ^ 1.2)`
+  - Day-based composition table with 5 tiers (day 7/14/21/28/49+)
+  - Config day thresholds gate advanced variants (feral, demolisher, charged, infernal)
+  - Radiated modifier randomly applied to base variants on day 28+
   - Spawns zombies 24-40 blocks from each player at surface level
   - Wave multiplier: `1 + 0.25 * waveIndex` for escalating difficulty
-  - Currently uses vanilla zombies (placeholder for future custom variants)
 - **HordeConfig**: `horde.toml` with all spec §4.2 config keys
 - **BloodMoonSyncPayload**: Network packet syncing blood moon state to clients
 - **BloodMoonClientState**: Client singleton storing active state, wave info, day number
 - **BloodMoonSkyRenderer**: Fog color tint that gradually ramps to red during active blood moon
+
+#### Custom Zombie System — Milestone 4 (Spec §3.1-3.2)
+- **ZombieVariant enum**: All 18 variants with base HP, damage, speed, XP, spawn day
+  - 3 modifier types (Radiated, Charged, Infernal) with configurable stat multipliers
+- **BaseSevenDaysZombie**: Core entity extending Zombie
+  - Applies variant stats on spawn via `finalizeSpawn()` with tick fallback
+  - Modifier system: stats applied after variant stats, persisted via NBT, reapplied on load
+  - Night speed bonus: +50% movement speed during nighttime (configurable)
+  - Radiated regen: 2 HP/sec healing tick (configurable)
+  - XP reward includes modifier bonus
+- **18 variant entity types** registered via `DeferredRegister<EntityType<?>>`
+  - Special mechanics per spec §3.2: explosions, projectiles, chain lightning, fire trails, wall climbing, healing aura, screamer spawning, flying dive attacks, ground pound AoE
+- **ZombieConfig** (`zombies.toml`): Per-variant HP/damage/speed overrides, all special mechanic tuning values, modifier multipliers
+- **ModEntities**: Registration with `EntityAttributeCreationEvent` for all 18 types
 
 ## Known Bugs / Issues
 1. **Sprint bug (known, unresolved)**: Sprint can get stuck — holding W alone gives infinite sprint (stamina drains but sprint doesn't cancel). Simplified from speed-heuristic approach to direct `isSprinting()` checks. Likely needs a client-side Mixin on `LocalPlayer.aiStep()` for proper fix.
@@ -105,13 +143,20 @@ src/main/java/com/sevendaystominecraft/
 - See `PROJECT_NOTES.md` for session-by-session status and known issues
 
 ## NeoForge API Notes
+- `EntityType.Builder.build()` requires `ResourceKey<EntityType<?>>` in 1.21.4 — use `ResourceKey.create(Registries.ENTITY_TYPE, ResourceLocation.fromNamespaceAndPath(MOD_ID, name))`
+- `Entity.hurt()` is `final` → override `actuallyHurt(ServerLevel, DamageSource, float)` for damage interception
+- `doHurtTarget()` signature: `doHurtTarget(ServerLevel serverLevel, Entity target)`
+- `SoundEvents.LLAMA_SPIT`, `GHAST_SCREAM`, `RAVAGER_ROAR`, `LIGHTNING_BOLT_THUNDER` — direct `SoundEvent`, no `.value()` needed
+- `convertsInWater()` → `isSensitiveToWater()`; `isSunSensitive()` removed entirely
+- `isGlowing()` → `isCurrentlyGlowing()`
+- `getExperienceReward()` → `getBaseExperienceReward(ServerLevel level)`
 - `EntityType.create()` requires `EntitySpawnReason` parameter in 1.21.4
-- `SoundEvents` fields are `Reference<SoundEvent>`, use `.value()` for direct access
 - `@EventBusSubscriber(bus = Bus.MOD)` is deprecated but still functional
 - `SavedData` uses `Factory<>` with constructor + load function for `computeIfAbsent`
 - `CanPlayerSleepEvent` is the correct hook for blocking sleep (not `PlayerSleepInBedEvent`)
 - Sprint detection: avoid speed-based heuristics; use `player.isSprinting()` directly and handle client-side via Mixin or sync packets
+- Config pattern: Static `SPEC` + `INSTANCE` via `new ModConfigSpec.Builder().configure(Klass::new)`
 
 ## Spec / Roadmap
 The full implementation is tracked in `docs/7dtm_final_spec.md` with 19 phases.
-Milestones 1-3 complete. Next priorities: sprint bug fix, custom zombie entities (§3), heatmap system (§1.3).
+Milestones 1-4 complete. Next priorities: sprint bug fix, loot/crafting system (§5-6), heatmap system (§1.3).

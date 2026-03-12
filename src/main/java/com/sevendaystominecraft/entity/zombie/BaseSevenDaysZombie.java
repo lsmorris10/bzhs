@@ -1,0 +1,217 @@
+package com.sevendaystominecraft.entity.zombie;
+
+import com.sevendaystominecraft.config.ZombieConfig;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.DifficultyInstance;
+import net.minecraft.world.entity.EntitySpawnReason;
+import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.SpawnGroupData;
+import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
+import net.minecraft.world.entity.ai.attributes.Attributes;
+import net.minecraft.world.entity.monster.Zombie;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.ServerLevelAccessor;
+import org.jetbrains.annotations.Nullable;
+
+public class BaseSevenDaysZombie extends Zombie {
+
+    protected final ZombieVariant variant;
+    protected ZombieVariant modifier;
+    protected boolean isHordeMob;
+    private boolean statsApplied = false;
+
+    public BaseSevenDaysZombie(EntityType<? extends Zombie> type, Level level, ZombieVariant variant) {
+        super(type, level);
+        this.variant = variant;
+        this.modifier = null;
+        this.isHordeMob = false;
+    }
+
+    public ZombieVariant getVariant() {
+        return variant;
+    }
+
+    public ZombieVariant getModifier() {
+        return modifier;
+    }
+
+    public void setModifier(ZombieVariant mod) {
+        if (mod != null && mod.isModifier()) {
+            this.modifier = mod;
+            if (statsApplied) {
+                applyModifierStats();
+            }
+        }
+    }
+
+    public void setHordeMob(boolean hordeMob) {
+        this.isHordeMob = hordeMob;
+        if (hordeMob) {
+            setPersistenceRequired();
+        }
+    }
+
+    public boolean isHordeMob() {
+        return isHordeMob;
+    }
+
+    @Override
+    @Nullable
+    public SpawnGroupData finalizeSpawn(ServerLevelAccessor level, DifficultyInstance difficulty,
+                                         EntitySpawnReason reason, @Nullable SpawnGroupData spawnData) {
+        spawnData = super.finalizeSpawn(level, difficulty, reason, spawnData);
+        applyAllStats();
+        return spawnData;
+    }
+
+    @Override
+    public void tick() {
+        super.tick();
+        if (!statsApplied && !level().isClientSide()) {
+            applyAllStats();
+        }
+
+        if (!level().isClientSide() && modifier == ZombieVariant.RADIATED && tickCount % 20 == 0) {
+            float regenPerSec = ZombieConfig.INSTANCE.radiatedRegenPerSec.get().floatValue();
+            if (getHealth() < getMaxHealth()) {
+                heal(regenPerSec);
+            }
+        }
+
+        if (!level().isClientSide() && !isHordeMob) {
+            applyNightSpeedBonus();
+        }
+    }
+
+    private void applyAllStats() {
+        applyVariantStats();
+        if (modifier != null) {
+            applyModifierStats();
+        }
+        statsApplied = true;
+    }
+
+    @Override
+    public void addAdditionalSaveData(CompoundTag tag) {
+        super.addAdditionalSaveData(tag);
+        tag.putBoolean("7dtm_horde", isHordeMob);
+        if (modifier != null) {
+            tag.putString("7dtm_modifier", modifier.name());
+        }
+    }
+
+    @Override
+    public void readAdditionalSaveData(CompoundTag tag) {
+        super.readAdditionalSaveData(tag);
+        isHordeMob = tag.getBoolean("7dtm_horde");
+        if (tag.contains("7dtm_modifier")) {
+            try {
+                modifier = ZombieVariant.valueOf(tag.getString("7dtm_modifier"));
+            } catch (IllegalArgumentException ignored) {}
+        }
+        statsApplied = false;
+    }
+
+    protected void applyVariantStats() {
+        double hp = variant.getBaseHP();
+        double damage = variant.getBaseDamage();
+        double speed = convertSpeedToAttribute(variant.getBaseSpeed());
+
+        getAttribute(Attributes.MAX_HEALTH).setBaseValue(hp);
+        setHealth((float) hp);
+        getAttribute(Attributes.ATTACK_DAMAGE).setBaseValue(damage);
+        getAttribute(Attributes.MOVEMENT_SPEED).setBaseValue(speed);
+    }
+
+    protected void applyModifierStats() {
+        if (modifier == null) return;
+
+        double currentHP = getAttribute(Attributes.MAX_HEALTH).getBaseValue();
+        double currentDmg = getAttribute(Attributes.ATTACK_DAMAGE).getBaseValue();
+        double currentSpd = getAttribute(Attributes.MOVEMENT_SPEED).getBaseValue();
+
+        double hpMult, dmgMult, spdMult;
+        ZombieConfig cfg = ZombieConfig.INSTANCE;
+
+        switch (modifier) {
+            case RADIATED -> {
+                hpMult = cfg.radiatedHPMult.get();
+                dmgMult = cfg.radiatedDamageMult.get();
+                spdMult = cfg.radiatedSpeedMult.get();
+            }
+            case CHARGED -> {
+                hpMult = cfg.chargedHPMult.get();
+                dmgMult = cfg.chargedDamageMult.get();
+                spdMult = cfg.chargedSpeedMult.get();
+            }
+            case INFERNAL -> {
+                hpMult = cfg.infernalHPMult.get();
+                dmgMult = cfg.infernalDamageMult.get();
+                spdMult = cfg.infernalSpeedMult.get();
+            }
+            default -> { return; }
+        }
+
+        double newHP = currentHP * hpMult;
+        double newDmg = currentDmg * dmgMult;
+        double newSpd = currentSpd * spdMult;
+
+        getAttribute(Attributes.MAX_HEALTH).setBaseValue(newHP);
+        setHealth((float) newHP);
+        getAttribute(Attributes.ATTACK_DAMAGE).setBaseValue(newDmg);
+        getAttribute(Attributes.MOVEMENT_SPEED).setBaseValue(newSpd);
+    }
+
+    private void applyNightSpeedBonus() {
+        if (level() instanceof ServerLevel serverLevel) {
+            long timeOfDay = serverLevel.getDayTime() % 24000;
+            boolean isNight = timeOfDay >= 13000 && timeOfDay < 23000;
+            double baseSpeed = convertSpeedToAttribute(variant.getBaseSpeed());
+            if (modifier != null) {
+                ZombieConfig cfg = ZombieConfig.INSTANCE;
+                double spdMult = switch (modifier) {
+                    case RADIATED -> cfg.radiatedSpeedMult.get();
+                    case CHARGED -> cfg.chargedSpeedMult.get();
+                    case INFERNAL -> cfg.infernalSpeedMult.get();
+                    default -> 1.0;
+                };
+                baseSpeed *= spdMult;
+            }
+
+            if (isNight) {
+                double bonus = ZombieConfig.INSTANCE.nightSpeedBonus.get();
+                getAttribute(Attributes.MOVEMENT_SPEED).setBaseValue(baseSpeed * (1.0 + bonus));
+            } else {
+                getAttribute(Attributes.MOVEMENT_SPEED).setBaseValue(baseSpeed);
+            }
+        }
+    }
+
+    @Override
+    protected int getBaseExperienceReward(ServerLevel level) {
+        int base = variant.getXpReward();
+        if (modifier != null) {
+            base += modifier.getXpReward();
+        }
+        return base;
+    }
+
+    @Override
+    public boolean isSensitiveToWater() {
+        return false;
+    }
+
+    protected static double convertSpeedToAttribute(double blocksPerSecond) {
+        return blocksPerSecond * 0.1;
+    }
+
+    public static AttributeSupplier.Builder createBaseZombieAttributes() {
+        return Zombie.createAttributes()
+                .add(Attributes.MAX_HEALTH, 100.0)
+                .add(Attributes.ATTACK_DAMAGE, 8.0)
+                .add(Attributes.MOVEMENT_SPEED, 0.1)
+                .add(Attributes.FOLLOW_RANGE, 48.0)
+                .add(Attributes.KNOCKBACK_RESISTANCE, 0.0);
+    }
+}

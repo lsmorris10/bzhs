@@ -4,6 +4,8 @@ import com.mojang.logging.LogUtils;
 import com.sevendaystominecraft.capability.ModAttachments;
 import com.sevendaystominecraft.config.HordeConfig;
 import com.sevendaystominecraft.config.SurvivalConfig;
+import com.sevendaystominecraft.config.ZombieConfig;
+import com.sevendaystominecraft.entity.ModEntities;
 
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.fml.ModContainer;
@@ -43,6 +45,12 @@ public class SevenDaysToMinecraft {
         // ── Milestone #3: Register Horde Config (horde.toml) ─────────
         modContainer.registerConfig(ModConfig.Type.SERVER, HordeConfig.SPEC, "horde.toml");
 
+        // ── Milestone #4: Register Zombie Config (zombies.toml) ──────
+        modContainer.registerConfig(ModConfig.Type.SERVER, ZombieConfig.SPEC, "zombies.toml");
+
+        // ── Milestone #4: Register Custom Entities ──────────────────
+        ModEntities.ENTITY_TYPES.register(modEventBus);
+
         // Register mod lifecycle events
         modEventBus.addListener(this::onCommonSetup);
         modEventBus.addListener(this::onClientSetup);
@@ -52,11 +60,11 @@ public class SevenDaysToMinecraft {
 
         // Note: PlayerStatsHandler is registered via @EventBusSubscriber (auto-discovered)
         // Note: ModNetworking is registered via @EventBusSubscriber(bus = Bus.MOD) (auto-discovered)
+        // Note: ModEntities.AttributeRegistration registered via @EventBusSubscriber(bus = Bus.MOD)
 
-        // TODO: Phase 1 — Register systems in order:
+        // TODO: Register remaining systems:
         // - ModBlocks.register(modEventBus);      // Custom blocks
         // - ModItems.register(modEventBus);       // Custom items
-        // - ModEntities.register(modEventBus);    // Zombie/animal entities
         // - ModParticles.register(modEventBus);   // Custom particles (§14.7.2)
         // - ModSounds.register(modEventBus);      // Custom sounds
 
