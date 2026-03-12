@@ -28,7 +28,9 @@ src/main/java/com/sevendaystominecraft/
 ├── client/
 │   ├── StatsHudOverlay.java        — HUD overlay for player stats + blood moon indicator
 │   ├── BloodMoonClientState.java   — Client-side blood moon state singleton
-│   └── BloodMoonSkyRenderer.java   — Red sky/fog tint during blood moon
+│   ├── BloodMoonSkyRenderer.java   — Red sky/fog tint during blood moon
+│   ├── ModEntityRenderers.java     — Entity renderer registration for all 18 zombie types
+│   └── ScaledZombieRenderer.java   — ZombieRenderer subclass with configurable scale factor
 ├── config/
 │   ├── SurvivalConfig.java         — Server-side survival config (survival.toml)
 │   ├── HordeConfig.java            — Server-side horde/blood moon config (horde.toml)

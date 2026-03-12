@@ -47,6 +47,19 @@ Built the entire custom zombie entity system from scratch. Here's the breakdown:
 - **Night speed bonus unused**: Config key `nightSpeedBonus` was defined but never read. Now applied in `tick()` based on time-of-day check.
 - **HordeConfig day thresholds ignored**: `feralDay`/`demolisherDay`/`chargedDay`/`infernalDay` were in config but `HordeSpawner` used hardcoded tables. Added `applyConfigThresholds()` to gate variant slots.
 
+### Entity renderer crash fix
+- **Problem**: All 18 zombie types crashed the game on spawn with `NullPointerException: entityrenderer is null` — no renderers were registered.
+- **Fix**: Created `client/ModEntityRenderers.java` — registers renderers for all 18 entity types via `EntityRenderersEvent.RegisterRenderers` on the MOD bus (client-only).
+- Created `client/ScaledZombieRenderer.java` — extends `ZombieRenderer` with configurable scale factor, overrides `scale()` to apply PoseStack scaling.
+- **Renderer assignments**:
+  - Standard humanoid zombies (Walker, Crawler, FrozenLumberjack, BloatedWalker, SpiderZombie, FeralWight, Cop, Screamer, MutatedChuck, Nurse, Soldier, Charged, Infernal): `ZombieRenderer` (1.0x)
+  - Demolisher: `ScaledZombieRenderer` at 1.2x (larger armored zombie)
+  - Behemoth: `ScaledZombieRenderer` at 1.8x (boss-sized)
+  - ZombieDog: `ScaledZombieRenderer` at 0.5x (dog-sized)
+  - Vulture: `ScaledZombieRenderer` at 0.4x (small flying)
+  - ZombieBear: `ScaledZombieRenderer` at 1.5x (bear-sized)
+- **Note**: All entities extend `Zombie` via `BaseSevenDaysZombie`, so vanilla animal renderers (`WolfRenderer`, `PhantomRenderer`, `PolarBearRenderer`) cannot be used directly (type mismatch — those renderers expect their specific entity classes). Scaled zombie models with correct bounding boxes provide visually distinct sizes. Full custom models/textures are future work.
+
 ### Build status
 BUILD SUCCESSFUL — 0 errors, only deprecation warnings on `@EventBusSubscriber(bus = Bus.MOD)` (still functional in NeoForge 21.4.140).
 
