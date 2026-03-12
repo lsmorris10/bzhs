@@ -2,6 +2,30 @@
 
 ---
 
+## Currently Running Tasks (March 12, 2026 — overnight)
+
+Three task agents are running in parallel while you sleep:
+
+1. **Task #5 — Heatmap Spawning System** (Spec §1.3): Adds per-chunk heat tracking driven by player activity (block breaking, torch placement, explosions, sprinting). Chunks that accumulate enough heat trigger scout Walkers, Screamer spawns, and mini-hordes. Includes `/7dtm heat` and `/7dtm heat_clear` debug commands.
+
+2. **Task #6 — Hide Vanilla Hunger Bar**: Removes the redundant vanilla drumstick hunger bar since the custom HUD already displays Food, Water, and Stamina bars.
+
+3. **Task #7 — HUD Health Bar Replacing Vanilla Hearts**: Adds an HP bar to the custom stats panel and hides the vanilla heart icons, consolidating all player vitals into the custom HUD.
+
+---
+
+## When You Wake Up — Checklist
+
+- [ ] Check if all three tasks (#5, #6, #7) completed and merged successfully
+- [ ] Run `./gradlew build` to verify everything compiles cleanly
+- [ ] Test in-game: spawn zombies near high-heat areas, verify heatmap spawning works (place lots of torches or break blocks to raise chunk heat, then check `/7dtm heat`)
+- [ ] Verify vanilla hunger bar (drumstick icons) is gone and the custom HUD shows Food/Water/Stamina bars
+- [ ] Verify vanilla hearts are gone and the custom HUD shows an HP bar
+- [ ] Check the sprint bug — still unresolved, needs client-side Mixin on `LocalPlayer.aiStep()`
+- [ ] Look at `docs/if-bored.md` for edge cases worth testing
+
+---
+
 ## Session — March 12, 2026
 
 ### What was done
@@ -103,7 +127,11 @@ BUILD SUCCESSFUL — 0 errors, only deprecation warnings on `@EventBusSubscriber
 
 5. **TODO — HUD polish**: Compass/minimap not yet started.
 
-6. **DONE — Heatmap**: Implemented in Milestone 5 (see below).
+6. **DONE — Heatmap**: Core implementation complete in Milestone 5. Task #5 adds the spawning integration and is merging overnight.
+
+7. **IN PROGRESS — Hide Vanilla Hunger Bar** (Task #6): Removing vanilla drumstick icons; custom HUD already handles Food/Water/Stamina display.
+
+8. **IN PROGRESS — HUD Health Bar** (Task #7): Adding HP bar to the custom stats panel and hiding vanilla heart icons.
 
 ### HP Display and Zombie Size Fixes (Task #3)
 
@@ -195,5 +223,7 @@ BUILD SUCCESSFUL — 0 errors.
 - Screamer scream heat (already partially handled in ScreamerZombie)
 
 ## Next Up
-- Sprint bug fix (Mixin approach).
-- Loot/crafting system (Spec §5-6).
+- **Sprint bug fix** — Client-side Mixin on `LocalPlayer.aiStep()` to properly cancel sprint when stamina is depleted.
+- **Loot & crafting system** (Spec §5-6) — Custom loot tables, crafting recipes, and item progression.
+- **Custom textures & models** — Replace scaled zombie renderers with proper custom models and textures for each variant.
+- **World generation** — Custom biomes, structures, and POI generation per the spec.
