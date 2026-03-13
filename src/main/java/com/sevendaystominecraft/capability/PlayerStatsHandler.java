@@ -222,17 +222,30 @@ public class PlayerStatsHandler {
                 SevenDaysPlayerStats newStats = event.getEntity().getData(ModAttachments.PLAYER_STATS.get());
                 newStats.copyFrom(oldStats);
 
-                // On respawn, reset certain stats to reasonable values
-                // (player shouldn't respawn at 0 food/water)
                 newStats.setFood(newStats.getMaxFood() * 0.5f);
                 newStats.setWater(newStats.getMaxWater() * 0.5f);
                 newStats.setStamina(newStats.getMaxStamina());
-                // Clear all debuffs on respawn
-                for (String id : SevenDaysPlayerStats.KNOWN_DEBUFF_IDS) {
-                    newStats.removeDebuff(id);
-                }
+
+                clearAllDebuffs(event.getEntity(), newStats);
             }
         }
+    }
+
+    public static void clearAllDebuffs(Player player, SevenDaysPlayerStats stats) {
+        for (String id : SevenDaysPlayerStats.KNOWN_DEBUFF_IDS) {
+            stats.removeDebuff(id);
+        }
+        stats.setBleedingStacks(0);
+
+        var speedAttr = player.getAttribute(Attributes.MOVEMENT_SPEED);
+        if (speedAttr != null) {
+            speedAttr.removeModifier(SPRAIN_SLOWDOWN_ID);
+            speedAttr.removeModifier(FRACTURE_SLOWDOWN_ID);
+            speedAttr.removeModifier(HYPOTHERMIA_SLOWDOWN_ID);
+            speedAttr.removeModifier(FREEZE_SLOWDOWN_ID);
+        }
+
+        player.removeEffect(MobEffects.CONFUSION);
     }
 
     /**
