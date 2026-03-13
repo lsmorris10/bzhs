@@ -8,6 +8,7 @@ import com.sevendaystominecraft.network.SyncPlayerStatsPayload;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
+import net.minecraft.world.entity.ai.attributes.AttributeInstance;
 import net.minecraft.world.entity.ai.attributes.AttributeModifier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.player.Player;
@@ -49,6 +50,8 @@ public class PlayerStatsHandler {
             ResourceLocation.fromNamespaceAndPath(SevenDaysToMinecraft.MOD_ID, "hypothermia_slowdown");
     private static final ResourceLocation FREEZE_SLOWDOWN_ID =
             ResourceLocation.fromNamespaceAndPath(SevenDaysToMinecraft.MOD_ID, "freeze_slowdown");
+    private static final ResourceLocation BASE_HEALTH_MODIFIER_ID =
+            ResourceLocation.fromNamespaceAndPath(SevenDaysToMinecraft.MOD_ID, "base_max_health");
 
     // Tick counter key — we store it transiently (doesn't need persistence)
     // We use the player's tick count (tickCount) modulo for throttling
@@ -230,6 +233,7 @@ public class PlayerStatsHandler {
                 clearAllDebuffs(event.getEntity(), newStats);
             }
         }
+        applyBaseMaxHealth(event.getEntity());
     }
 
     public static void clearAllDebuffs(Player player, SevenDaysPlayerStats stats) {
@@ -255,9 +259,33 @@ public class PlayerStatsHandler {
     @SubscribeEvent
     public static void onPlayerLogin(PlayerEvent.PlayerLoggedInEvent event) {
         if (event.getEntity() instanceof ServerPlayer serverPlayer) {
+            applyBaseMaxHealth(serverPlayer);
             SevenDaysPlayerStats stats = serverPlayer.getData(ModAttachments.PLAYER_STATS.get());
             sendStatsToClient(serverPlayer, stats);
             SevenDaysToMinecraft.LOGGER.debug("7DTM: Synced player stats to {} on login", serverPlayer.getName().getString());
+        }
+    }
+
+    private static void applyBaseMaxHealth(Player player) {
+        double configuredMax = SurvivalConfig.INSTANCE.baseMaxHealth.get();
+        double vanillaBase = 20.0;
+        double bonus = configuredMax - vanillaBase;
+
+        AttributeInstance healthAttr = player.getAttribute(Attributes.MAX_HEALTH);
+        if (healthAttr == null) return;
+
+        boolean hadModifier = healthAttr.getModifier(BASE_HEALTH_MODIFIER_ID) != null;
+
+        healthAttr.removeModifier(BASE_HEALTH_MODIFIER_ID);
+        if (bonus != 0.0) {
+            healthAttr.addPermanentModifier(new AttributeModifier(
+                    BASE_HEALTH_MODIFIER_ID, bonus, AttributeModifier.Operation.ADD_VALUE));
+        }
+
+        if (!hadModifier) {
+            player.setHealth(player.getMaxHealth());
+        } else if (player.getHealth() > player.getMaxHealth()) {
+            player.setHealth(player.getMaxHealth());
         }
     }
 
