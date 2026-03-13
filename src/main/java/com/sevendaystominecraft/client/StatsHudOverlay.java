@@ -30,7 +30,6 @@ public class StatsHudOverlay {
     private static final int TEXT_OFFSET_X = 4;
     private static final int LABEL_WIDTH = 55;
 
-    private static final int BG_COLOR = 0xAA000000;
     private static final int FOOD_COLOR = 0xFFFF8C00;
     private static final int FOOD_LOW_COLOR = 0xFFFF3300;
     private static final int WATER_COLOR = 0xFF3399FF;
