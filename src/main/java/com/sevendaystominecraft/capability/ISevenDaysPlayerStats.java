@@ -76,6 +76,10 @@ public interface ISevenDaysPlayerStats {
     /** Tick all debuffs: decrement durations, remove those that expire. */
     void tickDebuffs();
 
+    /** Current bleeding stacks (0–3). Damage scales with stacks. */
+    int getBleedingStacks();
+    void setBleedingStacks(int stacks);
+
     // ── Utility ─────────────────────────────────────────────────────────
     /** Copy all values from another stats instance (used on death/respawn). */
     void copyFrom(ISevenDaysPlayerStats other);

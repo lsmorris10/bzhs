@@ -24,6 +24,8 @@ src/main/java/com/sevendaystominecraft/
 │   ├── ISevenDaysPlayerStats.java  — Player stats interface
 │   ├── ModAttachments.java         — NeoForge data attachments registration
 │   ├── PlayerStatsHandler.java     — Event handlers for player stats
+│   ├── FallDamageHandler.java      — Fall damage event handler (sprain/fracture triggers)
+│   ├── ExplosionHandler.java       — Explosion proximity handler (concussion trigger)
 │   └── SevenDaysPlayerStats.java   — Player stats implementation (Food, Water, Stamina, etc.)
 ├── client/
 │   ├── StatsHudOverlay.java        — HUD overlay for player stats + blood moon indicator
@@ -152,7 +154,7 @@ src/main/java/com/sevendaystominecraft/
 ## Known Bugs / Issues
 1. **Sprint bug (known, unresolved)**: Sprint can get stuck — holding W alone gives infinite sprint (stamina drains but sprint doesn't cancel). Simplified from speed-heuristic approach to direct `isSprinting()` checks. Likely needs a client-side Mixin on `LocalPlayer.aiStep()` for proper fix.
 2. **Temperature**: Adjustment rate changed to 0.3°F/s — needs long-term gameplay verification
-3. **Debuffs**: Infection/bleeding effects unverified in gameplay testing
+3. **Debuffs**: All 12 types have triggers and effects implemented; gameplay balance verification pending
 4. **Horde spawn balance**: Needs verification that spawn counts match intended difficulty
 
 ## Workflow
@@ -193,4 +195,4 @@ src/main/java/com/sevendaystominecraft/
 
 ## Spec / Roadmap
 The full implementation is tracked in `docs/7dtm_final_spec.md` with 19 phases.
-Milestones 1-5 complete. Milestone 6 (HUD polish) in progress: compass + minimap + player tracking added. Next priorities: sprint bug fix, loot/crafting system (§5-6).
+Milestones 1-5 complete. Milestone 3 debuffs complete (all 12 debuff types). Milestone 6 (HUD polish) in progress: compass + minimap + player tracking added. Next priorities: sprint bug fix, loot/crafting system (§5-6).

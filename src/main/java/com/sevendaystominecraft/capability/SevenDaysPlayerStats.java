@@ -47,6 +47,11 @@ public class SevenDaysPlayerStats implements ISevenDaysPlayerStats, INBTSerializ
     /** Active debuffs: debuffId → remaining ticks. */
     private final Map<String, Integer> debuffs = new HashMap<>();
 
+    /** Bleeding stacks: 0–3. Each stack increases bleed damage. */
+    private int bleedingStacks = 0;
+
+    public static final int MAX_BLEEDING_STACKS = 3;
+
     // =====================================================================
     // ISevenDaysPlayerStats implementation
     // =====================================================================
@@ -94,6 +99,14 @@ public class SevenDaysPlayerStats implements ISevenDaysPlayerStats, INBTSerializ
     }
 
     @Override
+    public int getBleedingStacks() { return bleedingStacks; }
+
+    @Override
+    public void setBleedingStacks(int stacks) {
+        this.bleedingStacks = Math.max(0, Math.min(MAX_BLEEDING_STACKS, stacks));
+    }
+
+    @Override
     public void tickDebuffs() {
         Iterator<Map.Entry<String, Integer>> it = debuffs.entrySet().iterator();
         while (it.hasNext()) {
@@ -104,6 +117,9 @@ public class SevenDaysPlayerStats implements ISevenDaysPlayerStats, INBTSerializ
             } else {
                 entry.setValue(remaining);
             }
+        }
+        if (!hasDebuff(DEBUFF_BLEEDING)) {
+            bleedingStacks = 0;
         }
     }
 
@@ -117,6 +133,7 @@ public class SevenDaysPlayerStats implements ISevenDaysPlayerStats, INBTSerializ
         this.maxStamina = other.getMaxStamina();
         this.staminaExhausted = other.isStaminaExhausted();
         this.coreTemperature = other.getCoreTemperature();
+        this.bleedingStacks = other.getBleedingStacks();
         this.debuffs.clear();
         this.debuffs.putAll(other.getDebuffs());
     }
@@ -142,6 +159,7 @@ public class SevenDaysPlayerStats implements ISevenDaysPlayerStats, INBTSerializ
         tag.putFloat("MaxStamina", maxStamina);
         tag.putBoolean("StaminaExhausted", staminaExhausted);
         tag.putFloat("CoreTemp", coreTemperature);
+        tag.putInt("BleedingStacks", bleedingStacks);
 
         // Serialize debuffs as a sub-compound
         if (!debuffs.isEmpty()) {
@@ -172,6 +190,7 @@ public class SevenDaysPlayerStats implements ISevenDaysPlayerStats, INBTSerializ
         maxStamina = tag.contains("MaxStamina") ? tag.getFloat("MaxStamina") : DEFAULT_MAX_STAMINA;
         staminaExhausted = tag.contains("StaminaExhausted") && tag.getBoolean("StaminaExhausted");
         coreTemperature = tag.contains("CoreTemp") ? tag.getFloat("CoreTemp") : DEFAULT_CORE_TEMP;
+        bleedingStacks = tag.contains("BleedingStacks") ? tag.getInt("BleedingStacks") : 0;
 
         // Deserialize debuffs from sub-compound
         debuffs.clear();

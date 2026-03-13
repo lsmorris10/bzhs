@@ -5,6 +5,8 @@ import com.sevendaystominecraft.config.SurvivalConfig;
 import com.sevendaystominecraft.network.SyncPlayerStatsPayload;
 
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.effect.MobEffectInstance;
+import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.ai.attributes.AttributeModifier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.player.Player;
@@ -36,9 +38,16 @@ import net.neoforged.neoforge.network.PacketDistributor;
 @EventBusSubscriber(modid = SevenDaysToMinecraft.MOD_ID)
 public class PlayerStatsHandler {
 
-    // ResourceLocation for the movement speed modifier we manage
     private static final ResourceLocation STARVATION_SLOWDOWN_ID =
             ResourceLocation.fromNamespaceAndPath(SevenDaysToMinecraft.MOD_ID, "starvation_slowdown");
+    private static final ResourceLocation SPRAIN_SLOWDOWN_ID =
+            ResourceLocation.fromNamespaceAndPath(SevenDaysToMinecraft.MOD_ID, "sprain_slowdown");
+    private static final ResourceLocation FRACTURE_SLOWDOWN_ID =
+            ResourceLocation.fromNamespaceAndPath(SevenDaysToMinecraft.MOD_ID, "fracture_slowdown");
+    private static final ResourceLocation HYPOTHERMIA_SLOWDOWN_ID =
+            ResourceLocation.fromNamespaceAndPath(SevenDaysToMinecraft.MOD_ID, "hypothermia_slowdown");
+    private static final ResourceLocation FREEZE_SLOWDOWN_ID =
+            ResourceLocation.fromNamespaceAndPath(SevenDaysToMinecraft.MOD_ID, "freeze_slowdown");
 
     // Tick counter key — we store it transiently (doesn't need persistence)
     // We use the player's tick count (tickCount) modulo for throttling
@@ -265,56 +274,56 @@ public class PlayerStatsHandler {
         float foodPct = (stats.getMaxFood() > 0) ? (stats.getFood() / stats.getMaxFood()) * 100f : 0f;
         float waterPct = (stats.getMaxWater() > 0) ? (stats.getWater() / stats.getMaxWater()) * 100f : 0f;
 
-        // Halve regen if food OR water below cascade threshold 1
         if (foodPct < cfg.cascadeThreshold1.get().floatValue()
                 || waterPct < cfg.cascadeThreshold1.get().floatValue()) {
             regenPerTick *= 0.5f;
         }
 
+        if (stats.hasDebuff(SevenDaysPlayerStats.DEBUFF_INFECTION_1)) {
+            regenPerTick *= 0.75f;
+        }
+
         stats.setStamina(stats.getStamina() + regenPerTick);
     }
 
-    /**
-     * Apply debuff damage/effects each tick.
-     * Spec §1.2 — each debuff has specific effects.
-     */
     private static void applyDebuffEffects(Player player, SevenDaysPlayerStats stats) {
-        // Bleeding: −1 HP/3sec = −1/60 ticks ≈ −0.0167/tick
+        // Bleeding: −1 HP/3sec per stack (max 3 stacks)
         if (stats.hasDebuff(SevenDaysPlayerStats.DEBUFF_BLEEDING)) {
-            if (player.tickCount % 60 == 0) { // every 3 seconds
-                player.hurt(player.damageSources().magic(), 1.0f);
+            int stacks = Math.max(1, stats.getBleedingStacks());
+            if (player.tickCount % 60 == 0) {
+                player.hurt(player.damageSources().magic(), 1.0f * stacks);
             }
         }
 
-        // Infection Stage 2: −0.5 HP/sec = −0.025/tick
+        // Infection Stage 1: −25% stamina regen (applied in applyStaminaRegen)
+        // No direct damage, penalty handled via applyStaminaRegen
+
+        // Infection Stage 2: −0.5 HP/sec
         if (stats.hasDebuff(SevenDaysPlayerStats.DEBUFF_INFECTION_2)) {
-            if (player.tickCount % 20 == 0) { // every second
+            if (player.tickCount % 20 == 0) {
                 player.hurt(player.damageSources().magic(), 0.5f);
             }
         }
 
         // Burn: −2 HP/sec while active
         if (stats.hasDebuff(SevenDaysPlayerStats.DEBUFF_BURN)) {
-            if (player.tickCount % 10 == 0) { // every 0.5 sec
+            if (player.tickCount % 10 == 0) {
                 player.hurt(player.damageSources().onFire(), 1.0f);
             }
         }
 
         // Radiation: −1 HP/5sec
         if (stats.hasDebuff(SevenDaysPlayerStats.DEBUFF_RADIATION)) {
-            if (player.tickCount % 100 == 0) { // every 5 seconds
+            if (player.tickCount % 100 == 0) {
                 player.hurt(player.damageSources().magic(), 1.0f);
             }
         }
 
         // Dysentery: water drains ×3, food drains ×2
-        // (Applied as additional drain in tick — multiplicative effect)
         if (stats.hasDebuff(SevenDaysPlayerStats.DEBUFF_DYSENTERY)) {
             SurvivalConfig cfg = SurvivalConfig.INSTANCE;
-            // Extra ×2 water drain (on top of normal ×1 already applied = total ×3)
             float extraWater = (float) (cfg.waterDrainPerMinute.get() * 2.0 / 1200.0);
             stats.setWater(stats.getWater() - extraWater);
-            // Extra ×1 food drain (on top of normal ×1 = total ×2)
             float extraFood = (float) (cfg.foodDrainPerMinute.get() / 1200.0);
             stats.setFood(stats.getFood() - extraFood);
         }
@@ -322,7 +331,6 @@ public class PlayerStatsHandler {
         // Hypothermia: stamina drain ×2 (extra drain)
         if (stats.hasDebuff(SevenDaysPlayerStats.DEBUFF_HYPOTHERMIA)) {
             SurvivalConfig cfg = SurvivalConfig.INSTANCE;
-            // Extra stamina drain equivalent to sprint drain
             float extraStamina = (float) (cfg.staminaDrainSprint.get() / 20.0);
             stats.setStamina(stats.getStamina() - extraStamina * 0.5f);
         }
@@ -332,6 +340,50 @@ public class PlayerStatsHandler {
             SurvivalConfig cfg = SurvivalConfig.INSTANCE;
             float extraWater = (float) (cfg.waterDrainPerMinute.get() * 2.0 / 1200.0);
             stats.setWater(stats.getWater() - extraWater);
+        }
+
+        // Electrocuted/Stunned: freeze player movement (apply extreme slowdown)
+        boolean frozen = stats.hasDebuff(SevenDaysPlayerStats.DEBUFF_ELECTROCUTED)
+                || stats.hasDebuff(SevenDaysPlayerStats.DEBUFF_STUNNED);
+        applyDebuffModifier(player, FREEZE_SLOWDOWN_ID, frozen, -1.0f);
+
+        if (frozen && player.isSprinting()) {
+            player.setSprinting(false);
+        }
+
+        // Sprain: −30% movement speed
+        boolean sprained = stats.hasDebuff(SevenDaysPlayerStats.DEBUFF_SPRAIN)
+                && !stats.hasDebuff(SevenDaysPlayerStats.DEBUFF_FRACTURE);
+        applyDebuffModifier(player, SPRAIN_SLOWDOWN_ID, sprained, -0.3f);
+
+        // Fracture: −60% movement speed (overrides sprain)
+        boolean fractured = stats.hasDebuff(SevenDaysPlayerStats.DEBUFF_FRACTURE);
+        applyDebuffModifier(player, FRACTURE_SLOWDOWN_ID, fractured, -0.6f);
+        if (fractured && player.isSprinting()) {
+            player.setSprinting(false);
+        }
+
+        // Hypothermia: −20% movement speed
+        boolean hypothermic = stats.hasDebuff(SevenDaysPlayerStats.DEBUFF_HYPOTHERMIA);
+        applyDebuffModifier(player, HYPOTHERMIA_SLOWDOWN_ID, hypothermic, -0.2f);
+
+        // Concussion: apply Nausea for aim sway/screen wobble
+        if (stats.hasDebuff(SevenDaysPlayerStats.DEBUFF_CONCUSSION)) {
+            if (!player.hasEffect(MobEffects.CONFUSION)) {
+                player.addEffect(new MobEffectInstance(MobEffects.CONFUSION, 40, 0, false, false, true));
+            }
+        }
+    }
+
+    private static void applyDebuffModifier(Player player, ResourceLocation id, boolean active, float amount) {
+        var attribute = player.getAttribute(Attributes.MOVEMENT_SPEED);
+        if (attribute == null) return;
+        if (active && !attribute.hasModifier(id)) {
+            attribute.addTransientModifier(new AttributeModifier(
+                    id, amount, AttributeModifier.Operation.ADD_MULTIPLIED_TOTAL
+            ));
+        } else if (!active && attribute.hasModifier(id)) {
+            attribute.removeModifier(id);
         }
     }
 
