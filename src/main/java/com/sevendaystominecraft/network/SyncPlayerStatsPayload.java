@@ -11,21 +11,6 @@ import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.resources.ResourceLocation;
 
-/**
- * Network payload for syncing player stats from server → client.
- *
- * Sent manually via PacketDistributor.sendToPlayer() from PlayerStatsHandler.
- *
- * @param food             current food value
- * @param maxFood          max food value
- * @param water            current water value
- * @param maxWater         max water value
- * @param stamina          current stamina value
- * @param maxStamina       max stamina value
- * @param staminaExhausted whether sprint is blocked (exhaustion mode)
- * @param coreTemp         core body temperature in °F
- * @param debuffs          active debuffs (id → remaining ticks)
- */
 public record SyncPlayerStatsPayload(
         float food,
         float maxFood,
@@ -35,16 +20,20 @@ public record SyncPlayerStatsPayload(
         float maxStamina,
         boolean staminaExhausted,
         float coreTemp,
-        Map<String, Integer> debuffs
+        Map<String, Integer> debuffs,
+        int xp,
+        int level,
+        int perkPoints,
+        int attributePoints,
+        Map<String, Integer> activePerks,
+        int[] attributeLevels,
+        long unkillableCooldownEnd
 ) implements CustomPacketPayload {
 
     public static final Type<SyncPlayerStatsPayload> TYPE = new Type<>(
             ResourceLocation.fromNamespaceAndPath(SevenDaysToMinecraft.MOD_ID, "sync_player_stats")
     );
 
-    /**
-     * StreamCodec for encoding/decoding this payload on the network.
-     */
     public static final StreamCodec<ByteBuf, SyncPlayerStatsPayload> STREAM_CODEC =
             new StreamCodec<>() {
                 @Override
@@ -58,7 +47,6 @@ public record SyncPlayerStatsPayload(
                     boolean staminaExhausted = buf.readBoolean();
                     float coreTemp = buf.readFloat();
 
-                    // Read debuff map
                     int count = ByteBufCodecs.VAR_INT.decode(buf);
                     Map<String, Integer> debuffs = new HashMap<>();
                     for (int i = 0; i < count; i++) {
@@ -67,8 +55,31 @@ public record SyncPlayerStatsPayload(
                         debuffs.put(id, ticks);
                     }
 
+                    int xp = ByteBufCodecs.VAR_INT.decode(buf);
+                    int level = ByteBufCodecs.VAR_INT.decode(buf);
+                    int perkPoints = ByteBufCodecs.VAR_INT.decode(buf);
+                    int attributePoints = ByteBufCodecs.VAR_INT.decode(buf);
+
+                    int perkCount = ByteBufCodecs.VAR_INT.decode(buf);
+                    Map<String, Integer> activePerks = new HashMap<>();
+                    for (int i = 0; i < perkCount; i++) {
+                        String id = ByteBufCodecs.STRING_UTF8.decode(buf);
+                        int rank = ByteBufCodecs.VAR_INT.decode(buf);
+                        activePerks.put(id, rank);
+                    }
+
+                    int attrCount = ByteBufCodecs.VAR_INT.decode(buf);
+                    int[] attributeLevels = new int[attrCount];
+                    for (int i = 0; i < attrCount; i++) {
+                        attributeLevels[i] = ByteBufCodecs.VAR_INT.decode(buf);
+                    }
+
+                    long unkillableCooldownEnd = buf.readLong();
+
                     return new SyncPlayerStatsPayload(food, maxFood, water, maxWater,
-                            stamina, maxStamina, staminaExhausted, coreTemp, debuffs);
+                            stamina, maxStamina, staminaExhausted, coreTemp, debuffs,
+                            xp, level, perkPoints, attributePoints, activePerks, attributeLevels,
+                            unkillableCooldownEnd);
                 }
 
                 @Override
@@ -82,12 +93,29 @@ public record SyncPlayerStatsPayload(
                     buf.writeBoolean(payload.staminaExhausted);
                     buf.writeFloat(payload.coreTemp);
 
-                    // Write debuff map
                     ByteBufCodecs.VAR_INT.encode(buf, payload.debuffs.size());
                     for (Map.Entry<String, Integer> entry : payload.debuffs.entrySet()) {
                         ByteBufCodecs.STRING_UTF8.encode(buf, entry.getKey());
                         ByteBufCodecs.VAR_INT.encode(buf, entry.getValue());
                     }
+
+                    ByteBufCodecs.VAR_INT.encode(buf, payload.xp);
+                    ByteBufCodecs.VAR_INT.encode(buf, payload.level);
+                    ByteBufCodecs.VAR_INT.encode(buf, payload.perkPoints);
+                    ByteBufCodecs.VAR_INT.encode(buf, payload.attributePoints);
+
+                    ByteBufCodecs.VAR_INT.encode(buf, payload.activePerks.size());
+                    for (Map.Entry<String, Integer> entry : payload.activePerks.entrySet()) {
+                        ByteBufCodecs.STRING_UTF8.encode(buf, entry.getKey());
+                        ByteBufCodecs.VAR_INT.encode(buf, entry.getValue());
+                    }
+
+                    ByteBufCodecs.VAR_INT.encode(buf, payload.attributeLevels.length);
+                    for (int attrLevel : payload.attributeLevels) {
+                        ByteBufCodecs.VAR_INT.encode(buf, attrLevel);
+                    }
+
+                    buf.writeLong(payload.unkillableCooldownEnd);
                 }
             };
 

@@ -104,6 +104,13 @@ src/main/java/com/sevendaystominecraft/
 │   ├── BloodMoonTracker.java       — SavedData for day tracking & blood moon phase state
 │   ├── BloodMoonEventHandler.java  — Server tick handler for blood moon timeline + sleep prevention
 │   └── HordeSpawner.java           — Wave spawning with composition table, config day thresholds
+├── perk/
+│   ├── Attribute.java            — 5 attribute enum (STR/PER/FOR/AGI/INT)
+│   ├── PerkDefinition.java       — Perk data class with rank requirements
+│   ├── PerkRegistry.java         — Static registry of all 45 perks (40 + 5 masteries)
+│   ├── LevelManager.java         — XP gain, level-up formula, zombie kill + block break hooks
+│   ├── PerkCommand.java          — /7dtm level, /7dtm perk, /7dtm attribute, /7dtm perks commands
+│   └── PerkEffectHandler.java    — Perk effect hooks (damage reduction, mining speed, unkillable, ghost)
 ├── mixin/
 │   ├── FoodDataMixin.java          — Cancels vanilla food saturation
 │   ├── LivingEntityHurtMixin.java  — Custom damage handling
@@ -224,7 +231,7 @@ src/main/java/com/sevendaystominecraft/
 
 ## Spec / Roadmap
 The full implementation is tracked in `docs/7dtm_final_spec.md` with 19 phases.
-Milestones 1-6 complete. Milestone 6 (HUD polish) includes compass + minimap + player tracking. Next priorities: sprint bug fix, skills/perks system (§5), trader NPCs (§9).
+Milestones 1-7 complete. Milestone 6 (HUD polish) includes compass + minimap + player tracking. Milestone 7 (XP/Leveling/Perks) implemented: full perk registry, level-up system, commands, HUD XP bar. Milestone 3 debuffs complete (all 12 debuff types). Next priorities: sprint bug fix, skill books (§5.3), trader NPCs (§9).
 
 ## Milestone #6: Loot & Crafting System
 - **Items**: 17 core materials + Dukes Casino Token registered via ModItems with creative tabs
@@ -237,3 +244,26 @@ Milestones 1-6 complete. Milestone 6 (HUD polish) includes compass + minimap + p
 - **Command**: `/7dtm loot_stage` shows player's current loot stage with breakdown
 - **4×4 Crafting Grid**: Deferred — Mixin complexity on NeoForge 1.21.4's CraftingMenu/InventoryMenu is too high; workstation-based crafting is implemented first as the task spec allows
 - `BlockEntityType` in NeoForge 1.21.4: No `Builder` class — use constructor directly: `new BlockEntityType<>(Supplier, Block...)`
+
+#### XP, Leveling & Perk System — Milestone 7 (Spec §1.4, §5)
+- **LevelManager**: XP gain from zombie kills (uses ZombieVariant.xpReward + modifier bonus) and block mining (1-5 XP by hardness)
+  - Formula: `XP_to_next = floor(1000 × level ^ 1.05)` — handles multi-level gains
+  - Each level-up: +1 perk point; every 10 levels: +1 bonus attribute point
+- **PerkRegistry**: 45 perks total (8 per attribute tree + 5 Tier-10 masteries)
+  - Strength: Brawler, Pummel Pete, Skull Crusher, Sexual Tyrannosaurus, Master Chef, Pack Mule, Miner 69er, Mother Lode, Titan
+  - Perception: Archery, Gunslinger, Rifle Guy, Demolitions Expert, Lock Picking, Lucky Looter, Treasure Hunter, Spear Master, Eagle Eye
+  - Fortitude: Healing Factor, Iron Gut, Rule 1 Cardio, Living Off the Land, Pain Tolerance, Heavy Armor, Well Insulated, Self-Medicated, Unkillable
+  - Agility: Light Armor, Parkour, Hidden Strike, From the Shadows, Deep Cuts, Run and Gun, Flurry of Blows, Gunslinger (Agility), Ghost
+  - Intellect: Advanced Engineering, Grease Monkey, Better Barter, Daring Adventurer, Physician, Electrocutioner, Robotics Inventor, Charismatic Nature, Mastermind
+- **Active perk effects**:
+  - Healing Factor: +20% health regen per rank
+  - Rule 1 Cardio: +10% stamina regen + 5% sprint speed per rank
+  - Sexual Tyrannosaurus: -15% stamina cost on all actions per rank
+  - Pain Tolerance: -10% damage taken per rank
+  - Miner 69er: +15% mining speed per rank
+  - Well Insulated: ±10°F comfort zone per rank
+  - Unkillable (Fortitude T10): Fatal damage → survive at 1 HP + 10s invulnerability (60 min cooldown)
+  - Ghost (AGI T10): Stealth kills produce zero heatmap noise
+- **Commands**: `/7dtm level|stats`, `/7dtm perk <id> [rank]`, `/7dtm attribute <STR|PER|FOR|AGI|INT>`, `/7dtm perks`
+- **HUD**: XP bar + level counter added to stats overlay
+- **Persistence**: All XP/level/perk data serialized to NBT, synced via network payload, preserved through death/respawn
