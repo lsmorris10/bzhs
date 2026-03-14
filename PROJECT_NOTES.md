@@ -23,72 +23,12 @@
 
 ## Current Status & Next Up
 
+**Completed Milestones:** 1 (Scaffold), 2 (Player Stats), 3 (Debuffs — all 12 types), 4 (Temperature — partial), 5 (Heatmap), 6 (Loot & Crafting), 7 (XP/Leveling/Perks), 8 (Blood Moon/Horde Night), 9 (HUD — compass, minimap, stats overlay).
+
 **Next Tasks:**
 - **Sprint bug fix** — Client-side Mixin on `LocalPlayer.aiStep()` to properly cancel sprint when stamina is depleted.
 - **Custom textures & models** — Replace scaled zombie renderers with proper custom models and textures for each variant.
 - **World generation** — Custom biomes, structures, and POI generation per the spec.
-
----
-
-## Pending Testing & Debugging (March 12, 2026)
-
-### Build Verification
-- [ ] Run `./gradlew build` — confirm it compiles cleanly with zero errors
-
-### Systems to Verify In-Game
-
-- **Compass & Minimap:**
-  - [ ] Verify HUD compass shows cardinal directions (N/S/E/W)
-  - [ ] Minimap renders nearby terrain correctly
-  - [ ] Player tracking dot works in multiplayer
-
-- **Zombie Name Tags:**
-  - [ ] Confirm name tags and HP bars are NOT visible through walls (occlusion fix)
-
-- **Sunlight Burning Disabled:**
-  - [ ] All 7DTM zombies should NOT burn in daylight
-
-- **Loot & Crafting System:**
-  - [ ] Open loot containers, verify loot tables populate correctly
-  - [ ] Test crafting recipes work end-to-end
-  - [ ] Check item progression tiers
-
-- **XP & Leveling System:**
-  - [ ] Kill zombies and verify XP gain
-  - [ ] Check level-up notifications display correctly
-  - [ ] Test perk unlocks and confirm their effects apply
-
-- **Debuffs System:**
-  - [ ] Trigger each debuff: Bleeding, Infection, Dysentery, Sprain, Fracture
-  - [ ] Verify effects apply correctly (damage over time, movement penalties, etc.)
-  - [ ] Test cures work for each debuff
-  - [ ] Confirm debuffs clear on death
-  - [ ] Test `/7dtm cleardebuffs` command
-
-- **Night Zombie Speed:**
-  - [ ] Verify zombies move at 2.25x speed at night
-
-- **Day Cycle:**
-  - [ ] Confirm day/night cycle is 48,000 ticks (double vanilla length)
-
-- **Player Health:**
-  - [ ] Confirm base health is 100 HP
-  - [ ] Zombies no longer one-shot the player
-
-- **HUD Layout:**
-  - [ ] Stats HUD doesn't overlap compass
-  - [ ] Background removed from stats HUD
-  - [ ] Everything readable and properly positioned
-
-- **Heatmap:**
-  - [ ] Re-verify heatmap still works properly alongside all the new systems
-  - [ ] `/7dtm heat` and `/7dtm heat_clear` commands still functional
-
-- **Previous Systems (Regression Check):**
-  - [ ] Temperature system (0.3°F/s adjustment, biome shifts)
-  - [ ] Horde spawn balance (blood moon triggers, zombie composition)
-  - [ ] Vanilla hunger/health bars still hidden, custom HUD still correct
-  - [ ] Spawn all zombie types (no crashes), test modifier variants
 
 ---
 
@@ -97,8 +37,6 @@
 1. **SPRINT BUG — FIX ANOTHER DAY** (unresolved since Milestone 2):
    - Sprint can get stuck — holding W alone gives infinite sprint. Stamina drains but sprint doesn't cancel. Needs a client-side Mixin on `LocalPlayer.aiStep()`.
    - **Not on today's test list.** This is a known issue that requires a proper client-side fix.
-
-2. **UNPUSHED COMMITS** — As of end of March 12 session, there are commits ahead of `origin/master`. Push to GitHub before pulling on Antigravity.
 
 ---
 

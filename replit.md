@@ -136,7 +136,7 @@ src/main/java/com/sevendaystominecraft/
 - **Config**: `survival.toml` for per-server tuning of survival parameters
   - Temperature adjustment rate default lowered to 0.3°F/s for more realistic pacing
 
-#### Horde Night System — Milestone 3 (Spec §4)
+#### Horde Night & Blood Moon System (Spec §4) — DONE
 - **BloodMoonTracker**: SavedData persisting game day, phase (NONE/PREP/ACTIVE/POST), wave state, and all event flags — survives server restarts
 - **BloodMoonEventHandler**: Server-side tick handler implementing the full blood moon timeline:
   - Day before: "Horde Night Tomorrow" warning at 20:00
@@ -157,7 +157,7 @@ src/main/java/com/sevendaystominecraft/
 - **BloodMoonClientState**: Client singleton storing active state, wave info, day number
 - **BloodMoonSkyRenderer**: Fog color tint that gradually ramps to red during active blood moon
 
-#### Custom Zombie System — Milestone 4 (Spec §3.1-3.2)
+#### Custom Zombie System (Spec §3.1-3.2) — DONE
 - **ZombieVariant enum**: All 18 variants with base HP, damage, speed, XP, spawn day
   - 3 modifier types (Radiated, Charged, Infernal) with configurable stat multipliers
 - **BaseSevenDaysZombie**: Core entity extending Zombie
@@ -171,7 +171,7 @@ src/main/java/com/sevendaystominecraft/
 - **ZombieConfig** (`zombies.toml`): Per-variant HP/damage/speed overrides, all special mechanic tuning values, modifier multipliers
 - **ModEntities**: Registration with `EntityAttributeCreationEvent` for all 18 types
 
-#### Heatmap System — Milestone 5 (Spec §1.3)
+#### Heatmap System (Spec §1.3) — DONE
 - **HeatmapData**: Per-chunk SavedData storing heat sources with individual decay rates, persisted to NBT
 - **HeatmapManager**: Server-side tick handler (1-second intervals) processing heat decay with configurable multiplier
 - **HeatEventHandler**: Hooks into block break (+0.5, 3-chunk radius), torch placement (+2, 1-chunk), sprint (+0.2/sec, 2-chunk), explosions (+25, 6-chunk)
@@ -231,9 +231,9 @@ src/main/java/com/sevendaystominecraft/
 
 ## Spec / Roadmap
 The full implementation is tracked in `docs/7dtm_final_spec.md` with 19 phases.
-Milestones 1-7 complete. Milestone 6 (HUD polish) includes compass + minimap + player tracking. Milestone 7 (XP/Leveling/Perks) implemented: full perk registry, level-up system, commands, HUD XP bar. Milestone 3 debuffs complete (all 12 debuff types). Next priorities: sprint bug fix, skill books (§5.3), trader NPCs (§9).
+Milestones 1-9 complete (except #4 Temperature which is partial). Milestone 3 (Debuffs): DONE — all 12 debuff types. Milestone 5 (Heatmap): DONE. Milestone 6 (Loot & Crafting): DONE — workstations, loot containers, scrapping, quality tiers. Milestone 7 (XP/Leveling/Perks): DONE — full perk registry, level-up system, commands, HUD XP bar. Milestone 8 (Blood Moon/Horde Night): DONE. Milestone 9 (HUD): DONE — compass, minimap, player tracking, stats overlay. Next priorities: sprint bug fix, custom textures/models, world generation.
 
-## Milestone #6: Loot & Crafting System
+## Loot & Crafting System (Spec §6) — DONE
 - **Items**: 17 core materials + Dukes Casino Token registered via ModItems with creative tabs
 - **Quality Tiers**: T1 (Poor, ×0.7) → T6 (Legendary, ×1.5) with color codes and mod slot scaling
 - **Workstations**: 7 workstation blocks (Campfire, Grill, Workbench, Forge, Cement Mixer, Chemistry Station, Advanced Workbench) with block entities, container menus, and GUI screens; fuel-based workstations tick to process items
@@ -245,7 +245,7 @@ Milestones 1-7 complete. Milestone 6 (HUD polish) includes compass + minimap + p
 - **4×4 Crafting Grid**: Deferred — Mixin complexity on NeoForge 1.21.4's CraftingMenu/InventoryMenu is too high; workstation-based crafting is implemented first as the task spec allows
 - `BlockEntityType` in NeoForge 1.21.4: No `Builder` class — use constructor directly: `new BlockEntityType<>(Supplier, Block...)`
 
-#### XP, Leveling & Perk System — Milestone 7 (Spec §1.4, §5)
+#### XP, Leveling & Perk System (Spec §1.4, §5) — DONE
 - **LevelManager**: XP gain from zombie kills (uses ZombieVariant.xpReward + modifier bonus) and block mining (1-5 XP by hardness)
   - Formula: `XP_to_next = floor(1000 × level ^ 1.05)` — handles multi-level gains
   - Each level-up: +1 perk point; every 10 levels: +1 bonus attribute point

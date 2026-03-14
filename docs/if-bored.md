@@ -6,7 +6,7 @@ A go-to checklist of known edge cases, tricky interactions, and things worth tes
 
 ## Zombie Combat & AI
 
-- Spawn all 16 zombie types one at a time and confirm none crash the game
+- Spawn all 18 zombie types one at a time and confirm none crash the game
 - Spawn each modifier variant (Radiated, Charged, Infernal) on every eligible base type (Walker, Crawler, Feral Wight, Cop, Soldier) — verify stat multipliers apply correctly (HP x2/x1.8, Damage x1.3–1.5, Speed boosts)
 - Radiated zombie regen: does 2 HP/sec regen actually work? Can you out-damage it?
 - Charged zombie chain lightning: does it actually arc to 3 nearby entities? Does the 1.5s stun (Electrocuted debuff) apply to all hit targets?
