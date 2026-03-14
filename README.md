@@ -137,7 +137,7 @@ Requires **Java 21**.
 ./gradlew build --no-daemon
 ```
 
-Output JAR: `build/libs/sevendaystominecraft-0.1.0-alpha.jar`
+Output JAR: `build/libs/BrutalZombieHordeSurvival-0.1.0-alpha.jar`
 
 Copy the JAR into your Minecraft `mods/` folder (requires NeoForge 21.4.140 for Minecraft 1.21.4).
 
