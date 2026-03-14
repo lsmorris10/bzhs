@@ -33,8 +33,9 @@ crash-reports/
 Thumbs.db
 desktop.ini
 
-# Landing page (local only, not for GitHub)
-public/
+# Landing page build artifacts (keep index.html tracked)
+public/*
+!public/index.html
 
 # Misc
 *.log

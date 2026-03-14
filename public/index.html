@@ -1,0 +1,557 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Brutal Zombie Horde Survival — Minecraft Mod</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    html, body { height: 100%; }
+    body {
+      background-color: #111;
+      color: #e0e0e0;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      line-height: 1.7;
+    }
+
+    .hero {
+      background: linear-gradient(160deg, #111 0%, #2a0a0a 40%, #1a0505 70%, #111 100%);
+      text-align: center;
+      padding: 5rem 1.5rem 3.5rem;
+      border-bottom: 3px solid #800000;
+      position: relative;
+      overflow: hidden;
+    }
+    .hero::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: radial-gradient(ellipse at 50% 0%, rgba(128,0,0,0.15) 0%, transparent 70%);
+      pointer-events: none;
+    }
+    .hero h1 {
+      color: #ffffff;
+      font-size: 3.2rem;
+      font-weight: 800;
+      margin-bottom: 0.6rem;
+      letter-spacing: -1px;
+      text-shadow: 0 2px 20px rgba(128,0,0,0.3);
+      position: relative;
+    }
+    .version-tag {
+      display: inline-block;
+      background: linear-gradient(135deg, #800000, #a00000);
+      color: #fff;
+      padding: 0.35rem 1.2rem;
+      border-radius: 20px;
+      font-size: 0.9rem;
+      font-weight: 600;
+      margin-bottom: 1.5rem;
+      letter-spacing: 0.3px;
+      position: relative;
+    }
+    .hero p.tagline {
+      color: #b0b0b0;
+      font-size: 1.2rem;
+      margin-bottom: 2.5rem;
+      max-width: 620px;
+      margin-left: auto;
+      margin-right: auto;
+      position: relative;
+    }
+
+    .download-btn {
+      display: inline-block;
+      background: linear-gradient(135deg, #4CAF50, #388E3C);
+      color: #fff;
+      text-decoration: none;
+      padding: 1rem 2.8rem;
+      font-size: 1.2rem;
+      font-weight: 700;
+      border-radius: 10px;
+      transition: transform 0.2s, box-shadow 0.2s;
+      box-shadow: 0 4px 20px rgba(76, 175, 80, 0.25);
+      position: relative;
+    }
+    .download-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 25px rgba(76, 175, 80, 0.4);
+      opacity: 1;
+    }
+    .download-btn:active {
+      transform: translateY(0);
+    }
+    .download-note {
+      color: #777;
+      font-size: 0.85rem;
+      margin-top: 1rem;
+    }
+    .download-note a {
+      color: #999;
+      font-size: 0.85rem;
+      text-decoration: underline;
+      transition: color 0.2s;
+    }
+    .download-note a:hover { color: #ccc; }
+
+    .trust-badges {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 0.6rem;
+      margin-top: 2.5rem;
+      padding: 0 1rem;
+    }
+    .badge {
+      background: rgba(255, 255, 255, 0.06);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      padding: 0.4rem 1rem;
+      border-radius: 20px;
+      font-size: 0.82rem;
+      color: #bbb;
+      white-space: nowrap;
+      transition: background 0.2s, border-color 0.2s;
+    }
+    .badge:hover {
+      background: rgba(255, 255, 255, 0.1);
+      border-color: rgba(255, 255, 255, 0.2);
+    }
+    .badge a {
+      color: #bbb;
+      text-decoration: none;
+      font-size: 0.82rem;
+    }
+    .badge a:hover { color: #fff; }
+
+    .section {
+      max-width: 820px;
+      margin: 0 auto;
+      padding: 3rem 1.5rem;
+    }
+    .section h2 {
+      color: #fff;
+      font-size: 1.7rem;
+      margin-bottom: 1.25rem;
+      border-left: 4px solid #800000;
+      padding-left: 0.85rem;
+      font-weight: 700;
+    }
+
+    .features-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 1rem;
+      margin-bottom: 1rem;
+    }
+    .feature-card {
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid rgba(255, 255, 255, 0.07);
+      border-radius: 10px;
+      padding: 1.25rem;
+      transition: background 0.25s, border-color 0.25s, transform 0.2s;
+    }
+    .feature-card:hover {
+      background: rgba(255, 255, 255, 0.06);
+      border-color: rgba(128, 0, 0, 0.4);
+      transform: translateY(-2px);
+    }
+    .feature-card .icon {
+      font-size: 1.6rem;
+      margin-bottom: 0.5rem;
+      display: block;
+    }
+    .feature-card h3 {
+      color: #fff;
+      font-size: 0.95rem;
+      margin-bottom: 0.35rem;
+      font-weight: 600;
+    }
+    .feature-card p {
+      color: #999;
+      font-size: 0.82rem;
+      line-height: 1.5;
+    }
+
+    .status-card {
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid rgba(255, 255, 255, 0.07);
+      border-radius: 10px;
+      padding: 1.75rem;
+    }
+    .status-version {
+      font-size: 1.05rem;
+      color: #ccc;
+      margin-bottom: 1.25rem;
+      padding-bottom: 1rem;
+      border-bottom: 1px solid rgba(255,255,255,0.06);
+    }
+    .status-version strong {
+      color: #fff;
+    }
+
+    .milestone-list {
+      list-style: none;
+      padding: 0;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0.4rem 2rem;
+      margin-bottom: 1.5rem;
+    }
+    .milestone-list li {
+      color: #bbb;
+      font-size: 0.88rem;
+      padding: 0.35rem 0;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    .milestone-list li .check {
+      color: #4CAF50;
+      font-weight: 700;
+      flex-shrink: 0;
+    }
+
+    .coming-section {
+      border-top: 1px solid rgba(255,255,255,0.06);
+      padding-top: 1.25rem;
+    }
+    .coming-section h3 {
+      color: #ff9800;
+      font-size: 0.9rem;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 0.6rem;
+      font-weight: 700;
+    }
+    .coming-list {
+      list-style: none;
+      padding: 0;
+    }
+    .coming-list li {
+      color: #aaa;
+      font-size: 0.88rem;
+      padding: 0.3rem 0;
+    }
+    .coming-list li::before {
+      content: "→ ";
+      color: #ff9800;
+      font-weight: 600;
+    }
+
+    .recent-section {
+      margin-top: 2.5rem;
+    }
+    .recent-section h2 {
+      font-size: 1.5rem;
+    }
+    .recent-list {
+      list-style: none;
+      padding: 0;
+    }
+    .recent-list li {
+      color: #bbb;
+      font-size: 0.88rem;
+      padding: 0.5rem 0;
+      border-bottom: 1px solid rgba(255,255,255,0.04);
+      display: flex;
+      align-items: flex-start;
+      gap: 0.5rem;
+    }
+    .recent-list li:last-child {
+      border-bottom: none;
+    }
+    .recent-list li .dot {
+      color: #800000;
+      font-weight: 700;
+      flex-shrink: 0;
+      margin-top: 1px;
+    }
+
+    .disclaimer {
+      max-width: 820px;
+      margin: 0 auto;
+      padding: 0 1.5rem 1.5rem;
+    }
+    .disclaimer p {
+      color: #666;
+      font-size: 0.78rem;
+      line-height: 1.6;
+      border-top: 1px solid rgba(255, 255, 255, 0.05);
+      padding-top: 1rem;
+    }
+
+    .email-section {
+      background: linear-gradient(180deg, rgba(128,0,0,0.1) 0%, rgba(128,0,0,0.05) 100%);
+      border-top: 1px solid rgba(128, 0, 0, 0.25);
+      border-bottom: 1px solid rgba(128, 0, 0, 0.25);
+      padding: 3rem 1.5rem;
+      text-align: center;
+    }
+    .email-section h2 {
+      color: #fff;
+      font-size: 1.5rem;
+      margin-bottom: 0.5rem;
+      border: none;
+      padding: 0;
+      font-weight: 700;
+    }
+    .email-section p {
+      color: #999;
+      font-size: 0.95rem;
+      margin-bottom: 1.5rem;
+    }
+    .email-form {
+      display: flex;
+      gap: 0.5rem;
+      max-width: 440px;
+      margin: 0 auto;
+    }
+    .email-form input[type="email"] {
+      flex: 1;
+      padding: 0.8rem 1rem;
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      border-radius: 8px;
+      background: rgba(255, 255, 255, 0.06);
+      color: #fff;
+      font-size: 0.95rem;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+    .email-form input[type="email"]::placeholder {
+      color: #777;
+    }
+    .email-form input[type="email"]:focus {
+      border-color: rgba(128, 0, 0, 0.6);
+    }
+    .email-form button {
+      background: linear-gradient(135deg, #800000, #a00000);
+      color: #fff;
+      border: none;
+      padding: 0.8rem 1.6rem;
+      border-radius: 8px;
+      font-size: 0.95rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: transform 0.15s, box-shadow 0.2s;
+      white-space: nowrap;
+    }
+    .email-form button:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 4px 15px rgba(128, 0, 0, 0.3);
+    }
+    .form-note {
+      color: #666;
+      font-size: 0.75rem;
+      margin-top: 0.75rem;
+      font-style: italic;
+    }
+    .form-success {
+      display: none;
+      color: #4CAF50;
+      font-size: 1rem;
+      margin-top: 1rem;
+    }
+    .form-error {
+      display: none;
+      color: #f44336;
+      font-size: 0.9rem;
+      margin-top: 1rem;
+    }
+
+    footer {
+      text-align: center;
+      padding: 2rem 1.5rem;
+    }
+    footer p {
+      color: #444;
+      font-size: 0.8rem;
+    }
+    footer a {
+      color: #777;
+      font-size: 0.8rem;
+      text-decoration: none;
+      transition: color 0.2s;
+    }
+    footer a:hover { color: #aaa; }
+
+    a { color: #fff; text-decoration: underline; }
+    a:hover { opacity: 0.85; }
+
+    @media (max-width: 768px) {
+      .hero { padding: 3.5rem 1.25rem 2.5rem; }
+      .hero h1 { font-size: 2.4rem; }
+      .features-grid { grid-template-columns: 1fr 1fr; }
+      .milestone-list { grid-template-columns: 1fr; gap: 0.2rem; }
+    }
+
+    @media (max-width: 480px) {
+      .hero { padding: 2.5rem 1rem 2rem; }
+      .hero h1 { font-size: 1.9rem; letter-spacing: -0.5px; }
+      .hero p.tagline { font-size: 1rem; }
+      .version-tag { font-size: 0.8rem; }
+      .download-btn { padding: 0.85rem 2rem; font-size: 1.05rem; }
+      .features-grid { grid-template-columns: 1fr; }
+      .section { padding: 2rem 1rem; }
+      .section h2 { font-size: 1.4rem; }
+      .email-form { flex-direction: column; }
+      .email-form button { padding: 0.8rem; }
+      .trust-badges { gap: 0.4rem; }
+      .badge { font-size: 0.75rem; padding: 0.3rem 0.7rem; }
+      .feature-card { padding: 1rem; }
+    }
+  </style>
+</head>
+<body>
+
+  <section class="hero">
+    <h1>Brutal Zombie Horde Survival</h1>
+    <div class="version-tag">Minecraft 1.21.4 — NeoForge — Alpha</div>
+    <p class="tagline">A 7 Days to Die-inspired survival overhaul for Minecraft. Blood moons, zombie hordes, 45 perks, full crafting rework, and much more.</p>
+
+    <a href="https://github.com/lsmorris10/7dtm/releases" class="download-btn">⬇ Download Latest Release</a>
+    <p class="download-note">Available on <a href="https://github.com/lsmorris10/7dtm">GitHub</a> — open source, always free</p>
+
+    <div class="trust-badges">
+      <span class="badge"><a href="https://github.com/lsmorris10/7dtm">Open Source</a></span>
+      <span class="badge">NeoForge 21.4.140</span>
+      <span class="badge">No Dependencies</span>
+      <span class="badge">Java 21</span>
+      <span class="badge">9 Milestones Complete</span>
+    </div>
+  </section>
+
+  <div class="section">
+    <h2>Key Features</h2>
+    <div class="features-grid">
+      <div class="feature-card">
+        <span class="icon">🧟</span>
+        <h3>18 Zombie Variants</h3>
+        <p>Darkness-based speed scaling makes nighttime terrifying. Zombies get faster as light drops.</p>
+      </div>
+      <div class="feature-card">
+        <span class="icon">🌑</span>
+        <h3>Blood Moon Hordes</h3>
+        <p>Every 7th night brings a brutal horde event with escalating waves and no hiding.</p>
+      </div>
+      <div class="feature-card">
+        <span class="icon">💀</span>
+        <h3>12 Survival Debuffs</h3>
+        <p>Thirst, stamina, infection, bleeding, and more. Every decision matters.</p>
+      </div>
+      <div class="feature-card">
+        <span class="icon">🔨</span>
+        <h3>Loot &amp; Crafting Overhaul</h3>
+        <p>Completely reworked crafting recipes, loot tables, and resource progression.</p>
+      </div>
+      <div class="feature-card">
+        <span class="icon">⭐</span>
+        <h3>XP, Leveling &amp; 45 Perks</h3>
+        <p>Earn XP, level up, and unlock perks across combat, survival, and utility trees.</p>
+      </div>
+      <div class="feature-card">
+        <span class="icon">🧭</span>
+        <h3>Full HUD System</h3>
+        <p>Compass, minimap, and stats overlay keep you informed without breaking immersion.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <h2>Development Status</h2>
+    <div class="status-card">
+      <p class="status-version"><strong>Alpha v0.1.0</strong> — Active development &middot; Updated March 14, 2026</p>
+
+      <ul class="milestone-list">
+        <li><span class="check">✓</span> Project scaffold &amp; architecture</li>
+        <li><span class="check">✓</span> Player stats (thirst, stamina, infection)</li>
+        <li><span class="check">✓</span> All 12 debuff types</li>
+        <li><span class="check">✓</span> Temperature system (partial)</li>
+        <li><span class="check">✓</span> Zombie heatmap tracking</li>
+        <li><span class="check">✓</span> Loot &amp; crafting overhaul</li>
+        <li><span class="check">✓</span> XP, leveling &amp; 45 perks</li>
+        <li><span class="check">✓</span> Blood Moon / Horde Night</li>
+        <li><span class="check">✓</span> HUD — compass, minimap, stats overlay</li>
+      </ul>
+
+      <p style="color:#999; font-size:0.82rem; margin-bottom:0.4rem; margin-top:0.75rem; text-transform:uppercase; letter-spacing:0.5px; font-weight:600;">Post-Milestone Improvements</p>
+      <ul class="milestone-list" style="margin-bottom:1.5rem;">
+        <li><span class="check">✓</span> Vanilla damage scaling to 100 HP</li>
+        <li><span class="check">✓</span> 48k-tick day cycle with sky fix</li>
+        <li><span class="check">✓</span> Darkness-based zombie speed</li>
+        <li><span class="check">✓</span> Coal vein rebalancing</li>
+      </ul>
+
+      <div class="coming-section">
+        <h3>Coming Next</h3>
+        <ul class="coming-list">
+          <li>Sprint bug fix — proper stamina-based sprint cancellation</li>
+          <li>Custom textures &amp; models for zombie variants</li>
+          <li>World generation — custom biomes, structures &amp; POIs</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <div class="section recent-section">
+    <h2>Recent Changes</h2>
+    <ul class="recent-list">
+      <li><span class="dot">●</span> Darkness-based zombie speed replaces old tick-based day/night system</li>
+      <li><span class="dot">●</span> Vanilla damage scaling proportionally adjusted for 100 HP (fall, drowning, fire, lava, cactus)</li>
+      <li><span class="dot">●</span> Sun/moon visual cycle fixed for 48,000-tick day length</li>
+      <li><span class="dot">●</span> Coal ore vein sizes reduced for better resource balance</li>
+      <li><span class="dot">●</span> Project rebranded to Brutal Zombie Horde Survival (BZHS)</li>
+    </ul>
+  </div>
+
+  <div class="disclaimer">
+    <p><strong>Disclaimer:</strong> This mod is unofficial fan-made content inspired by 7 Days to Die and is not affiliated with, endorsed by, or connected to The Fun Pimps in any way.</p>
+  </div>
+
+  <section class="email-section">
+    <h2>Stay in the Loop</h2>
+    <p>Get notified when major updates drop and when 1.0 launches.</p>
+    <!--
+      FORMSPREE SETUP:
+      1. Create a free account at https://formspree.io
+      2. Create a new form and copy your form ID (e.g., "xabcdefg")
+      3. Replace "YOUR_FORM_ID" below with your actual form ID
+      Example: action="https://formspree.io/f/xabcdefg"
+    -->
+    <form class="email-form" id="signup-form" action="https://formspree.io/f/YOUR_FORM_ID" method="POST">
+      <input type="email" name="email" placeholder="you@example.com" required>
+      <button type="submit">Notify Me</button>
+    </form>
+    <p class="form-note">Formspree form ID not yet configured — replace YOUR_FORM_ID in the HTML to activate.</p>
+    <p class="form-success" id="form-success">Thanks! You'll hear from us when there's news.</p>
+    <p class="form-error" id="form-error">Something went wrong. Please try again.</p>
+  </section>
+
+  <footer>
+    <p><a href="https://github.com/lsmorris10/7dtm">GitHub</a> &middot; Brutal Zombie Horde Survival &middot; 2026</p>
+  </footer>
+
+  <script>
+    var form = document.getElementById('signup-form');
+    form.addEventListener('submit', function(e) {
+      e.preventDefault();
+      var data = new FormData(form);
+      document.getElementById('form-error').style.display = 'none';
+      fetch(form.action, {
+        method: 'POST',
+        body: data,
+        headers: { 'Accept': 'application/json' }
+      }).then(function(response) {
+        if (response.ok) {
+          form.style.display = 'none';
+          document.getElementById('form-success').style.display = 'block';
+        } else {
+          document.getElementById('form-error').style.display = 'block';
+        }
+      }).catch(function() {
+        document.getElementById('form-error').style.display = 'block';
+      });
+    });
+  </script>
+</body>
+</html>
