@@ -33,6 +33,9 @@ crash-reports/
 Thumbs.db
 desktop.ini
 
+# Landing page (local only, not for GitHub)
+public/
+
 # Misc
 *.log
 *.tmp
