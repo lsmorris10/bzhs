@@ -32,3 +32,7 @@ outputType = "console"
 [postMerge]
 path = "scripts/post-merge.sh"
 timeoutMs = 180000
+
+[deployment]
+deploymentTarget = "static"
+publicDir = "public"
