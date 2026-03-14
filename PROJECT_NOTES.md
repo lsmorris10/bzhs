@@ -25,7 +25,7 @@
 
 **Completed Milestones:** 1 (Scaffold), 2 (Player Stats), 3 (Debuffs — all 12 types), 4 (Temperature — partial), 5 (Heatmap), 6 (Loot & Crafting), 7 (XP/Leveling/Perks), 8 (Blood Moon/Horde Night), 9 (HUD — compass, minimap, stats overlay).
 
-**March 14 Completed Work:**
+**March 13 Completed Work:**
 - Vanilla damage scaling to 100 HP — fall damage, drowning, fire, lava, cactus all proportionally scaled so 100 HP feels equivalent to vanilla 20 HP.
 - 48,000-tick day cycle sky fix — sun/moon visual cycle now correctly completes one full rotation in 48,000 ticks.
 - Darkness-based zombie speed — zombies speed up based on light level instead of tick-based day/night; replaces old tick-based night speed system.
@@ -68,7 +68,7 @@
 
 ## Recent Completed Work
 
-**March 14 Session [MERGED]**
+**March 13 Session (in progress)**
 - Vanilla damage scaling to 100 HP (fall, drowning, fire, lava, cactus proportionally scaled)
 - 48,000-tick day cycle sky fix (sun/moon visual rotation corrected)
 - Darkness-based zombie speed (light-level-based, replaces tick-based night speed)
