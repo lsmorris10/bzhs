@@ -142,6 +142,14 @@ What feels right for the mod? Drop your thoughts.
 
 ---
 
+## Resolution
+
+**Option D (Darkness with a Night Floor) was chosen and implemented.**
+
+Zombies now check block light and sky light at their position. If both are at or below the configured threshold (default: 7), they receive the darkness speed bonus. During the night window (tick 26,000–46,000), all zombies receive at minimum the night speed bonus regardless of light level, preventing torch-spamming from trivializing nighttime. Blood Moon horde zombies are unaffected (they skip this system entirely via `isHordeMob`). Coal ore vein sizes were also reduced (~halved) to make torches a meaningful resource investment.
+
+---
+
 ## Relevant files
 - `src/main/java/com/sevendaystominecraft/entity/zombie/BaseSevenDaysZombie.java:208-231`
 - `src/main/java/com/sevendaystominecraft/heatmap/HeatmapSpawner.java:202-208`

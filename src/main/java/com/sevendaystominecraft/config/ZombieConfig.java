@@ -18,6 +18,8 @@ public class ZombieConfig {
     public final ModConfigSpec.IntValue maxZombiesBase;
     public final ModConfigSpec.IntValue maxZombiesCap;
     public final ModConfigSpec.DoubleValue nightSpeedBonus;
+    public final ModConfigSpec.DoubleValue darknessSpeedBonus;
+    public final ModConfigSpec.IntValue darknessLightThreshold;
     public final ModConfigSpec.BooleanValue replaceVanillaHostiles;
 
     public final ModConfigSpec.DoubleValue walkerHP;
@@ -125,6 +127,12 @@ public class ZombieConfig {
         nightSpeedBonus = builder
                 .comment("Speed multiplier bonus for sprint-capable zombies at night (spec §3.2: 1.25 = +125%, i.e. 2.25x base speed)")
                 .defineInRange("nightSpeedBonus", 1.25, 0.0, 3.0);
+        darknessSpeedBonus = builder
+                .comment("Speed multiplier bonus for zombies in dark areas (block light and sky light both <= darknessLightThreshold). Defaults to same value as nightSpeedBonus.")
+                .defineInRange("darknessSpeedBonus", 1.25, 0.0, 3.0);
+        darknessLightThreshold = builder
+                .comment("Light level threshold for darkness speed bonus. Zombies get the bonus when both block light and sky light are at or below this value.")
+                .defineInRange("darknessLightThreshold", 7, 0, 15);
         replaceVanillaHostiles = builder
                 .comment("Replace all vanilla hostile mob spawns with 7DTM zombie variants")
                 .define("replaceVanillaHostiles", true);

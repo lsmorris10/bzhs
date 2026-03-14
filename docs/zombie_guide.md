@@ -8,10 +8,12 @@ A complete guide to every zombie type in the game, including their stats, abilit
 
 All 18 zombie types in 7 Days to Minecraft share these universal traits:
 
-**Day vs Night**
-- Zombies are slower and less aggressive during the day. At night (18:00-06:00), all zombies gain a **+125% movement speed bonus (2.25x)**, making nighttime significantly more dangerous.
+**Darkness-Based Speed**
+- Zombie speed reacts to the **light level at their feet**, not just the time of day. When both block light and sky light are at or below the darkness threshold (default: 7), zombies gain a **+125% darkness speed bonus (2.25x)** — making caves, unlit rooms, and dark areas dangerous at any time of day.
+- During nighttime (18:00-06:00), all zombies receive **at minimum** the night speed bonus (+125%) regardless of light level. Torches cannot cheese the night — it's always dangerous after dark.
+- During the day, well-lit areas (sunlight, torched caves) keep zombies at normal speed. Lighting is a **strategic defense** resource.
 - Zombie spawn rates are **3x higher at night** compared to daytime.
-- Zombies do **not** burn in sunlight. Unlike vanilla Minecraft, the undead roam freely during the day — they're just slower and easier to manage.
+- Zombies do **not** burn in sunlight. Unlike vanilla Minecraft, the undead roam freely during the day — they're just slower and easier to manage in well-lit areas.
 
 **Modifiers**
 - Any base zombie type can spawn with a modifier (Radiated, Charged, or Infernal) during late-game horde nights. A modified zombie keeps all of its normal abilities but gains boosted stats and an extra effect. See the [Modifiers](#modifiers) section for details.
@@ -298,9 +300,16 @@ Infernal zombies leave a trail of fire wherever they walk and set players ablaze
 
 ---
 
-## Night Behavior
+## Night & Darkness Behavior
 
-All zombies receive a +125% movement speed bonus (2.25x) during nighttime (configurable). This creates the dramatic day-to-night threat escalation that defines the 7 Days to Die experience — zombies shift from slow shamblers to full sprinters after dark. Plan your activities accordingly — getting caught in the open after dark is far more punishing than during the day.
+Zombie speed is driven by **darkness**, not just the clock. The system checks the light level (both block light and sky light) at each zombie's position:
+
+- **Daytime, dark area** (caves, unlit rooms): Zombies get the darkness speed bonus (+125% by default, 2.25x base speed). Caves are always dangerous.
+- **Daytime, well-lit area** (surface sunlight, torched caves): Zombies move at normal speed. Lighting your base and surrounding areas is an effective defense.
+- **Nighttime, any light level**: All zombies get at minimum the night speed bonus (+125% by default, 2.25x base speed). Night is always dangerous — you can't trivialize it with torches.
+- **Blood Moon**: Horde zombies are unaffected by the darkness/night speed system. They have their own speed handling and are always at full threat.
+
+This means torches and lighting are a meaningful strategic resource. Placing torches in caves, around your base perimeter, and in defensive corridors slows down approaching zombies during the day. But once night falls, the speed floor kicks in and all zombies are fast regardless of light. Plan your outdoor activities and cave exploration accordingly.
 
 ---
 

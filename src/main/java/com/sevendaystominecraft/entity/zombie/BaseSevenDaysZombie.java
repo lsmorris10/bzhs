@@ -13,6 +13,7 @@ import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.monster.Zombie;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.LightLayer;
 import net.minecraft.world.level.ServerLevelAccessor;
 import org.jetbrains.annotations.Nullable;
 
@@ -210,8 +211,8 @@ public class BaseSevenDaysZombie extends Zombie {
             long timeOfDay = serverLevel.getDayTime() % SevenDaysConstants.DAY_LENGTH;
             boolean isNight = timeOfDay >= SevenDaysConstants.NIGHT_START && timeOfDay < SevenDaysConstants.NIGHT_END;
             double baseSpeed = convertSpeedToAttribute(variant.getBaseSpeed());
+            ZombieConfig cfg = ZombieConfig.INSTANCE;
             if (modifier != null) {
-                ZombieConfig cfg = ZombieConfig.INSTANCE;
                 double spdMult = switch (modifier) {
                     case RADIATED -> cfg.radiatedSpeedMult.get();
                     case CHARGED -> cfg.chargedSpeedMult.get();
@@ -221,11 +222,27 @@ public class BaseSevenDaysZombie extends Zombie {
                 baseSpeed *= spdMult;
             }
 
+            int threshold = cfg.darknessLightThreshold.get();
+            int blockLight = serverLevel.getBrightness(LightLayer.BLOCK, blockPosition());
+            int skyLight = serverLevel.getBrightness(LightLayer.SKY, blockPosition());
+            boolean isDark = blockLight <= threshold && skyLight <= threshold;
+
             if (isNight) {
-                double bonus = ZombieConfig.INSTANCE.nightSpeedBonus.get();
-                getAttribute(Attributes.MOVEMENT_SPEED).setBaseValue(baseSpeed * (1.0 + bonus));
+                double nightBonus = cfg.nightSpeedBonus.get();
+                if (isDark) {
+                    double darknessBonus = cfg.darknessSpeedBonus.get();
+                    double bonus = Math.max(nightBonus, darknessBonus);
+                    getAttribute(Attributes.MOVEMENT_SPEED).setBaseValue(baseSpeed * (1.0 + bonus));
+                } else {
+                    getAttribute(Attributes.MOVEMENT_SPEED).setBaseValue(baseSpeed * (1.0 + nightBonus));
+                }
             } else {
-                getAttribute(Attributes.MOVEMENT_SPEED).setBaseValue(baseSpeed);
+                if (isDark) {
+                    double darknessBonus = cfg.darknessSpeedBonus.get();
+                    getAttribute(Attributes.MOVEMENT_SPEED).setBaseValue(baseSpeed * (1.0 + darknessBonus));
+                } else {
+                    getAttribute(Attributes.MOVEMENT_SPEED).setBaseValue(baseSpeed);
+                }
             }
         }
     }
