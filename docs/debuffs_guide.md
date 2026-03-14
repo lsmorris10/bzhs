@@ -1,4 +1,4 @@
-# 7 Days to Minecraft — Debuffs Guide
+# Brutal Zombie Horde Survival — Debuffs Guide
 
 A complete guide to every debuff in the game, including how they're triggered, what they do to your character, how long they last, and how to cure or manage them.
 

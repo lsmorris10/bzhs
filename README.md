@@ -1,6 +1,8 @@
-# 7 Days to Minecraft
+# Brutal Zombie Horde Survival
 
-A total conversion mod for **Minecraft 1.21.4** (NeoForge) that brings **7 Days to Die** survival gameplay into Minecraft. Aligned to 7 Days to Die 2.6 Experimental (Feb 2026).
+> **Disclaimer:** This mod is unofficial fan-made content inspired by 7 Days to Die and is not affiliated with, endorsed by, or connected to The Fun Pimps in any way.
+
+A total conversion mod for **Minecraft 1.21.4** (NeoForge) inspired by **7 Days to Die** survival gameplay. Aligned to the style of 7 Days to Die 2.6 Experimental (Feb 2026).
 
 | | |
 |---|---|
@@ -85,7 +87,7 @@ A total conversion mod for **Minecraft 1.21.4** (NeoForge) that brings **7 Days 
 
 ## Commands
 
-All commands are under `/7dtm`:
+All commands use the `/7dtm` prefix (internal command name unchanged):
 
 | Command | Permission | Description |
 |---------|-----------|-------------|
@@ -123,7 +125,7 @@ Five server-side config files are generated in the `serverconfig/` folder:
 | [`docs/heatmap_guide.md`](docs/heatmap_guide.md) | Heatmap system mechanics with exact values |
 | [`docs/debuffs_guide.md`](docs/debuffs_guide.md) | All 12 debuffs with triggers, effects, and durations |
 | [`docs/if-bored.md`](docs/if-bored.md) | Edge case testing scenarios |
-| [`docs/7dtm_final_spec.md`](docs/7dtm_final_spec.md) | Full implementation spec (2273 lines, 20 sections) |
+| [`docs/bzhs_final_spec.md`](docs/bzhs_final_spec.md) | Full implementation spec (2273 lines, 20 sections) |
 
 ---
 

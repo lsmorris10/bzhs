@@ -1,4 +1,4 @@
-# 7 Days to Minecraft — Default Configuration
+# Brutal Zombie Horde Survival — Default Configuration
 # These files provide the out-of-box defaults for all mod systems.
 # See §15.7 of the spec for the full config file reference.
 #

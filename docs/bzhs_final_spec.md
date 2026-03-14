@@ -1,6 +1,8 @@
-# 7 Days to Minecraft — FINAL Production-Ready Specification
+# Brutal Zombie Horde Survival — FINAL Production-Ready Specification
 
-### Aligned to 7 Days to Die 2.6 Experimental (Feb 25, 2026)
+> **Disclaimer:** This mod is unofficial fan-made content inspired by 7 Days to Die and is not affiliated with, endorsed by, or connected to The Fun Pimps in any way.
+
+### Aligned to the style of 7 Days to Die 2.6 Experimental (Feb 25, 2026)
 
 > **Mod ID**: `sevendaystominecraft` | **Loader**: NeoForge 1.21+ | **Java**: 21 (required) | **Single JAR, zero dependencies**
 > **Spec Version**: 1.0-FINAL | **Date**: March 2026
@@ -2269,4 +2271,4 @@ sevendaystominecraft/
 
 ---
 
-> **End of Specification** — This document constitutes the complete, consolidated, production-ready reference for the "7 Days to Minecraft" total-conversion mod, aligned to 7 Days to Die Stable 1.0 + Experimental 2.6 (Feb 25, 2026). Includes comprehensive visual/animation polish specifications (§14.7) for sprint poses, environmental VFX, body language, and immersion effects. A solo NeoForge developer can begin implementation at Milestone #1 with zero additional research.
+> **End of Specification** — This document constitutes the complete, consolidated, production-ready reference for the "Brutal Zombie Horde Survival" total-conversion mod, inspired by 7 Days to Die and aligned to the style of 7 Days to Die Stable 1.0 + Experimental 2.6 (Feb 25, 2026). Includes comprehensive visual/animation polish specifications (§14.7) for sprint poses, environmental VFX, body language, and immersion effects. A solo NeoForge developer can begin implementation at Milestone #1 with zero additional research.

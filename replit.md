@@ -1,7 +1,7 @@
-# 7 Days to Minecraft — NeoForge Mod
+# Brutal Zombie Horde Survival (BZHS) — NeoForge Mod
 
 ## Project Overview
-A total conversion mod for Minecraft 1.21.4 (NeoForge) that brings 7 Days to Die survival gameplay into Minecraft. Aligned to 7 Days to Die 2.6 Experimental (Feb 2026).
+A total conversion mod for Minecraft 1.21.4 (NeoForge) inspired by 7 Days to Die survival gameplay. Aligned to the style of 7 Days to Die 2.6 Experimental (Feb 2026). Previously known as "7 Days to Minecraft" — rebranded to avoid trademark concerns. Internal code (mod ID `sevendaystominecraft`, package names, `/7dtm` command prefix) remains unchanged.
 
 **Mod ID**: `sevendaystominecraft`  
 **Loader**: NeoForge 21.4.140  
@@ -210,7 +210,7 @@ src/main/java/com/sevendaystominecraft/
 - Use `./gradlew build` to compile and package the mod JAR
 - Use `./gradlew runClient` to launch Minecraft with the mod (requires display)
 - Use `./gradlew runServer` to launch a Minecraft server with the mod
-- Full spec in `docs/7dtm_final_spec.md` (2273 lines, 20 sections)
+- Full spec in `docs/bzhs_final_spec.md` (2273 lines, 20 sections)
 - See `archive/` for resolved spec drafts
 - See `PROJECT_NOTES.md` for session-by-session status and known issues
 
@@ -230,7 +230,7 @@ src/main/java/com/sevendaystominecraft/
 - Config pattern: Static `SPEC` + `INSTANCE` via `new ModConfigSpec.Builder().configure(Klass::new)`
 
 ## Spec / Roadmap
-The full implementation is tracked in `docs/7dtm_final_spec.md` with 19 phases.
+The full implementation is tracked in `docs/bzhs_final_spec.md` with 19 phases.
 Milestones 1-9 complete (except #4 Temperature which is partial). Milestone 3 (Debuffs): DONE — all 12 debuff types. Milestone 5 (Heatmap): DONE. Milestone 6 (Loot & Crafting): DONE — workstations, loot containers, scrapping, quality tiers. Milestone 7 (XP/Leveling/Perks): DONE — full perk registry, level-up system, commands, HUD XP bar. Milestone 8 (Blood Moon/Horde Night): DONE. Milestone 9 (HUD): DONE — compass, minimap, player tracking, stats overlay. Next priorities: sprint bug fix, custom textures/models, world generation.
 
 ## Loot & Crafting System (Spec §6) — DONE

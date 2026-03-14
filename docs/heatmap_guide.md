@@ -1,4 +1,4 @@
-# Heatmap System Guide
+# Brutal Zombie Horde Survival — Heatmap System Guide
 
 The heatmap is a per-chunk tracking system that measures how much noise and activity a player generates. The more you do in an area, the more heat builds up — and the more zombies come looking for you.
 

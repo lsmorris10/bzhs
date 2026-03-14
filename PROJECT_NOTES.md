@@ -59,7 +59,7 @@
 - **P4 (core — damage scaling):** Vanilla damage scaling — does fall damage, drowning, fire, lava, cactus feel proportional to 100 HP (same danger as vanilla 20 HP)?
 - **P5 (HUD):** Compass at top-center showing cardinal directions? Minimap in top-right showing terrain + player dots? Stats bars (HP/Food/Water/Stamina) rendering without overlap?
 - **P6 (heatmap):** Mining/torches/sprinting raise chunk heat? Scouts at 25, Screamer at 50, mini-horde at 75, waves at 100?
-- **P7 (combat):** Zombie name tags + HP bars hidden behind walls? Sunlight doesn't burn 7DTM zombies?
+- **P7 (combat):** Zombie name tags + HP bars hidden behind walls? Sunlight doesn't burn BZHS zombies?
 - **P8 (survival stats):** Sprint bug still present (known, deferred)? Stamina drain/regen rates feel correct? Food/water drain working?
 - **P9 (blood moon):** Every 7 days, warning → red sky → siren → horde → dawn burn sequence works?
 - **P10 (debuffs):** Bleeding/Infection/Fracture/etc. apply and clear correctly? `/7dtm cleardebuffs` works?
@@ -77,7 +77,7 @@
 **March 12 Late-Session Work [MERGED]**
 - Zombie name tag occlusion fix (name tags and HP bars not visible through walls)
 - HUD compass and minimap with player tracking
-- Sunlight burning disabled for all 7DTM zombies
+- Sunlight burning disabled for all BZHS zombies
 - Zombie behavior summary added to `docs/zombie_guide.md`
 - Loot and crafting system (Milestone 6) — loot tables, crafting recipes, item progression tiers
 - XP, leveling & perk system — kill XP, level-up notifications, perk unlocks

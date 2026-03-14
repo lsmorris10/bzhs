@@ -1,4 +1,4 @@
-# 7 Days to Minecraft — Zombie Bestiary
+# Brutal Zombie Horde Survival — Zombie Bestiary
 
 A complete guide to every zombie type in the game, including their stats, abilities, and when they start appearing.
 
@@ -6,7 +6,7 @@ A complete guide to every zombie type in the game, including their stats, abilit
 
 ## General Zombie Behavior
 
-All 18 zombie types in 7 Days to Minecraft share these universal traits:
+All 18 zombie types in Brutal Zombie Horde Survival share these universal traits:
 
 **Darkness-Based Speed**
 - Zombie speed reacts to the **light level at their feet**, not just the time of day. When both block light and sky light are at or below the darkness threshold (default: 7), zombies gain a **+125% darkness speed bonus (2.25x)** — making caves, unlit rooms, and dark areas dangerous at any time of day.
