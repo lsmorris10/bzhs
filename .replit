@@ -22,10 +22,6 @@ args = "Build Mod"
 task = "workflow.run"
 args = "Preview Site"
 
-[[workflows.workflow.tasks]]
-task = "workflow.run"
-args = "Dev History Dashboard"
-
 [[workflows.workflow]]
 name = "Build Mod"
 author = "agent"
@@ -45,18 +41,6 @@ author = "agent"
 task = "shell.exec"
 args = "python3 -m http.server 5000 --directory public"
 waitForPort = 5000
-
-[workflows.workflow.metadata]
-outputType = "webview"
-
-[[workflows.workflow]]
-name = "Dev History Dashboard"
-author = "agent"
-
-[[workflows.workflow.tasks]]
-task = "shell.exec"
-args = "cd artifacts/dev-history-dashboard && PORT=5001 BASE_PATH='/' pnpm run dev"
-waitForPort = 5001
 
 [workflows.workflow.metadata]
 outputType = "webview"
