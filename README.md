@@ -79,9 +79,10 @@ A total conversion mod for **Minecraft 1.21.4** (NeoForge) inspired by **7 Days 
 - Active perk effects: damage reduction, mining speed, health regen, stamina efficiency, temperature resistance, death-save (Unkillable), stealth kills (Ghost), and more
 
 ### Extended Day Cycle
-- Day/night cycle doubled to **48,000 ticks** (vanilla is 24,000)
-- Custom sky rendering for smooth sun/moon positioning
-- All blood moon, zombie behavior, and temperature thresholds scaled accordingly
+- Day/night cycle doubled via **slower-tick approach** (TIME_SCALE=2) — game time advances 1 tick every 2 server ticks
+- `dayTime` stays on vanilla 24,000-tick scale, so sun/moon rendering, F3 day counter, and all vanilla time logic work natively
+- One full day takes ~40 real minutes instead of vanilla's ~20 minutes
+- All blood moon, zombie behavior, and temperature thresholds use the natural `dayTime` values
 
 ---
 
@@ -121,7 +122,6 @@ Five server-side config files are generated in the `serverconfig/` folder:
 
 | Guide | Description |
 |-------|-------------|
-| [`docs/zombie_guide.md`](docs/zombie_guide.md) | All 18 zombie variants with stats, abilities, and behavior |
 | [`docs/heatmap_guide.md`](docs/heatmap_guide.md) | Heatmap system mechanics with exact values |
 | [`docs/debuffs_guide.md`](docs/debuffs_guide.md) | All 12 debuffs with triggers, effects, and durations |
 | [`docs/edge-case-testing.md`](docs/edge-case-testing.md) | Edge case testing scenarios |
@@ -154,8 +154,12 @@ Copy the JAR into your Minecraft `mods/` folder (requires NeoForge 21.4.140 for 
 - Loot containers, workstations, and crafting
 - XP, leveling, and 45-perk system
 - Compass, minimap, and player tracking
-- Extended 48,000-tick day cycle
+- Extended day cycle via slower-tick refactor (TIME_SCALE=2, vanilla 24k dayTime preserved)
 - 100 HP player base health
+- Vanilla mob damage scaling for all mobs (fall, drowning, fire, lava, cactus, plus all vanilla mob attacks proportionally scaled to 100 HP)
+- LevelTimeOfDayMixin crash fix (target corrected to `getSunAngle`)
+- Mod JAR and metadata renamed to match BZHS branding
+- Landing page download button with GitHub Releases API integration
 
 ### In Progress / Next
 - Sprint bug fix (client-side Mixin)

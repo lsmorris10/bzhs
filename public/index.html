@@ -461,7 +461,7 @@
   <div class="section">
     <h2>Development Status</h2>
     <div class="status-card">
-      <p class="status-version"><strong>Alpha v0.1.0</strong> — Active development &middot; Updated March 14, 2026</p>
+      <p class="status-version"><strong>Alpha v0.1.0</strong> — Active development &middot; Updated March 15, 2026</p>
 
       <ul class="milestone-list">
         <li><span class="check">✓</span> Project scaffold &amp; architecture</li>
@@ -478,9 +478,12 @@
       <p style="color:#999; font-size:0.82rem; margin-bottom:0.4rem; margin-top:0.75rem; text-transform:uppercase; letter-spacing:0.5px; font-weight:600;">Post-Milestone Improvements</p>
       <ul class="milestone-list" style="margin-bottom:1.5rem;">
         <li><span class="check">✓</span> Vanilla damage scaling to 100 HP</li>
-        <li><span class="check">✓</span> 48k-tick day cycle with sky fix</li>
+        <li><span class="check">✓</span> Doubled day cycle (slower-tick refactor)</li>
         <li><span class="check">✓</span> Darkness-based zombie speed</li>
         <li><span class="check">✓</span> Coal vein rebalancing</li>
+        <li><span class="check">✓</span> Mob damage scaling for all vanilla mobs</li>
+        <li><span class="check">✓</span> LevelTimeOfDayMixin crash fix</li>
+        <li><span class="check">✓</span> Mod JAR &amp; metadata rebrand</li>
       </ul>
 
       <div class="coming-section">
@@ -497,11 +500,13 @@
   <div class="section recent-section">
     <h2>Recent Changes</h2>
     <ul class="recent-list">
+      <li><span class="dot">●</span> Day cycle refactored to slower-tick approach — doubled day length using vanilla 24k time scale</li>
+      <li><span class="dot">●</span> Vanilla mob damage scaling extended to all mobs for balanced 100 HP combat</li>
+      <li><span class="dot">●</span> LevelTimeOfDayMixin crash fix — corrected mixin target for stable startup</li>
       <li><span class="dot">●</span> Darkness-based zombie speed replaces old tick-based day/night system</li>
       <li><span class="dot">●</span> Vanilla damage scaling proportionally adjusted for 100 HP (fall, drowning, fire, lava, cactus)</li>
-      <li><span class="dot">●</span> Sun/moon visual cycle fixed for 48,000-tick day length</li>
-      <li><span class="dot">●</span> Coal ore vein sizes reduced for better resource balance</li>
-      <li><span class="dot">●</span> Project rebranded to Brutal Zombie Horde Survival (BZHS)</li>
+      <li><span class="dot">●</span> Mod JAR and metadata renamed to match BZHS branding</li>
+      <li><span class="dot">●</span> Download button fetches latest release directly from GitHub</li>
     </ul>
   </div>
 
