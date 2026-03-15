@@ -28,7 +28,7 @@
 **March 13–15 Completed Work:**
 - Vanilla damage scaling to 100 HP — fall damage, drowning, fire, lava, cactus all proportionally scaled so 100 HP feels equivalent to vanilla 20 HP.
 - Day cycle doubled via slower-tick refactor (TIME_SCALE=2) — game time advances 1 tick per 2 server ticks, keeping vanilla 24k dayTime scale intact. Sky rendering, F3 day counter, and all vanilla time logic work natively.
-- Darkness-based zombie speed — zombies speed up based on light level instead of tick-based day/night; replaces old tick-based night speed system.
+- Dual zombie speed system — zombies get a night speed bonus when dayTime is in the night range (13000–23000), AND a separate darkness speed bonus when both block light and sky light are ≤ 7. When both conditions are true, the higher bonus is used (not additive). This replaced the old tick-based night-only speed system.
 - Coal vein nerf — reduced coal ore vein sizes to balance resource acquisition.
 - Project rebranded to "Brutal Zombie Horde Survival" (BZHS) — mod ID, display name, and all user-facing references updated (#43).
 - Landing page created and published, then upgraded to V2 with improved design (#40, #41, #45).
@@ -63,7 +63,7 @@
 - **P1 (game-breaking):** Does the mod build and launch without crashes? Verify LevelTimeOfDayMixin crash fix (#59) — no more startup crash on `getSunAngle`.
 - **P2 (core — day cycle):** Slower-tick day cycle (TIME_SCALE=2) — game time advances 1 tick every 2 server ticks, so one full day takes ~40 real minutes instead of ~20. Verify: sun/moon visual cycle uses vanilla 24k rendering naturally (no custom sky code). F3 day counter should now be correct (dayTime is still 24k-based). HUD day counter should also match.
 - **P3 (core — mob damage):** Vanilla mob damage scaling — do all vanilla mob attacks (zombies, skeletons, spiders, creeper explosions, etc.) feel proportional to 100 HP? Environmental damage (fall, drowning, fire, lava, cactus) still correct?
-- **P4 (core — darkness speed):** Darkness-based zombie speed — do zombies speed up in dark caves during daytime? Do torches slow them down?
+- **P4 (core — dual zombie speed):** Dual speed system — do zombies get the night speed bonus during nighttime (dayTime 13000–23000)? Do they also get the darkness speed bonus in dark caves (block light + sky light ≤ 7) during daytime? Do torches slow them down? When both night and darkness apply, verify max bonus is used (not additive).
 - **P5 (HUD):** Compass at top-center showing cardinal directions? Minimap in top-right showing terrain + player dots? Stats bars (HP/Food/Water/Stamina) rendering without overlap?
 - **P6 (heatmap):** Mining/torches/sprinting raise chunk heat? Scouts at 25, Screamer at 50, mini-horde at 75, waves at 100?
 - **P7 (combat):** Zombie name tags + HP bars hidden behind walls? Sunlight doesn't burn BZHS zombies?
@@ -95,8 +95,8 @@
 
 **March 13 Session**
 - Vanilla damage scaling to 100 HP (fall, drowning, fire, lava, cactus proportionally scaled)
-- 48,000-tick day cycle sky fix (sun/moon visual rotation corrected)
-- Darkness-based zombie speed (light-level-based, replaces tick-based night speed)
+- 48,000-tick day cycle sky fix (sun/moon visual rotation corrected) — **superseded by slower-tick refactor (#60); dayTime now uses vanilla 24k scale**
+- Darkness-based zombie speed (light-level-based, replaces tick-based night speed) — **later expanded to dual system: night dayTime check + darkness light-level check (#66)**
 - Coal vein nerf (reduced ore vein sizes)
 
 **March 12 Late-Session Work [MERGED]**
@@ -109,7 +109,7 @@
 - Debuffs system — Bleeding, Infection, Dysentery, Sprain, Fracture with triggers and cures
 - Stats HUD overlap fix (moved down below compass, removed background)
 - Night zombie speed increased to 2.25x
-- Day cycle doubled to 48,000 ticks
+- Day cycle doubled to 48,000 ticks — **superseded by slower-tick refactor (#60); dayTime now stays on vanilla 24k scale, time advances at half speed via TIME_SCALE=2**
 - Debuffs persistence bug fixed (twice — `/bzhs cleardebuffs` command + `copyOnDeath` removal)
 - Debuffs guide created (`docs/debuffs_guide.md`)
 - Player base health set to 100 HP

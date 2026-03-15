@@ -40,7 +40,7 @@ A total conversion mod for **Minecraft 1.21.4** (NeoForge) inspired by **7 Days 
 - **Animals (3)**: Zombie Dog, Zombie Bear, Vulture
 - **Special Mechanics**: Explosions, acid spit projectiles, chain lightning, fire trails, wall climbing, healing aura, screamer spawning, flying dive attacks, ground pound AoE
 - **Modifiers**: Radiated (HP regen), Charged (chain lightning), Infernal (fire trail + burn)
-- **Night Speed**: 2.25x movement speed at night (configurable)
+- **Dual Speed System**: Night speed bonus when dayTime is in the night range (13000–23000), plus a separate darkness speed bonus when both block light and sky light are ≤ 7. When both conditions apply, the higher bonus is used (not additive)
 - Zombies do NOT burn in sunlight
 - Name tags and HP bars only visible with line-of-sight (not through walls)
 
@@ -83,6 +83,8 @@ A total conversion mod for **Minecraft 1.21.4** (NeoForge) inspired by **7 Days 
 - `dayTime` stays on vanilla 24,000-tick scale, so sun/moon rendering, F3 day counter, and all vanilla time logic work natively
 - One full day takes ~40 real minutes instead of vanilla's ~20 minutes
 - All blood moon, zombie behavior, and temperature thresholds use the natural `dayTime` values
+- **Affected by TIME_SCALE**: day/night progression, sun/moon position, sleep cycle — anything driven by `dayTime`
+- **NOT affected by TIME_SCALE**: server tick rate, debuff timers, heatmap decay, redstone, mob AI ticks — these all run on server ticks at normal speed
 
 ---
 

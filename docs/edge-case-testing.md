@@ -26,7 +26,7 @@ A go-to checklist of known edge cases, tricky interactions, and things worth tes
 - Zombie Dog pack spawning: do they actually spawn in groups? Is their 3.5 speed correct and not absurdly fast?
 - Vulture flight: does the swoop attack work? Can it path through solid blocks? Does it get stuck in terrain?
 - Behemoth ground pound: does the 6-block AoE radius work? Does it deal 75% of its base damage (37.5)? Does knockback apply?
-- Darkness speed bonus: do zombies get +125% speed when both block light AND sky light ≤ 7? Does the same +125% bonus apply at night (tick 26000–46000)? When both conditions are true, verify the max of the two bonuses is used (not additive)
+- Darkness speed bonus: do zombies get the darkness speed bonus when both block light AND sky light ≤ 7? Night speed bonus applies when dayTime is 13000–23000 (vanilla 24k scale). When both night and darkness conditions are true, verify the max of the two bonuses is used (not additive)
 - Zombie block destruction: do zombies bash through walls? Do they prefer weaker materials (wood over concrete) via the A* cost formula?
 
 ---
@@ -78,7 +78,7 @@ These debuffs have their effects fully implemented in `PlayerStatsHandler.applyD
 ## Temperature System
 
 - Biome temperature variation: does Pine Forest feel different from Desert and Snowy Tundra?
-- Night temperature drop: -10°F at night (tick 26000–46000) — does it transition smoothly or jump?
+- Night temperature drop: -10°F at night (dayTime 13000–23000, vanilla 24k scale) — does it transition smoothly or jump?
 - Altitude effect: -1°F per 10 blocks above Y=64 — go to Y=200 and check if you're freezing
 - Temperature convergence rate: ±0.3°F/sec toward ambient — is this smooth or jerky?
 - Clothing insulation: do armor pieces / clothing actually modify temperature? (Check if implemented)
@@ -89,12 +89,12 @@ These debuffs have their effects fully implemented in `PlayerStatsHandler.applyD
 ## Blood Moon & Horde
 
 - Does the Blood Moon trigger exactly every 7 days (configurable)?
-- Warning at tick 28000 the day before — does the chat message appear?
-- Sky turns red at tick 24000 on horde day — visual check
-- Siren plays at tick 25000 — audio check
-- Horde spawning starts at tick 32000, 4 waves with 10-min (600 sec) intervals — verify timing
-- Final wave forced at tick 44000 — verify it fires even if regular waves haven't finished (note: final-wave forcing may preempt regular interval wave progression depending on timing)
-- Dawn burn at tick 47000: do all surviving horde zombies within 128 blocks ignite?
+- Warning at dayTime 14000 the day before — does the chat message appear?
+- Sky turns red at dayTime 12000 on horde day — visual check
+- Siren plays at dayTime 12500 — audio check
+- Horde spawning starts at dayTime 16000, 4 waves with 10-min (600 sec) intervals — verify timing
+- Final wave forced at dayTime 22000 — verify it fires even if regular waves haven't finished (note: final-wave forcing may preempt regular interval wave progression depending on timing)
+- Dawn burn at dayTime 23500: do all surviving horde zombies within 128 blocks ignite?
 - Wave size escalation: +25% per wave index (wave 1 = base, wave 2 = ×1.25, wave 3 = ×1.5, wave 4 = ×1.75)
 - Wave composition thresholds:
   - Day 7: Walkers (70%) + Crawlers (20%) + Ferals (10%, but only if day ≥ 14 via config — otherwise redistributed to Walkers)
@@ -203,8 +203,8 @@ These debuffs have their effects fully implemented in `PlayerStatsHandler.applyD
 - Starvation + Bleeding + Infection Stage 1: starvation drains HP while infection reduces stamina regen — does the player degrade quickly?
 - Temperature extremes during Blood Moon: hypothermia/hyperthermia effects are coded but not yet auto-triggered by temperature — once trigger paths are added, test if stamina drain during horde makes combat impossible
 - Death loop: if the player dies and respawns in a dangerous area (Wasteland, active Blood Moon), can they stabilize or do they instantly die again?
-- Darkness speed in caves: zombies underground (block light ≤ 7, sky light ≤ 7) should get +125% speed even during daytime — verify caves are extra dangerous
-- 48000-tick day cycle: verify all time-dependent systems use the custom DAY_LENGTH (48000) instead of vanilla's 24000
+- Darkness speed in caves: zombies underground (block light ≤ 7, sky light ≤ 7) should get the darkness speed bonus even during daytime — verify caves are extra dangerous
+- Extended day cycle: verify the slower-tick approach (TIME_SCALE=2) doubles the real-time day length while keeping dayTime on the vanilla 24,000-tick scale. All time-dependent systems (blood moon, zombie behavior, temperature) should use standard dayTime values, not doubled values
 - 100 HP pool interactions: verify damage from all sources (zombies, fall, fire, starvation, debuffs) is balanced for the 100 HP pool
 - Miner 69er + heatmap from mining: does the +15% mining speed per rank cause faster heat buildup (more blocks broken per minute)?
 - Healing Factor during combat: does the +20% health regen per rank meaningfully offset damage taken in fights?

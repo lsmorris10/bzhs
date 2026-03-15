@@ -6,7 +6,7 @@ A complete guide to every debuff in the game, including how they're triggered, w
 
 ## How Debuffs Work
 
-Debuffs are negative status effects applied to your character through combat, environmental hazards, falls, and other dangers. Each debuff has a duration measured in game ticks (20 ticks = 1 second), and they count down automatically every tick. When the timer hits zero, the debuff is removed.
+Debuffs are negative status effects applied to your character through combat, environmental hazards, falls, and other dangers. Each debuff has a duration measured in server ticks (20 server ticks = 1 second), and they count down automatically every server tick. Debuff timers run at normal server tick speed and are **not** slowed by the extended day cycle (TIME_SCALE). When the timer hits zero, the debuff is removed.
 
 **Key mechanics:**
 - Debuffs use a **longest-duration-wins** rule. If you're hit with the same debuff again while it's already active, only the longer duration is kept — the timer never downgrades.

@@ -62,7 +62,7 @@ Wave mode is the heatmap's way of punishing sustained heavy activity. If you kee
 ## Heat Decay
 
 Heat doesn't last forever. Each heat source decays individually based on its own decay rate:
-- Decay is calculated every second (technically every 20 game ticks).
+- Decay is calculated every second (technically every 20 server ticks — server ticks run at normal speed and are NOT affected by the extended day cycle TIME_SCALE).
 - The formula: each tick, a source loses `(decayPerMinute / 60)` heat points.
 - When a source hits 0, it's removed entirely.
 - If all sources in a chunk are gone, the chunk returns to 0 heat.

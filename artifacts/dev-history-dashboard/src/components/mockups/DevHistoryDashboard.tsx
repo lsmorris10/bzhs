@@ -92,6 +92,13 @@ const ALL_TASKS: Record<string, Task[]> = {
     { id: 61, title: "Mob damage scaling", category: "survival", status: "merged" },
     { id: 62, title: "POI zombie spec", category: "docs", status: "merged" },
     { id: 63, title: "Docs update", category: "docs", status: "merged" },
+    { id: 64, title: "Tick refactor analysis", category: "daycycle", status: "merged" },
+    { id: 65, title: "Blood moon tick constants", category: "daycycle", status: "merged" },
+    { id: 66, title: "Dual zombie speed system", category: "zombies", status: "merged" },
+    { id: 67, title: "Zombie speed config", category: "zombies", status: "merged" },
+    { id: 68, title: "Zombie speed tests", category: "zombies", status: "merged" },
+    { id: 69, title: "Landing page V3", category: "landing", status: "merged" },
+    { id: 70, title: "Docs/guides/dashboard update", category: "docs", status: "merged" },
   ],
 };
 
