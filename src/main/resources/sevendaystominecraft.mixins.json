@@ -8,8 +8,7 @@
         "FoodDataMixin",
         "PlayerHealMixin",
         "LivingEntityHurtMixin",
-        "SprintBlockMixin",
-        "LevelTimeOfDayMixin"
+        "SprintBlockMixin"
     ],
     "client": [],
     "injectors": {

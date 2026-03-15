@@ -49,7 +49,7 @@ public abstract class LivingEntityHurtMixin {
         if (player.getRandom().nextFloat() < infectionChance) {
             if (!stats.hasDebuff(SevenDaysPlayerStats.DEBUFF_INFECTION_1)
                     && !stats.hasDebuff(SevenDaysPlayerStats.DEBUFF_INFECTION_2)) {
-                stats.addDebuff(SevenDaysPlayerStats.DEBUFF_INFECTION_1, (int) SevenDaysConstants.DAY_LENGTH);
+                stats.addDebuff(SevenDaysPlayerStats.DEBUFF_INFECTION_1, (int) SevenDaysConstants.REAL_TICKS_PER_DAY);
             }
         }
 
