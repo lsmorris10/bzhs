@@ -2,6 +2,9 @@ package com.sevendaystominecraft.entity.zombie;
 
 import com.sevendaystominecraft.SevenDaysConstants;
 import com.sevendaystominecraft.config.ZombieConfig;
+import com.sevendaystominecraft.entity.zombie.ai.ZombieBreakBlockGoal;
+import com.sevendaystominecraft.entity.zombie.ai.ZombieHordePathGoal;
+import com.sevendaystominecraft.entity.zombie.ai.ZombieInvestigateGoal;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
@@ -30,6 +33,14 @@ public class BaseSevenDaysZombie extends Zombie {
         this.variant = variant;
         this.modifier = null;
         this.isHordeMob = false;
+    }
+
+    @Override
+    protected void registerGoals() {
+        super.registerGoals();
+        goalSelector.addGoal(3, new ZombieBreakBlockGoal(this));
+        goalSelector.addGoal(4, new ZombieHordePathGoal(this));
+        goalSelector.addGoal(5, new ZombieInvestigateGoal(this));
     }
 
     public ZombieVariant getVariant() {

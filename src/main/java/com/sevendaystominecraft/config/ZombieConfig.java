@@ -112,6 +112,13 @@ public class ZombieConfig {
     public final ModConfigSpec.DoubleValue infernalSpeedMult;
     public final ModConfigSpec.IntValue infernalFireTrailInterval;
 
+    public final ModConfigSpec.BooleanValue blockBreakEnabled;
+    public final ModConfigSpec.DoubleValue blockBreakSpeedMultiplier;
+    public final ModConfigSpec.IntValue investigateRange;
+    public final ModConfigSpec.IntValue hordePathRange;
+    public final ModConfigSpec.IntValue hordePathRangeDay21;
+    public final ModConfigSpec.DoubleValue blockHPMultiplier;
+
     ZombieConfig(ModConfigSpec.Builder builder) {
         builder.comment("Brutal Zombie Horde Survival — Zombie Configuration",
                        "Per-variant HP/damage/speed overrides (spec §3.1)")
@@ -136,6 +143,24 @@ public class ZombieConfig {
         replaceVanillaHostiles = builder
                 .comment("Replace all vanilla hostile mob spawns with BZHS zombie variants")
                 .define("replaceVanillaHostiles", true);
+        blockBreakEnabled = builder
+                .comment("Whether zombies can break blocks to reach players")
+                .define("blockBreakEnabled", true);
+        blockBreakSpeedMultiplier = builder
+                .comment("Multiplier for zombie block breaking speed (1.0 = normal)")
+                .defineInRange("blockBreakSpeedMultiplier", 1.0, 0.1, 10.0);
+        investigateRange = builder
+                .comment("Range in blocks for zombie heatmap investigation behavior")
+                .defineInRange("investigateRange", 32, 8, 128);
+        hordePathRange = builder
+                .comment("Range in blocks for horde pathfinding to players during Blood Moon")
+                .defineInRange("hordePathRange", 64, 16, 256);
+        hordePathRangeDay21 = builder
+                .comment("Range in blocks for horde pathfinding on day 21+")
+                .defineInRange("hordePathRangeDay21", 128, 32, 512);
+        blockHPMultiplier = builder
+                .comment("Global multiplier for block HP values (higher = blocks take longer to break)")
+                .defineInRange("blockHPMultiplier", 1.0, 0.1, 10.0);
         builder.pop();
 
         builder.push("walker");

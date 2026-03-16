@@ -66,8 +66,13 @@ src/main/java/com/sevendaystominecraft/
 ├── entity/
 │   ├── ModEntities.java            — DeferredRegister for all custom entity types + attribute events
 │   └── zombie/
-│       ├── BaseSevenDaysZombie.java — Base zombie entity with variant stats, modifiers, night speed bonus, radiated regen
+│       ├── BaseSevenDaysZombie.java — Base zombie entity with variant stats, modifiers, night speed bonus, radiated regen, behavior tree goals
 │       ├── ZombieVariant.java       — Enum of all 18 zombie variants with base stats
+│       ├── ai/
+│       │   ├── BlockHPRegistry.java       — Block HP lookup table for zombie block breaking (wood=10, stone=30, cobblestone=50, iron=200, obsidian=500)
+│       │   ├── ZombieBreakBlockGoal.java  — Goal: zombies break obstructing blocks to reach targets (priority 3)
+│       │   ├── ZombieHordePathGoal.java   — Goal: Blood Moon horde pathing toward nearest player (priority 4)
+│       │   └── ZombieInvestigateGoal.java — Goal: investigate high-heat chunks when idle (priority 5)
 │       ├── BehemothZombie.java      — Boss: knockback immune, ground pound AoE
 │       ├── BloatedWalkerZombie.java — Explodes on death (2-block radius)
 │       ├── ChargedZombie.java       — Chain lightning on hit
@@ -166,6 +171,12 @@ src/main/java/com/sevendaystominecraft/
   - Night speed bonus: +50% movement speed during nighttime (configurable)
   - Radiated regen: 2 HP/sec healing tick (configurable)
   - XP reward includes modifier bonus
+  - **Behavior tree goals** (registered at priorities 3-5, inherited by all 16 subclasses):
+    - `ZombieBreakBlockGoal` (P3): Breaks obstructing blocks to reach targets, with block HP system, vanilla break animation, mobGriefing gamerule respect
+    - `ZombieHordePathGoal` (P4): During Blood Moon, horde zombies path toward nearest player (64 blocks, 128 on day 21+)
+    - `ZombieInvestigateGoal` (P5): When idle, investigates high-heat chunks from heatmap system, wanders locally then re-queries
+  - **BlockHPRegistry**: Block HP lookup table (glass=3, wood=10, log=15, stone=30, cobblestone=50, iron=200, obsidian=500, bedrock=unbreakable)
+  - **ZombieConfig additions**: `blockBreakEnabled`, `blockBreakSpeedMultiplier`, `investigateRange`, `hordePathRange`, `hordePathRangeDay21`, `blockHPMultiplier`
 - **18 variant entity types** registered via `DeferredRegister<EntityType<?>>`
   - Special mechanics per spec §3.2: explosions, projectiles, chain lightning, fire trails, wall climbing, healing aura, screamer spawning, flying dive attacks, ground pound AoE
 - **ZombieConfig** (`zombies.toml`): Per-variant HP/damage/speed overrides, all special mechanic tuning values, modifier multipliers
