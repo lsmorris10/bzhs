@@ -14,6 +14,9 @@ import net.neoforged.neoforge.event.tick.LevelTickEvent;
 public class DayCycleHandler {
 
     private static int tickCounter = 0;
+    private static boolean initialTimeSet = false;
+
+    private static final long MORNING_START_TIME = 1000L;
 
     @SubscribeEvent
     public static void onLevelTick(LevelTickEvent.Post event) {
@@ -27,10 +30,21 @@ public class DayCycleHandler {
             SevenDaysToMinecraft.LOGGER.info("[BZHS] Disabled vanilla daylight cycle — using TIME_SCALE={} slower-tick day cycle", SevenDaysConstants.TIME_SCALE);
         }
 
+        if (!initialTimeSet && level.getDayTime() == 0) {
+            level.setDayTime(MORNING_START_TIME);
+            SevenDaysToMinecraft.LOGGER.info("[BZHS] Set initial world time to {} (clear morning) to avoid sunrise red sky", MORNING_START_TIME);
+        }
+        initialTimeSet = true;
+
         tickCounter++;
         if (tickCounter >= SevenDaysConstants.TIME_SCALE) {
             tickCounter = 0;
             level.setDayTime(level.getDayTime() + 1);
         }
+    }
+
+    public static void reset() {
+        initialTimeSet = false;
+        tickCounter = 0;
     }
 }

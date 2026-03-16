@@ -17,6 +17,10 @@ public class BloodMoonSkyRenderer {
     private static float currentIntensity = 0f;
     private static final float RAMP_SPEED = 0.002f;
 
+    public static void resetIntensity() {
+        currentIntensity = 0f;
+    }
+
     @SubscribeEvent
     public static void onComputeFogColor(ViewportEvent.ComputeFogColor event) {
         if (!BloodMoonClientState.isActive()) {

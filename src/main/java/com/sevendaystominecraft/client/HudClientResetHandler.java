@@ -11,8 +11,16 @@ import net.neoforged.neoforge.client.event.ClientPlayerNetworkEvent;
 public class HudClientResetHandler {
 
     @SubscribeEvent
+    public static void onPlayerLogin(ClientPlayerNetworkEvent.LoggingIn event) {
+        BloodMoonSkyRenderer.resetIntensity();
+        BloodMoonClientState.reset();
+    }
+
+    @SubscribeEvent
     public static void onPlayerLogout(ClientPlayerNetworkEvent.LoggingOut event) {
         NearbyPlayersClientState.reset();
         ChunkHeatClientState.reset();
+        BloodMoonSkyRenderer.resetIntensity();
+        BloodMoonClientState.reset();
     }
 }

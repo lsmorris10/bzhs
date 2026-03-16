@@ -10,6 +10,7 @@ import com.sevendaystominecraft.config.HordeConfig;
 import com.sevendaystominecraft.config.LootConfig;
 import com.sevendaystominecraft.config.SurvivalConfig;
 import com.sevendaystominecraft.config.ZombieConfig;
+import com.sevendaystominecraft.horde.DayCycleHandler;
 import com.sevendaystominecraft.entity.ModEntities;
 import com.sevendaystominecraft.item.ModCreativeTabs;
 import com.sevendaystominecraft.item.ModItems;
@@ -71,6 +72,13 @@ public class SevenDaysToMinecraft {
 
     private void onServerStarting(final ServerStartingEvent event) {
         LOGGER.info("BZHS Server Starting — Loading world data...");
+        DayCycleHandler.reset();
+
+        double baseMaxHealth = SurvivalConfig.INSTANCE.baseMaxHealth.get();
+        if (baseMaxHealth > 200.0) {
+            LOGGER.warn("[BZHS] baseMaxHealth is {} which exceeds the recommended maximum of 200. "
+                    + "Consider deleting your config file to regenerate defaults (100 HP).", baseMaxHealth);
+        }
     }
 
     private void onRegisterCommands(final RegisterCommandsEvent event) {
