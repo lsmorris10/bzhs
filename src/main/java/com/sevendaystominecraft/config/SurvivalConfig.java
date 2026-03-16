@@ -61,7 +61,7 @@ public class SurvivalConfig {
 
     // ── Base Health ──────────────────────────────────────────────────────
 
-    /** Player base max health in HP (vanilla default: 20 HP) */
+    /** Player base max health in HP (100 = BZHS default, 50 hearts; vanilla = 20) */
     public final ModConfigSpec.DoubleValue baseMaxHealth;
 
     // ── Health Regen ────────────────────────────────────────────────────
@@ -118,6 +118,16 @@ public class SurvivalConfig {
 
     // ── Sync ────────────────────────────────────────────────────────────
 
+    // ── Food/Water Restoration ─────────────────────────────────────────
+    public final ModConfigSpec.DoubleValue foodRestorationMultiplier;
+    public final ModConfigSpec.DoubleValue waterPerDrink;
+
+    // ── XP ───────────────────────────────────────────────────────────────
+    public final ModConfigSpec.IntValue vanillaMobXP;
+
+    // ── Player Damage ────────────────────────────────────────────────────
+    public final ModConfigSpec.DoubleValue playerDamageMultiplier;
+
     /** How often to sync stats to client (in ticks; 10 = every 0.5s) */
     public final ModConfigSpec.IntValue syncIntervalTicks;
 
@@ -171,8 +181,8 @@ public class SurvivalConfig {
         // Health
         builder.push("health");
         baseMaxHealth = builder
-                .comment("Player base max health in HP (20 = vanilla default, 10 hearts)")
-                .defineInRange("baseMaxHealth", 20.0, 20.0, 500.0);
+                .comment("Player base max health in HP (100 = BZHS default, 50 hearts; vanilla = 20)")
+                .defineInRange("baseMaxHealth", 100.0, 20.0, 500.0);
         healthRegenRate = builder
                 .comment("Health regen per second when above food/water thresholds")
                 .defineInRange("healthRegenRate", 0.1, 0.0, 10.0);
@@ -248,6 +258,30 @@ public class SurvivalConfig {
         undergroundNormTemp = builder
                 .comment("Temperature that underground areas (below Y=40) trend toward (°F)")
                 .defineInRange("undergroundNormTemp", 55.0, 0.0, 120.0);
+        builder.pop();
+
+        // Food/Water Restoration
+        builder.push("restoration");
+        foodRestorationMultiplier = builder
+                .comment("Multiplier applied to vanilla food nutrition to get BZHS food restoration (e.g. steak nutrition=8 * 5.0 = 40 food restored)")
+                .defineInRange("foodRestorationMultiplier", 5.0, 0.1, 50.0);
+        waterPerDrink = builder
+                .comment("Water restored per drink (water bottle, potion, milk bucket)")
+                .defineInRange("waterPerDrink", 25.0, 1.0, 100.0);
+        builder.pop();
+
+        // XP
+        builder.push("xp");
+        vanillaMobXP = builder
+                .comment("Mod XP awarded for killing vanilla hostile mobs (not BZHS zombies)")
+                .defineInRange("vanillaMobXP", 50, 0, 1000);
+        builder.pop();
+
+        // Player Damage
+        builder.push("combat");
+        playerDamageMultiplier = builder
+                .comment("Multiplier for player damage dealt to BZHS zombie entities (2.0 = double damage)")
+                .defineInRange("playerDamageMultiplier", 2.0, 0.1, 10.0);
         builder.pop();
 
         // Sync

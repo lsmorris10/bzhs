@@ -23,9 +23,18 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.resources.ResourceLocation;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
+import net.neoforged.neoforge.event.entity.living.LivingDamageEvent;
 import net.neoforged.neoforge.event.tick.PlayerTickEvent;
 import net.neoforged.neoforge.event.entity.player.PlayerEvent;
 import net.neoforged.neoforge.network.PacketDistributor;
+
+import com.sevendaystominecraft.entity.zombie.BaseSevenDaysZombie;
+
+import net.minecraft.world.food.FoodProperties;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
+
+import net.neoforged.neoforge.event.entity.living.LivingEntityUseItemEvent;
 
 @EventBusSubscriber(modid = SevenDaysToMinecraft.MOD_ID)
 public class PlayerStatsHandler {
@@ -267,6 +276,51 @@ public class PlayerStatsHandler {
         }
 
         player.removeEffect(MobEffects.CONFUSION);
+    }
+
+    @SubscribeEvent
+    public static void onItemUseFinish(LivingEntityUseItemEvent.Finish event) {
+        if (event.getEntity().level().isClientSide()) return;
+        if (!(event.getEntity() instanceof ServerPlayer serverPlayer)) return;
+
+        ItemStack stack = event.getItem();
+        SevenDaysPlayerStats stats = serverPlayer.getData(ModAttachments.PLAYER_STATS.get());
+        SurvivalConfig cfg = SurvivalConfig.INSTANCE;
+        boolean changed = false;
+
+        FoodProperties food = stack.get(net.minecraft.core.component.DataComponents.FOOD);
+        if (food != null) {
+            float restoration = food.nutrition() * cfg.foodRestorationMultiplier.get().floatValue();
+            stats.setFood(Math.min(stats.getMaxFood(), stats.getFood() + restoration));
+            changed = true;
+        }
+
+        boolean isDrink = stack.is(Items.POTION)
+                || stack.is(Items.MILK_BUCKET)
+                || stack.is(Items.MUSHROOM_STEW)
+                || stack.is(Items.BEETROOT_SOUP)
+                || stack.is(Items.RABBIT_STEW)
+                || stack.is(Items.SUSPICIOUS_STEW);
+        if (isDrink) {
+            float waterAmount = cfg.waterPerDrink.get().floatValue();
+            stats.setWater(Math.min(stats.getMaxWater(), stats.getWater() + waterAmount));
+            changed = true;
+        }
+
+        if (changed) {
+            sendStatsToClient(serverPlayer, stats);
+        }
+    }
+
+    @SubscribeEvent
+    public static void onPlayerDamageZombie(LivingDamageEvent.Pre event) {
+        if (!(event.getEntity() instanceof BaseSevenDaysZombie)) return;
+        if (!(event.getSource().getEntity() instanceof Player)) return;
+
+        float multiplier = SurvivalConfig.INSTANCE.playerDamageMultiplier.get().floatValue();
+        if (multiplier != 1.0f) {
+            event.setNewDamage(event.getNewDamage() * multiplier);
+        }
     }
 
     @SubscribeEvent

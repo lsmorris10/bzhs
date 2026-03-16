@@ -3,9 +3,11 @@ package com.sevendaystominecraft.perk;
 import com.sevendaystominecraft.SevenDaysToMinecraft;
 import com.sevendaystominecraft.capability.ModAttachments;
 import com.sevendaystominecraft.capability.SevenDaysPlayerStats;
+import com.sevendaystominecraft.config.SurvivalConfig;
 import com.sevendaystominecraft.entity.zombie.BaseSevenDaysZombie;
 
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.entity.monster.Monster;
 import net.minecraft.world.entity.player.Player;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
@@ -47,15 +49,21 @@ public class LevelManager {
     @SubscribeEvent
     public static void onLivingDeath(LivingDeathEvent event) {
         if (event.getEntity().level().isClientSide()) return;
-        if (!(event.getEntity() instanceof BaseSevenDaysZombie zombie)) return;
 
         var source = event.getSource();
-        if (source.getEntity() instanceof ServerPlayer player) {
+        if (!(source.getEntity() instanceof ServerPlayer player)) return;
+
+        if (event.getEntity() instanceof BaseSevenDaysZombie zombie) {
             int xp = zombie.getVariant().getXpReward();
             if (zombie.getModifier() != null) {
                 xp += zombie.getModifier().getXpReward();
             }
             awardXp(player, xp);
+        } else if (event.getEntity() instanceof Monster) {
+            int xp = SurvivalConfig.INSTANCE.vanillaMobXP.get();
+            if (xp > 0) {
+                awardXp(player, xp);
+            }
         }
     }
 
