@@ -2,10 +2,13 @@ package com.sevendaystominecraft.capability;
 
 import com.sevendaystominecraft.SevenDaysConstants;
 import com.sevendaystominecraft.SevenDaysToMinecraft;
+import com.sevendaystominecraft.block.ModBlocks;
 import com.sevendaystominecraft.config.SurvivalConfig;
 import com.sevendaystominecraft.network.SyncPlayerStatsPayload;
 import com.sevendaystominecraft.perk.Attribute;
 
+import net.minecraft.core.BlockPos;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
@@ -13,6 +16,10 @@ import net.minecraft.world.entity.ai.attributes.AttributeInstance;
 import net.minecraft.world.entity.ai.attributes.AttributeModifier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.level.biome.Biome;
+import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.CampfireBlock;
+import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.resources.ResourceLocation;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
@@ -70,7 +77,14 @@ public class PlayerStatsHandler {
             foodDrainPerTick *= cfg.foodDrainActivityMultiplier.get().floatValue();
         }
 
-        float ambientTemp = estimateAmbientTemperature(player);
+        boolean nearHeatSource = false;
+        if (player.tickCount % 20 == 0) {
+            nearHeatSource = hasNearbyHeatSource(player);
+            player.getPersistentData().putBoolean("sevendtm_near_heat", nearHeatSource);
+        } else {
+            nearHeatSource = player.getPersistentData().getBoolean("sevendtm_near_heat");
+        }
+        float ambientTemp = estimateAmbientTemperature(player, nearHeatSource);
         if (ambientTemp > 85.0f) {
             waterDrainPerTick *= cfg.waterDrainDesertMultiplier.get().floatValue();
         }
@@ -165,6 +179,39 @@ public class PlayerStatsHandler {
             stats.setCoreTemperature(Math.max(effectiveAmbient, currentTemp - adjustRate));
         }
 
+        float updatedTemp = stats.getCoreTemperature();
+
+        if (updatedTemp < cfg.hypothermiaThreshold.get().floatValue()) {
+            stats.setColdExposureTicks(stats.getColdExposureTicks() + 1);
+            if (stats.getColdExposureTicks() >= cfg.temperatureExposureTicks.get()
+                    && !stats.hasDebuff(SevenDaysPlayerStats.DEBUFF_HYPOTHERMIA)) {
+                stats.addDebuff(SevenDaysPlayerStats.DEBUFF_HYPOTHERMIA, Integer.MAX_VALUE);
+            }
+        } else {
+            stats.setColdExposureTicks(0);
+        }
+
+        if (updatedTemp > cfg.hyperthermiaThreshold.get().floatValue()) {
+            stats.setHeatExposureTicks(stats.getHeatExposureTicks() + 1);
+            if (stats.getHeatExposureTicks() >= cfg.temperatureExposureTicks.get()
+                    && !stats.hasDebuff(SevenDaysPlayerStats.DEBUFF_HYPERTHERMIA)) {
+                stats.addDebuff(SevenDaysPlayerStats.DEBUFF_HYPERTHERMIA, Integer.MAX_VALUE);
+            }
+        } else {
+            stats.setHeatExposureTicks(0);
+        }
+
+        if (stats.hasDebuff(SevenDaysPlayerStats.DEBUFF_HYPOTHERMIA)
+                && updatedTemp > cfg.hypothermiaClearThreshold.get().floatValue()) {
+            stats.removeDebuff(SevenDaysPlayerStats.DEBUFF_HYPOTHERMIA);
+            stats.setColdExposureTicks(0);
+        }
+        if (stats.hasDebuff(SevenDaysPlayerStats.DEBUFF_HYPERTHERMIA)
+                && updatedTemp < cfg.hyperthermiaClearThreshold.get().floatValue()) {
+            stats.removeDebuff(SevenDaysPlayerStats.DEBUFF_HYPERTHERMIA);
+            stats.setHeatExposureTicks(0);
+        }
+
         // ── 6. Tick Debuffs ─────────────────────────────────────────────
         stats.tickDebuffs();
         applyDebuffEffects(player, stats);
@@ -208,6 +255,8 @@ public class PlayerStatsHandler {
             stats.removeDebuff(id);
         }
         stats.setBleedingStacks(0);
+        stats.setColdExposureTicks(0);
+        stats.setHeatExposureTicks(0);
 
         var speedAttr = player.getAttribute(Attributes.MOVEMENT_SPEED);
         if (speedAttr != null) {
@@ -472,7 +521,8 @@ public class PlayerStatsHandler {
         return player.getDeltaMovement().horizontalDistanceSqr() > 0.0001;
     }
 
-    private static float estimateAmbientTemperature(Player player) {
+    private static float estimateAmbientTemperature(Player player, boolean nearHeatSource) {
+        SurvivalConfig cfg = SurvivalConfig.INSTANCE;
         float biomeTemp = player.level().getBiome(player.blockPosition()).value().getBaseTemperature();
 
         float fahrenheit = 10.0f + (biomeTemp * 55.0f);
@@ -487,6 +537,64 @@ public class PlayerStatsHandler {
             fahrenheit -= (float) ((altitude - 64) / 10.0);
         }
 
+        if (player.level() instanceof ServerLevel serverLevel) {
+            BlockPos pos = player.blockPosition();
+            if (serverLevel.isRaining() && serverLevel.canSeeSky(pos)) {
+                Biome biome = serverLevel.getBiome(pos).value();
+                Biome.Precipitation precip = biome.getPrecipitationAt(pos, serverLevel.getSeaLevel());
+                if (precip == Biome.Precipitation.SNOW) {
+                    fahrenheit += cfg.snowTempModifier.get().floatValue();
+                } else if (precip == Biome.Precipitation.RAIN) {
+                    fahrenheit += cfg.rainTempModifier.get().floatValue();
+                }
+            }
+        }
+
+        if (player.isInWater()) {
+            fahrenheit += cfg.waterTempModifier.get().floatValue();
+        }
+
+        float undergroundTarget = cfg.undergroundNormTemp.get().floatValue();
+        if (player.getY() < 40) {
+            fahrenheit = fahrenheit + (undergroundTarget - fahrenheit) * 0.5f;
+        }
+
+        if (nearHeatSource) {
+            fahrenheit += cfg.fireTempBonus.get().floatValue();
+        }
+
         return fahrenheit;
+    }
+
+    private static boolean hasNearbyHeatSource(Player player) {
+        BlockPos center = player.blockPosition();
+        int radius = 5;
+        for (int x = -radius; x <= radius; x++) {
+            for (int y = -radius; y <= radius; y++) {
+                for (int z = -radius; z <= radius; z++) {
+                    BlockPos checkPos = center.offset(x, y, z);
+                    BlockState state = player.level().getBlockState(checkPos);
+                    if (state.is(Blocks.FIRE) || state.is(Blocks.SOUL_FIRE)) {
+                        return true;
+                    }
+                    if (state.getBlock() instanceof CampfireBlock && state.hasProperty(CampfireBlock.LIT) && state.getValue(CampfireBlock.LIT)) {
+                        return true;
+                    }
+                    if (state.is(Blocks.FURNACE) || state.is(Blocks.BLAST_FURNACE) || state.is(Blocks.SMOKER)) {
+                        if (state.hasProperty(net.minecraft.world.level.block.AbstractFurnaceBlock.LIT)
+                                && state.getValue(net.minecraft.world.level.block.AbstractFurnaceBlock.LIT)) {
+                            return true;
+                        }
+                    }
+                    if (state.is(Blocks.LAVA)) {
+                        return true;
+                    }
+                    if (state.is(ModBlocks.FORGE_BLOCK.get())) {
+                        return true;
+                    }
+                }
+            }
+        }
+        return false;
     }
 }

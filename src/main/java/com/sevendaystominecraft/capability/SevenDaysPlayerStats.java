@@ -31,6 +31,9 @@ public class SevenDaysPlayerStats implements ISevenDaysPlayerStats, INBTSerializ
 
     private float coreTemperature = DEFAULT_CORE_TEMP;
 
+    private int coldExposureTicks = 0;
+    private int heatExposureTicks = 0;
+
     private final Map<String, Integer> debuffs = new HashMap<>();
 
     /** Bleeding stacks: 0–3. Each stack increases bleed damage. */
@@ -79,6 +82,11 @@ public class SevenDaysPlayerStats implements ISevenDaysPlayerStats, INBTSerializ
 
     @Override public float getCoreTemperature() { return coreTemperature; }
     @Override public void setCoreTemperature(float value) { this.coreTemperature = value; }
+
+    @Override public int getColdExposureTicks() { return coldExposureTicks; }
+    @Override public void setColdExposureTicks(int ticks) { this.coldExposureTicks = Math.max(0, ticks); }
+    @Override public int getHeatExposureTicks() { return heatExposureTicks; }
+    @Override public void setHeatExposureTicks(int ticks) { this.heatExposureTicks = Math.max(0, ticks); }
 
     @Override
     public Map<String, Integer> getDebuffs() {
@@ -202,6 +210,8 @@ public class SevenDaysPlayerStats implements ISevenDaysPlayerStats, INBTSerializ
         this.maxStamina = other.getMaxStamina();
         this.staminaExhausted = other.isStaminaExhausted();
         this.coreTemperature = other.getCoreTemperature();
+        this.coldExposureTicks = other.getColdExposureTicks();
+        this.heatExposureTicks = other.getHeatExposureTicks();
         this.bleedingStacks = other.getBleedingStacks();
         this.debuffs.clear();
         this.debuffs.putAll(other.getDebuffs());
@@ -236,6 +246,8 @@ public class SevenDaysPlayerStats implements ISevenDaysPlayerStats, INBTSerializ
         tag.putFloat("MaxStamina", maxStamina);
         tag.putBoolean("StaminaExhausted", staminaExhausted);
         tag.putFloat("CoreTemp", coreTemperature);
+        tag.putInt("ColdExposureTicks", coldExposureTicks);
+        tag.putInt("HeatExposureTicks", heatExposureTicks);
         tag.putInt("BleedingStacks", bleedingStacks);
 
         if (!debuffs.isEmpty()) {
@@ -280,6 +292,8 @@ public class SevenDaysPlayerStats implements ISevenDaysPlayerStats, INBTSerializ
         maxStamina = tag.contains("MaxStamina") ? tag.getFloat("MaxStamina") : DEFAULT_MAX_STAMINA;
         staminaExhausted = tag.contains("StaminaExhausted") && tag.getBoolean("StaminaExhausted");
         coreTemperature = tag.contains("CoreTemp") ? tag.getFloat("CoreTemp") : DEFAULT_CORE_TEMP;
+        coldExposureTicks = tag.contains("ColdExposureTicks") ? tag.getInt("ColdExposureTicks") : 0;
+        heatExposureTicks = tag.contains("HeatExposureTicks") ? tag.getInt("HeatExposureTicks") : 0;
         bleedingStacks = tag.contains("BleedingStacks") ? tag.getInt("BleedingStacks") : 0;
 
         debuffs.clear();

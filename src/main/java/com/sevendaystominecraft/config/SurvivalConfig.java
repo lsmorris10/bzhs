@@ -105,6 +105,17 @@ public class SurvivalConfig {
     /** Rate of core temp adjustment toward ambient (°F/sec, spec §1.1: 0.3) */
     public final ModConfigSpec.DoubleValue tempAdjustRate;
 
+    public final ModConfigSpec.DoubleValue hypothermiaThreshold;
+    public final ModConfigSpec.DoubleValue hyperthermiaThreshold;
+    public final ModConfigSpec.DoubleValue hypothermiaClearThreshold;
+    public final ModConfigSpec.DoubleValue hyperthermiaClearThreshold;
+    public final ModConfigSpec.IntValue temperatureExposureTicks;
+    public final ModConfigSpec.DoubleValue rainTempModifier;
+    public final ModConfigSpec.DoubleValue snowTempModifier;
+    public final ModConfigSpec.DoubleValue waterTempModifier;
+    public final ModConfigSpec.DoubleValue fireTempBonus;
+    public final ModConfigSpec.DoubleValue undergroundNormTemp;
+
     // ── Sync ────────────────────────────────────────────────────────────
 
     /** How often to sync stats to client (in ticks; 10 = every 0.5s) */
@@ -207,6 +218,36 @@ public class SurvivalConfig {
         tempAdjustRate = builder
                 .comment("Core temp adjustment rate toward ambient (°F/sec)")
                 .defineInRange("tempAdjustRate", 0.3, 0.01, 10.0);
+        hypothermiaThreshold = builder
+                .comment("Core temp below which cold exposure timer starts (°F)")
+                .defineInRange("hypothermiaThreshold", 32.0, -50.0, 100.0);
+        hyperthermiaThreshold = builder
+                .comment("Core temp above which heat exposure timer starts (°F)")
+                .defineInRange("hyperthermiaThreshold", 110.0, 80.0, 200.0);
+        hypothermiaClearThreshold = builder
+                .comment("Core temp above which hypothermia debuff clears (°F)")
+                .defineInRange("hypothermiaClearThreshold", 50.0, -50.0, 120.0);
+        hyperthermiaClearThreshold = builder
+                .comment("Core temp below which hyperthermia debuff clears (°F)")
+                .defineInRange("hyperthermiaClearThreshold", 100.0, 60.0, 200.0);
+        temperatureExposureTicks = builder
+                .comment("Ticks of exposure before temperature debuff triggers (2400 = 120 sec)")
+                .defineInRange("temperatureExposureTicks", 2400, 20, 72000);
+        rainTempModifier = builder
+                .comment("Temperature modifier when raining at player position (°F)")
+                .defineInRange("rainTempModifier", -15.0, -50.0, 0.0);
+        snowTempModifier = builder
+                .comment("Temperature modifier when snowing at player position (°F)")
+                .defineInRange("snowTempModifier", -20.0, -50.0, 0.0);
+        waterTempModifier = builder
+                .comment("Temperature modifier when player is in water (°F)")
+                .defineInRange("waterTempModifier", -25.0, -50.0, 0.0);
+        fireTempBonus = builder
+                .comment("Temperature bonus when near fire/campfire/furnace within 5 blocks (°F)")
+                .defineInRange("fireTempBonus", 15.0, 0.0, 50.0);
+        undergroundNormTemp = builder
+                .comment("Temperature that underground areas (below Y=40) trend toward (°F)")
+                .defineInRange("undergroundNormTemp", 55.0, 0.0, 120.0);
         builder.pop();
 
         // Sync

@@ -66,6 +66,12 @@ public interface ISevenDaysPlayerStats {
     int getPerkRank(String perkId);
     void setPerkRank(String perkId, int rank);
 
+    // ── Temperature Exposure Timers ─────────────────────────────────────
+    int getColdExposureTicks();
+    void setColdExposureTicks(int ticks);
+    int getHeatExposureTicks();
+    void setHeatExposureTicks(int ticks);
+
     // ── Unkillable Mastery Cooldown ─────────────────────────────────────
     long getUnkillableCooldownEnd();
     void setUnkillableCooldownEnd(long worldTimeTick);
