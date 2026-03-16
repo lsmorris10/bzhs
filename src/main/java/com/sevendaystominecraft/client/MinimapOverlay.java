@@ -85,7 +85,7 @@ public class MinimapOverlay {
                 double worldOffX = sx * SAMPLE_STEP;
                 double worldOffZ = sz * SAMPLE_STEP;
 
-                double screenDx = worldOffX * cosYaw + worldOffZ * sinYaw;
+                double screenDx = -(worldOffX * cosYaw + worldOffZ * sinYaw);
                 double screenDy = worldOffX * sinYaw - worldOffZ * cosYaw;
 
                 int screenPxX = mapX + halfMap + (int) screenDx;
@@ -126,7 +126,7 @@ public class MinimapOverlay {
             double dx = entry.x() - localPlayer.getX();
             double dz = entry.z() - localPlayer.getZ();
 
-            double screenDx = dx * cosYaw + dz * sinYaw;
+            double screenDx = -(dx * cosYaw + dz * sinYaw);
             double screenDy = dx * sinYaw - dz * cosYaw;
 
             int dotScreenX = centerX + (int) screenDx;

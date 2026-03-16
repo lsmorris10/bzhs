@@ -61,7 +61,7 @@ public class SurvivalConfig {
 
     // ── Base Health ──────────────────────────────────────────────────────
 
-    /** Player base max health in HP (100 = BZHS default, 50 hearts; vanilla = 20) */
+    /** Player base max health in HP (vanilla = 20, 10 hearts) */
     public final ModConfigSpec.DoubleValue baseMaxHealth;
 
     // ── Health Regen ────────────────────────────────────────────────────
@@ -181,8 +181,8 @@ public class SurvivalConfig {
         // Health
         builder.push("health");
         baseMaxHealth = builder
-                .comment("Player base max health in HP (100 = BZHS default, 50 hearts; vanilla = 20)")
-                .defineInRange("baseMaxHealth", 100.0, 20.0, 200.0);
+                .comment("Player base max health in HP (vanilla = 20, 10 hearts)")
+                .defineInRange("baseMaxHealth", 20.0, 20.0, 200.0);
         healthRegenRate = builder
                 .comment("Health regen per second when above food/water thresholds")
                 .defineInRange("healthRegenRate", 0.1, 0.0, 10.0);

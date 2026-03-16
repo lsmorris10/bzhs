@@ -15,7 +15,6 @@ import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.client.event.RegisterGuiLayersEvent;
-import net.neoforged.neoforge.client.event.RenderGuiLayerEvent;
 import net.neoforged.neoforge.client.gui.VanillaGuiLayers;
 
 @EventBusSubscriber(modid = SevenDaysToMinecraft.MOD_ID, bus = EventBusSubscriber.Bus.MOD, value = Dist.CLIENT)
@@ -37,8 +36,6 @@ public class StatsHudOverlay {
     private static final int WATER_LOW_COLOR = 0xFF0055AA;
     private static final int STAMINA_COLOR = 0xFF33CC33;
     private static final int STAMINA_LOW_COLOR = 0xFFCC3333;
-    private static final int HP_COLOR = 0xFFCC0000;
-    private static final int HP_LOW_COLOR = 0xFF880000;
     private static final int XP_COLOR = 0xFF9933FF;
     private static final int BORDER_COLOR = 0xFF333333;
     private static final int TEXT_COLOR = 0xFFFFFFFF;
@@ -84,15 +81,6 @@ public class StatsHudOverlay {
         float staminaPct = (stats.getMaxStamina() > 0) ? stats.getStamina() / stats.getMaxStamina() : 0f;
         drawStatBar(graphics, x, y, "Stamina", staminaPct, stats.getStamina(), stats.getMaxStamina(),
                 staminaPct < 0.3f ? STAMINA_LOW_COLOR : STAMINA_COLOR);
-        y += BAR_HEIGHT + BAR_SPACING;
-
-        float hp = player.getHealth();
-        float maxHp = player.getMaxHealth();
-        float hpPct = (maxHp > 0) ? hp / maxHp : 0f;
-        float displayHp = hp * 5.0f;
-        float displayMaxHp = maxHp * 5.0f;
-        drawStatBar(graphics, x, y, "HP", hpPct, displayHp, displayMaxHp,
-                hpPct < 0.3f ? HP_LOW_COLOR : HP_COLOR);
         y += BAR_HEIGHT + BAR_SPACING;
 
         int xpNeeded = LevelManager.xpToNextLevel(stats.getLevel());
@@ -157,15 +145,4 @@ public class StatsHudOverlay {
         graphics.drawString(mc.font, xpText, barX + BAR_WIDTH + 4, y, TEXT_COLOR, true);
     }
 
-    @EventBusSubscriber(modid = SevenDaysToMinecraft.MOD_ID, bus = EventBusSubscriber.Bus.GAME, value = Dist.CLIENT)
-    public static class VanillaHealthHider {
-
-        @SubscribeEvent
-        public static void onRenderGuiLayerPre(RenderGuiLayerEvent.Pre event) {
-            ResourceLocation layerName = event.getName();
-            if (layerName.equals(VanillaGuiLayers.PLAYER_HEALTH)) {
-                event.setCanceled(true);
-            }
-        }
-    }
 }
