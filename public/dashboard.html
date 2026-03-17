@@ -17,17 +17,6 @@
       line-height: 1.6;
     }
     .container { max-width: 1100px; margin: 0 auto; padding: 32px 24px; }
-    .back-link {
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      color: #64748b;
-      text-decoration: none;
-      font-size: 13px;
-      margin-bottom: 20px;
-      transition: color 0.2s;
-    }
-    .back-link:hover { color: #94a3b8; }
     .header { margin-bottom: 32px; }
     .header-row { display: flex; align-items: center; gap: 12px; margin-bottom: 8px; }
     .header-icon {
@@ -256,12 +245,60 @@
       .tabs { flex-direction: column; }
       .chart-row { gap: 8px; }
     }
+    .site-nav {
+      background: rgba(10, 10, 15, 0.95);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.07);
+      padding: 0 1.5rem;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      backdrop-filter: blur(8px);
+    }
+    .site-nav-inner {
+      max-width: 1100px;
+      margin: 0 auto;
+      display: flex;
+      align-items: center;
+      gap: 1.5rem;
+      height: 48px;
+    }
+    .site-nav .nav-brand {
+      font-weight: 700;
+      font-size: 0.9rem;
+      color: #fff;
+      text-decoration: none;
+      letter-spacing: -0.2px;
+      margin-right: auto;
+    }
+    .site-nav .nav-brand:hover { color: #fff; }
+    .site-nav a.nav-link {
+      color: #64748b;
+      text-decoration: none;
+      font-size: 0.85rem;
+      font-weight: 500;
+      transition: color 0.2s;
+      white-space: nowrap;
+    }
+    .site-nav a.nav-link:hover { color: #e2e8f0; }
+    .site-nav a.nav-link.active { color: #e2e8f0; }
+    @media (max-width: 480px) {
+      .site-nav-inner { gap: 1rem; }
+      .site-nav .nav-brand { font-size: 0.8rem; }
+      .site-nav a.nav-link { font-size: 0.78rem; }
+    }
   </style>
 </head>
 <body>
-  <div class="container">
-    <a href="index.html" class="back-link">&larr; Back to landing page</a>
+  <nav class="site-nav">
+    <div class="site-nav-inner">
+      <a href="index.html" class="nav-brand">BZHS</a>
+      <a href="index.html" class="nav-link">Home</a>
+      <a href="dashboard.html" class="nav-link active">Dashboard</a>
+      <a href="funding.html" class="nav-link">Dev Investment</a>
+    </div>
+  </nav>
 
+  <div class="container">
     <div class="header">
       <div class="header-row">
         <div class="header-icon">&#x2694;</div>

@@ -16,13 +16,48 @@
       font-family: 'Inter', -apple-system, sans-serif;
       line-height: 1.6;
     }
-    .container { max-width: 900px; margin: 0 auto; padding: 48px 24px; }
-    .back-link {
-      display: inline-flex; align-items: center; gap: 6px;
-      color: #64748b; text-decoration: none; font-size: 13px; margin-bottom: 24px;
-      transition: color 0.2s;
+    .site-nav {
+      background: rgba(10, 10, 15, 0.95);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.07);
+      padding: 0 1.5rem;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      backdrop-filter: blur(8px);
     }
-    .back-link:hover { color: #94a3b8; }
+    .site-nav-inner {
+      max-width: 900px;
+      margin: 0 auto;
+      display: flex;
+      align-items: center;
+      gap: 1.5rem;
+      height: 48px;
+    }
+    .site-nav .nav-brand {
+      font-weight: 700;
+      font-size: 0.9rem;
+      color: #fff;
+      text-decoration: none;
+      letter-spacing: -0.2px;
+      margin-right: auto;
+    }
+    .site-nav .nav-brand:hover { color: #fff; }
+    .site-nav a.nav-link {
+      color: #64748b;
+      text-decoration: none;
+      font-size: 0.85rem;
+      font-weight: 500;
+      transition: color 0.2s;
+      white-space: nowrap;
+    }
+    .site-nav a.nav-link:hover { color: #e2e8f0; }
+    .site-nav a.nav-link.active { color: #e2e8f0; }
+    @media (max-width: 480px) {
+      .site-nav-inner { gap: 1rem; }
+      .site-nav .nav-brand { font-size: 0.8rem; }
+      .site-nav a.nav-link { font-size: 0.78rem; }
+    }
+    .container { max-width: 900px; margin: 0 auto; padding: 48px 24px; }
 
     .page-header { text-align: center; margin-bottom: 48px; }
     .page-header h1 {
@@ -138,9 +173,16 @@
   </style>
 </head>
 <body>
-  <div class="container">
-    <a href="index.html" class="back-link">&larr; Back to landing page</a>
+  <nav class="site-nav">
+    <div class="site-nav-inner">
+      <a href="index.html" class="nav-brand">BZHS</a>
+      <a href="index.html" class="nav-link">Home</a>
+      <a href="dashboard.html" class="nav-link">Dashboard</a>
+      <a href="funding.html" class="nav-link active">Dev Investment</a>
+    </div>
+  </nav>
 
+  <div class="container">
     <div class="page-header">
       <h1>Development Investment</h1>
       <p>Full transparency on the effort and compute behind Brutal Zombie Horde Survival. Every stat pulled from real development history.</p>
@@ -148,15 +190,15 @@
 
     <div class="hero-stat-row">
       <div class="hero-stat">
-        <div class="val" style="color:#ef4444">98</div>
-        <div class="lbl">Tasks Completed</div>
+        <div class="val" style="color:#ef4444">97</div>
+        <div class="lbl">Tasks Merged</div>
       </div>
       <div class="hero-stat">
         <div class="val" style="color:#f97316">356</div>
         <div class="lbl">Commits</div>
       </div>
       <div class="hero-stat">
-        <div class="val" style="color:#eab308">7</div>
+        <div class="val" style="color:#eab308">6</div>
         <div class="lbl">Dev Days</div>
       </div>
       <div class="hero-stat">
@@ -164,8 +206,8 @@
         <div class="lbl">Lines of Java</div>
       </div>
       <div class="hero-stat">
-        <div class="val" style="color:#3b82f6">88</div>
-        <div class="lbl">Features Shipped</div>
+        <div class="val" style="color:#3b82f6">11</div>
+        <div class="lbl">Categories</div>
       </div>
     </div>
 
@@ -203,7 +245,7 @@
 
     <div class="section-card">
       <h2><span class="icon">&#x1F4C5;</span> Development Timeline</h2>
-      <p>Tasks completed per day across the 7-day development sprint:</p>
+      <p>Tasks completed per day across the development sprint:</p>
       <div class="timeline-bar">
         <div class="timeline-col">
           <div class="day-count">9</div>
@@ -259,14 +301,16 @@
 
     <div class="section-card" style="border-color: rgba(239,68,68,0.15); background: rgba(239,68,68,0.03);">
       <h2><span class="icon">&#x2764;</span> Support the Project</h2>
-      <p>BZHS is a passion project built by a solo developer with AI tools. If you enjoy the mod or want to see it grow, consider supporting development. Every contribution helps fund continued compute, new features, and faster updates.</p>
-      <p style="color:#64748b; font-size:12px; margin-top:8px;">Donation and support links coming soon.</p>
+      <p>BZHS is a passion project built by a solo developer with AI tools. If you enjoy the mod or want to see it grow, the best way to support development right now is to star the repository on GitHub — it helps visibility, signals interest, and keeps me motivated to ship more features.</p>
+      <p style="margin-top:14px;">
+        <a href="https://github.com/lsmorris10/bzhs" target="_blank" rel="noopener" style="display:inline-flex; align-items:center; gap:8px; background:rgba(255,255,255,0.06); border:1px solid rgba(255,255,255,0.12); color:#e2e8f0; text-decoration:none; padding:10px 18px; border-radius:8px; font-size:14px; font-weight:600; transition:background 0.2s;" onmouseover="this.style.background='rgba(255,255,255,0.1)'" onmouseout="this.style.background='rgba(255,255,255,0.06)'">&#x2B50; Star on GitHub</a>
+      </p>
     </div>
 
     <div class="footer-bar">
       <span>
         <a href="index.html">Home</a> &middot;
-        <a href="dashboard.html">Dev Dashboard</a> &middot;
+        <a href="dashboard.html">Dashboard</a> &middot;
         <a href="https://github.com/lsmorris10/bzhs">GitHub</a> &middot;
         Brutal Zombie Horde Survival &middot; 2026
       </span>
