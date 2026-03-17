@@ -45,6 +45,14 @@ public class ModCreativeTabs {
                         output.accept(ModItems.ACID.get());
                         output.accept(ModItems.POLYMER.get());
                         output.accept(ModItems.DUKES_CASINO_TOKEN.get());
+                        output.accept(ModItems.CONCRETE_MIX.get());
+                        output.accept(ModItems.ANTIBIOTICS.get());
+                        output.accept(ModItems.GUNPOWDER.get());
+                        output.accept(ModItems.GAS_CAN.get());
+                        output.accept(ModItems.FORGED_LEAD.get());
+                        output.accept(ModItems.NAIL.get());
+                        output.accept(ModItems.SPRING.get());
+                        output.accept(ModItems.CEMENT.get());
                     })
                     .build());
 

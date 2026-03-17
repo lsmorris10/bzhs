@@ -1,7 +1,6 @@
 package com.sevendaystominecraft.block.workstation;
 
 import com.sevendaystominecraft.block.ModBlockEntities;
-import com.sevendaystominecraft.item.ModItems;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.HolderLookup;
@@ -9,11 +8,15 @@ import net.minecraft.core.NonNullList;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.ContainerHelper;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
+
+import java.util.HashMap;
+import java.util.Map;
 
 public class WorkstationBlockEntity extends BlockEntity {
 
@@ -87,155 +90,135 @@ public class WorkstationBlockEntity extends BlockEntity {
         if (level.isClientSide) return;
 
         if (workstationType.usesFuel()) {
-            if (burnTime > 0) {
-                burnTime--;
-            }
+            tickFuelStation();
+        } else {
+            tickInstantStation();
+        }
+    }
 
-            if (burnTime == 0 && hasInputItems()) {
-                int fuelSlot = getFuelSlotStart();
-                if (fuelSlot < items.size()) {
-                    ItemStack fuel = items.get(fuelSlot);
-                    if (!fuel.isEmpty()) {
-                        burnTimeTotal = getFuelBurnTime(fuel);
-                        burnTime = burnTimeTotal;
-                        fuel.shrink(1);
-                        setChanged();
-                    }
+    private void tickFuelStation() {
+        if (burnTime > 0) {
+            burnTime--;
+        }
+
+        WorkstationRecipe matchedRecipe = findMatchingRecipe();
+
+        if (burnTime == 0 && matchedRecipe != null) {
+            int fuelSlot = getFuelSlotStart();
+            if (fuelSlot < items.size()) {
+                ItemStack fuel = items.get(fuelSlot);
+                if (!fuel.isEmpty()) {
+                    burnTimeTotal = getFuelBurnTime(fuel);
+                    burnTime = burnTimeTotal;
+                    fuel.shrink(1);
+                    setChanged();
                 }
             }
+        }
 
-            if (burnTime > 0 && hasInputItems()) {
+        if (burnTime > 0 && matchedRecipe != null) {
+            if (craftTimeTotal != matchedRecipe.processingTicks()) {
+                craftTimeTotal = matchedRecipe.processingTicks();
+            }
+            if (craftTimeTotal <= 0) craftTimeTotal = 200;
+            craftProgress++;
+            if (craftProgress >= craftTimeTotal) {
+                processRecipe(matchedRecipe);
+                craftProgress = 0;
+            }
+            setChanged();
+        } else if (matchedRecipe == null) {
+            if (craftProgress > 0) {
+                craftProgress = 0;
+                setChanged();
+            }
+        }
+    }
+
+    private void tickInstantStation() {
+        WorkstationRecipe matchedRecipe = findMatchingRecipe();
+        if (matchedRecipe != null) {
+            if (matchedRecipe.processingTicks() <= 0) {
+                processRecipe(matchedRecipe);
+                craftProgress = 0;
+                craftTimeTotal = 0;
+                setChanged();
+            } else {
+                if (craftTimeTotal != matchedRecipe.processingTicks()) {
+                    craftTimeTotal = matchedRecipe.processingTicks();
+                }
                 craftProgress++;
-                if (craftTimeTotal <= 0) craftTimeTotal = 200;
                 if (craftProgress >= craftTimeTotal) {
-                    processCraft();
+                    processRecipe(matchedRecipe);
                     craftProgress = 0;
                 }
                 setChanged();
-            } else if (!hasInputItems()) {
+            }
+        } else {
+            if (craftProgress > 0) {
                 craftProgress = 0;
+                setChanged();
             }
         }
     }
 
-    private boolean hasInputItems() {
+    private WorkstationRecipe findMatchingRecipe() {
+        Map<Item, Integer> inputCounts = countInputItems();
+        if (inputCounts.isEmpty()) return null;
+
+        WorkstationRecipe recipe = WorkstationRecipes.findMatch(workstationType, item -> inputCounts.getOrDefault(item, 0));
+        if (recipe == null) return null;
+
+        if (!canFitOutput(recipe.output())) return null;
+
+        return recipe;
+    }
+
+    private Map<Item, Integer> countInputItems() {
+        Map<Item, Integer> counts = new HashMap<>();
         for (int i = 0; i < workstationType.getInputSlots() && i < items.size(); i++) {
-            if (!items.get(i).isEmpty()) return true;
+            ItemStack stack = items.get(i);
+            if (!stack.isEmpty()) {
+                counts.merge(stack.getItem(), stack.getCount(), Integer::sum);
+            }
         }
-        return false;
+        return counts;
     }
 
-    private int getFuelSlotStart() {
-        return workstationType.getInputSlots() + workstationType.getOutputSlots();
-    }
-
-    private int getFuelBurnTime(ItemStack fuel) {
-        if (fuel.is(Items.COAL) || fuel.is(Items.CHARCOAL)) return 1600;
-        if (fuel.is(Items.OAK_LOG) || fuel.is(Items.BIRCH_LOG) || fuel.is(Items.SPRUCE_LOG)
-            || fuel.is(Items.DARK_OAK_LOG) || fuel.is(Items.JUNGLE_LOG) || fuel.is(Items.ACACIA_LOG)) return 300;
-        if (fuel.is(Items.OAK_PLANKS) || fuel.is(Items.BIRCH_PLANKS) || fuel.is(Items.SPRUCE_PLANKS)) return 200;
-        if (fuel.is(Items.STICK)) return 100;
-        return 200;
-    }
-
-    private void processCraft() {
+    private boolean canFitOutput(ItemStack output) {
         int outputStart = workstationType.getInputSlots();
         int outputEnd = outputStart + workstationType.getOutputSlots();
-
-        if (workstationType == WorkstationType.FORGE) {
-            processForgeRecipes(outputStart, outputEnd);
-        } else if (workstationType == WorkstationType.CAMPFIRE || workstationType == WorkstationType.GRILL) {
-            processCookingRecipes(outputStart, outputEnd);
-        } else {
-            processGenericSmelt(outputStart, outputEnd);
-        }
-    }
-
-    private void processForgeRecipes(int outputStart, int outputEnd) {
-        for (int i = 0; i < workstationType.getInputSlots() && i < items.size(); i++) {
-            ItemStack input = items.get(i);
-            if (input.isEmpty()) continue;
-
-            ItemStack result = ItemStack.EMPTY;
-            if (input.is(ModItems.IRON_SCRAP.get())) {
-                result = new ItemStack(ModItems.IRON_INGOT.get(), 1);
-            } else if (input.is(ModItems.SAND.get()) && hasMaterialInInput(ModItems.CLAY.get())) {
-                result = new ItemStack(ModItems.GLASS_JAR.get(), 3);
-                consumeMaterialFromInput(ModItems.CLAY.get(), 1);
-                input.shrink(2);
-            } else if (input.is(ModItems.IRON_INGOT.get())) {
-                result = new ItemStack(ModItems.FORGED_IRON.get(), 1);
+        for (int i = outputStart; i < outputEnd && i < items.size(); i++) {
+            ItemStack existing = items.get(i);
+            if (existing.isEmpty()) return true;
+            if (ItemStack.isSameItemSameComponents(existing, output)
+                    && existing.getCount() + output.getCount() <= existing.getMaxStackSize()) {
+                return true;
             }
-
-            if (!result.isEmpty()) {
-                if (input.is(ModItems.SAND.get())) {
-                    // already handled above
-                } else {
-                    input.shrink(1);
-                }
-                addToOutput(result, outputStart, outputEnd);
-                break;
-            }
-        }
-    }
-
-    private void processCookingRecipes(int outputStart, int outputEnd) {
-        for (int i = 0; i < workstationType.getInputSlots() && i < items.size(); i++) {
-            ItemStack input = items.get(i);
-            if (input.isEmpty()) continue;
-
-            ItemStack result = ItemStack.EMPTY;
-            if (input.is(Items.BEEF)) result = new ItemStack(Items.COOKED_BEEF);
-            else if (input.is(Items.PORKCHOP)) result = new ItemStack(Items.COOKED_PORKCHOP);
-            else if (input.is(Items.CHICKEN)) result = new ItemStack(Items.COOKED_CHICKEN);
-            else if (input.is(Items.MUTTON)) result = new ItemStack(Items.COOKED_MUTTON);
-            else if (input.is(Items.COD)) result = new ItemStack(Items.COOKED_COD);
-            else if (input.is(Items.SALMON)) result = new ItemStack(Items.COOKED_SALMON);
-            else if (input.is(Items.POTATO)) result = new ItemStack(Items.BAKED_POTATO);
-
-            if (!result.isEmpty()) {
-                input.shrink(1);
-                addToOutput(result, outputStart, outputEnd);
-                break;
-            }
-        }
-    }
-
-    private void processGenericSmelt(int outputStart, int outputEnd) {
-        for (int i = 0; i < workstationType.getInputSlots() && i < items.size(); i++) {
-            ItemStack input = items.get(i);
-            if (input.isEmpty()) continue;
-
-            ItemStack result = ItemStack.EMPTY;
-            if (input.is(ModItems.IRON_SCRAP.get())) {
-                result = new ItemStack(ModItems.IRON_INGOT.get(), 1);
-            }
-
-            if (!result.isEmpty()) {
-                input.shrink(1);
-                addToOutput(result, outputStart, outputEnd);
-                break;
-            }
-        }
-    }
-
-    private boolean hasMaterialInInput(net.minecraft.world.item.Item item) {
-        for (int i = 0; i < workstationType.getInputSlots() && i < items.size(); i++) {
-            if (items.get(i).is(item)) return true;
         }
         return false;
     }
 
-    private void consumeMaterialFromInput(net.minecraft.world.item.Item item, int count) {
-        for (int i = 0; i < workstationType.getInputSlots() && i < items.size(); i++) {
-            if (items.get(i).is(item)) {
-                items.get(i).shrink(count);
-                return;
+    private void processRecipe(WorkstationRecipe recipe) {
+        recipe.consumeInputs((item, count) -> consumeFromInputSlots(item, count));
+        addToOutput(recipe.output().copy());
+    }
+
+    private void consumeFromInputSlots(Item item, int count) {
+        int remaining = count;
+        for (int i = 0; i < workstationType.getInputSlots() && i < items.size() && remaining > 0; i++) {
+            ItemStack stack = items.get(i);
+            if (stack.is(item)) {
+                int take = Math.min(remaining, stack.getCount());
+                stack.shrink(take);
+                remaining -= take;
             }
         }
     }
 
-    private void addToOutput(ItemStack result, int outputStart, int outputEnd) {
+    private void addToOutput(ItemStack result) {
+        int outputStart = workstationType.getInputSlots();
+        int outputEnd = outputStart + workstationType.getOutputSlots();
         for (int i = outputStart; i < outputEnd && i < items.size(); i++) {
             ItemStack existing = items.get(i);
             if (existing.isEmpty()) {
@@ -250,6 +233,25 @@ public class WorkstationBlockEntity extends BlockEntity {
                 return;
             }
         }
+    }
+
+    private int getFuelSlotStart() {
+        return workstationType.getInputSlots() + workstationType.getOutputSlots();
+    }
+
+    private int getFuelBurnTime(ItemStack fuel) {
+        if (fuel.is(Items.COAL) || fuel.is(Items.CHARCOAL)) return 1600;
+        if (fuel.is(Items.COAL_BLOCK)) return 16000;
+        if (fuel.is(Items.LAVA_BUCKET)) return 20000;
+        if (fuel.is(Items.OAK_LOG) || fuel.is(Items.BIRCH_LOG) || fuel.is(Items.SPRUCE_LOG)
+            || fuel.is(Items.DARK_OAK_LOG) || fuel.is(Items.JUNGLE_LOG) || fuel.is(Items.ACACIA_LOG)
+            || fuel.is(Items.MANGROVE_LOG) || fuel.is(Items.CHERRY_LOG)) return 300;
+        if (fuel.is(Items.OAK_PLANKS) || fuel.is(Items.BIRCH_PLANKS) || fuel.is(Items.SPRUCE_PLANKS)
+            || fuel.is(Items.DARK_OAK_PLANKS) || fuel.is(Items.JUNGLE_PLANKS) || fuel.is(Items.ACACIA_PLANKS)) return 200;
+        if (fuel.is(Items.STICK)) return 100;
+        if (fuel.is(Items.DRIED_KELP_BLOCK)) return 4000;
+        if (fuel.is(Items.BLAZE_ROD)) return 2400;
+        return 200;
     }
 
     @Override

@@ -81,6 +81,16 @@ public class WorkstationScreen extends AbstractContainerScreen<WorkstationMenu> 
                     graphics.fill(sx, sy, sx + 18, sy + 18, 0xFFCC4400);
                     graphics.fill(sx + 1, sy + 1, sx + 17, sy + 17, 0xFF373737);
                 }
+
+                int flameX = leftPos + 26 + type.getFuelSlots() * 18 + 4;
+                int flameY = topPos + fuelY;
+                int burnTotal = menu.getData().get(1);
+                int burnCurrent = menu.getData().get(0);
+                graphics.fill(flameX, flameY, flameX + 14, flameY + 14, 0xFF555555);
+                if (burnTotal > 0 && burnCurrent > 0) {
+                    int flameHeight = burnCurrent * 14 / burnTotal;
+                    graphics.fill(flameX, flameY + 14 - flameHeight, flameX + 14, flameY + 14, 0xFFFF6600);
+                }
             }
 
             int inputRows = (int) Math.ceil((double) type.getInputSlots() / 3.0);

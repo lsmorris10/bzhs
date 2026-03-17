@@ -70,4 +70,28 @@ public class ModItems {
 
     public static final Supplier<Item> DUKES_CASINO_TOKEN = ITEMS.register("dukes_casino_token",
             () -> new Item(new Item.Properties().setId(key("dukes_casino_token")).stacksTo(50000)));
+
+    public static final Supplier<Item> CONCRETE_MIX = ITEMS.register("concrete_mix",
+            () -> new Item(new Item.Properties().setId(key("concrete_mix")).stacksTo(64)));
+
+    public static final Supplier<Item> ANTIBIOTICS = ITEMS.register("antibiotics",
+            () -> new Item(new Item.Properties().setId(key("antibiotics")).stacksTo(64)));
+
+    public static final Supplier<Item> GUNPOWDER = ITEMS.register("gunpowder",
+            () -> new Item(new Item.Properties().setId(key("gunpowder")).stacksTo(64)));
+
+    public static final Supplier<Item> GAS_CAN = ITEMS.register("gas_can",
+            () -> new Item(new Item.Properties().setId(key("gas_can")).stacksTo(16)));
+
+    public static final Supplier<Item> FORGED_LEAD = ITEMS.register("forged_lead",
+            () -> new Item(new Item.Properties().setId(key("forged_lead")).stacksTo(64)));
+
+    public static final Supplier<Item> NAIL = ITEMS.register("nail",
+            () -> new Item(new Item.Properties().setId(key("nail")).stacksTo(64)));
+
+    public static final Supplier<Item> SPRING = ITEMS.register("spring",
+            () -> new Item(new Item.Properties().setId(key("spring")).stacksTo(64)));
+
+    public static final Supplier<Item> CEMENT = ITEMS.register("cement",
+            () -> new Item(new Item.Properties().setId(key("cement")).stacksTo(64)));
 }
