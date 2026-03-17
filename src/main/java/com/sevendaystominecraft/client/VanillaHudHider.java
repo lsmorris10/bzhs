@@ -13,7 +13,9 @@ public class VanillaHudHider {
 
     @SubscribeEvent
     public static void onRenderGuiLayerPre(RenderGuiLayerEvent.Pre event) {
-        if (VanillaGuiLayers.FOOD_LEVEL.equals(event.getName())) {
+        if (VanillaGuiLayers.FOOD_LEVEL.equals(event.getName())
+                || VanillaGuiLayers.PLAYER_HEALTH.equals(event.getName())
+                || VanillaGuiLayers.ARMOR_LEVEL.equals(event.getName())) {
             event.setCanceled(true);
         }
     }

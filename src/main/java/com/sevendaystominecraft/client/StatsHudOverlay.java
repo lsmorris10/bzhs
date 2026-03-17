@@ -9,6 +9,7 @@ import com.sevendaystominecraft.perk.LevelManager;
 import net.minecraft.client.DeltaTracker;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.renderer.RenderType;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.player.Player;
 import net.neoforged.neoforge.client.event.RegisterGuiLayersEvent;
@@ -26,10 +27,6 @@ public class StatsHudOverlay {
     private static final int MARGIN_Y = 35;
     private static final int LABEL_WIDTH = 55;
 
-    private static final int FOOD_COLOR = 0xFFFF8C00;
-    private static final int FOOD_LOW_COLOR = 0xFFFF3300;
-    private static final int WATER_COLOR = 0xFF3399FF;
-    private static final int WATER_LOW_COLOR = 0xFF0055AA;
     private static final int STAMINA_COLOR = 0xFF33CC33;
     private static final int STAMINA_LOW_COLOR = 0xFFCC3333;
     private static final int XP_COLOR = 0xFF9933FF;
@@ -41,9 +38,45 @@ public class StatsHudOverlay {
     private static final int TEMP_NORMAL_COLOR = 0xFFAAFFAA;
     private static final int LEVEL_COLOR = 0xFFFFDD00;
 
+    private static final int ICON_SIZE = 9;
+    private static final int ICON_SPACING = 1;
+    private static final int ICONS_PER_ROW = 10;
+    private static final int ICON_STEP = ICON_SIZE + ICON_SPACING;
+
+    private static final float LOW_THRESHOLD = 0.3f;
+
+    private static final ResourceLocation HEART_FULL = guiTexture("heart_full");
+    private static final ResourceLocation HEART_HALF = guiTexture("heart_half");
+    private static final ResourceLocation HEART_EMPTY = guiTexture("heart_empty");
+    private static final ResourceLocation HEART_LOW = guiTexture("heart_low");
+
+    private static final ResourceLocation ARMOR_FULL = guiTexture("armor_full");
+    private static final ResourceLocation ARMOR_HALF = guiTexture("armor_half");
+    private static final ResourceLocation ARMOR_EMPTY = guiTexture("armor_empty");
+
+    private static final ResourceLocation FOOD_FULL = guiTexture("food_full");
+    private static final ResourceLocation FOOD_HALF = guiTexture("food_half");
+    private static final ResourceLocation FOOD_EMPTY = guiTexture("food_empty");
+    private static final ResourceLocation FOOD_LOW = guiTexture("food_low");
+    private static final ResourceLocation FOOD_HALF_LOW = guiTexture("food_half_low");
+
+    private static final ResourceLocation WATER_FULL = guiTexture("water_full");
+    private static final ResourceLocation WATER_HALF = guiTexture("water_half");
+    private static final ResourceLocation WATER_EMPTY = guiTexture("water_empty");
+    private static final ResourceLocation WATER_LOW = guiTexture("water_low");
+    private static final ResourceLocation WATER_HALF_LOW = guiTexture("water_half_low");
+
+    private static ResourceLocation guiTexture(String name) {
+        return ResourceLocation.fromNamespaceAndPath(SevenDaysToMinecraft.MOD_ID, "textures/gui/" + name + ".png");
+    }
+
+    private static void blitIcon(GuiGraphics graphics, ResourceLocation texture, int x, int y) {
+        graphics.blit(RenderType::guiTextured, texture, x, y, 0, 0, ICON_SIZE, ICON_SIZE, ICON_SIZE, ICON_SIZE);
+    }
+
     public static void onRegisterGuiLayers(RegisterGuiLayersEvent event) {
         event.registerAbove(VanillaGuiLayers.HOTBAR, OVERLAY_ID, StatsHudOverlay::render);
-        SevenDaysToMinecraft.LOGGER.info("BZHS: Registered stats HUD overlay (vanilla hunger bar hidden)");
+        SevenDaysToMinecraft.LOGGER.info("BZHS: Registered stats HUD overlay (vanilla hearts/armor/food hidden)");
     }
 
     public static void render(GuiGraphics graphics, DeltaTracker deltaTracker) {
@@ -55,6 +88,11 @@ public class StatsHudOverlay {
         if (!player.hasData(ModAttachments.PLAYER_STATS.get())) return;
         SevenDaysPlayerStats stats = player.getData(ModAttachments.PLAYER_STATS.get());
 
+        renderTopLeftStats(graphics, mc, stats);
+        renderIconHud(graphics, mc, player, stats);
+    }
+
+    private static void renderTopLeftStats(GuiGraphics graphics, Minecraft mc, SevenDaysPlayerStats stats) {
         int x = MARGIN_X;
         int y = MARGIN_Y;
 
@@ -63,19 +101,9 @@ public class StatsHudOverlay {
         graphics.drawString(mc.font, dayAndLevel, x, y, LEVEL_COLOR, true);
         y += 14;
 
-        float foodPct = (stats.getMaxFood() > 0) ? stats.getFood() / stats.getMaxFood() : 0f;
-        drawStatBar(graphics, x, y, "Food", foodPct, stats.getFood(), stats.getMaxFood(),
-                foodPct < 0.3f ? FOOD_LOW_COLOR : FOOD_COLOR);
-        y += BAR_HEIGHT + BAR_SPACING;
-
-        float waterPct = (stats.getMaxWater() > 0) ? stats.getWater() / stats.getMaxWater() : 0f;
-        drawStatBar(graphics, x, y, "Water", waterPct, stats.getWater(), stats.getMaxWater(),
-                waterPct < 0.3f ? WATER_LOW_COLOR : WATER_COLOR);
-        y += BAR_HEIGHT + BAR_SPACING;
-
         float staminaPct = (stats.getMaxStamina() > 0) ? stats.getStamina() / stats.getMaxStamina() : 0f;
         drawStatBar(graphics, x, y, "Stamina", staminaPct, stats.getStamina(), stats.getMaxStamina(),
-                staminaPct < 0.3f ? STAMINA_LOW_COLOR : STAMINA_COLOR);
+                staminaPct < LOW_THRESHOLD ? STAMINA_LOW_COLOR : STAMINA_COLOR);
         y += BAR_HEIGHT + BAR_SPACING;
 
         int xpNeeded = LevelManager.xpToNextLevel(stats.getLevel());
@@ -97,6 +125,106 @@ public class StatsHudOverlay {
                           .append(" (").append(entry.getValue() / 20).append("s) ");
             }
             graphics.drawString(mc.font, debuffText.toString(), x, y, DEBUFF_COLOR, true);
+        }
+    }
+
+    private static void renderIconHud(GuiGraphics graphics, Minecraft mc, Player player, SevenDaysPlayerStats stats) {
+        int screenWidth = mc.getWindow().getGuiScaledWidth();
+        int screenHeight = mc.getWindow().getGuiScaledHeight();
+
+        int hotbarTop = screenHeight - 22 - 1;
+
+        int leftBaseX = screenWidth / 2 - 91;
+        int rightBaseX = screenWidth / 2 + 91;
+
+        float hp = player.getHealth();
+        float maxHp = player.getMaxHealth();
+        int totalHearts = (int) Math.ceil(maxHp / 5.0);
+        int heartRows = (int) Math.ceil(totalHearts / (double) ICONS_PER_ROW);
+        float hpPct = (maxHp > 0) ? hp / maxHp : 0f;
+        boolean heartLow = hpPct < LOW_THRESHOLD;
+        boolean heartFlash = heartLow && (System.currentTimeMillis() / 500) % 2 == 0;
+
+        int healthBottomY = hotbarTop - 2;
+        for (int row = 0; row < heartRows; row++) {
+            int rowY = healthBottomY - (row + 1) * (ICON_SIZE + 1);
+            int heartsInRow = Math.min(ICONS_PER_ROW, totalHearts - row * ICONS_PER_ROW);
+            for (int i = 0; i < heartsInRow; i++) {
+                int heartIndex = row * ICONS_PER_ROW + i;
+                float heartMinHp = heartIndex * 5.0f;
+                int iconX = leftBaseX + i * ICON_STEP;
+
+                ResourceLocation icon;
+                if (hp >= heartMinHp + 5.0f) {
+                    icon = heartFlash ? HEART_LOW : HEART_FULL;
+                } else if (hp >= heartMinHp + 2.5f) {
+                    icon = heartFlash ? HEART_LOW : HEART_HALF;
+                } else {
+                    icon = HEART_EMPTY;
+                }
+                blitIcon(graphics, icon, iconX, rowY);
+            }
+        }
+
+        int armorValue = player.getArmorValue();
+        if (armorValue > 0) {
+            int armorIcons = 10;
+            int armorY = healthBottomY - heartRows * (ICON_SIZE + 1) - (ICON_SIZE + 1);
+            float armorPer = armorValue / 2.0f;
+            for (int i = 0; i < armorIcons; i++) {
+                int iconX = leftBaseX + i * ICON_STEP;
+                ResourceLocation icon;
+                if (armorPer >= i + 1) {
+                    icon = ARMOR_FULL;
+                } else if (armorPer >= i + 0.5f) {
+                    icon = ARMOR_HALF;
+                } else {
+                    icon = ARMOR_EMPTY;
+                }
+                blitIcon(graphics, icon, iconX, armorY);
+            }
+        }
+
+        float food = stats.getFood();
+        float maxFood = stats.getMaxFood();
+        float foodPct = (maxFood > 0) ? food / maxFood : 0f;
+        boolean foodLow = foodPct < LOW_THRESHOLD;
+        int foodY = hotbarTop - 2 - (ICON_SIZE + 1);
+        for (int i = 0; i < ICONS_PER_ROW; i++) {
+            int iconIndex = ICONS_PER_ROW - 1 - i;
+            int iconX = rightBaseX - (i + 1) * ICON_STEP;
+            float iconMinPct = iconIndex * 0.1f;
+
+            ResourceLocation icon;
+            if (foodPct >= iconMinPct + 0.1f) {
+                icon = foodLow ? FOOD_LOW : FOOD_FULL;
+            } else if (foodPct >= iconMinPct + 0.05f) {
+                icon = foodLow ? FOOD_HALF_LOW : FOOD_HALF;
+            } else {
+                icon = FOOD_EMPTY;
+            }
+            blitIcon(graphics, icon, iconX, foodY);
+        }
+
+        float water = stats.getWater();
+        float maxWater = stats.getMaxWater();
+        float waterPct = (maxWater > 0) ? water / maxWater : 0f;
+        boolean waterLow = waterPct < LOW_THRESHOLD;
+        int waterY = foodY + ICON_SIZE + 1;
+        for (int i = 0; i < ICONS_PER_ROW; i++) {
+            int iconIndex = ICONS_PER_ROW - 1 - i;
+            int iconX = rightBaseX - (i + 1) * ICON_STEP;
+            float iconMinPct = iconIndex * 0.1f;
+
+            ResourceLocation icon;
+            if (waterPct >= iconMinPct + 0.1f) {
+                icon = waterLow ? WATER_LOW : WATER_FULL;
+            } else if (waterPct >= iconMinPct + 0.05f) {
+                icon = waterLow ? WATER_HALF_LOW : WATER_HALF;
+            } else {
+                icon = WATER_EMPTY;
+            }
+            blitIcon(graphics, icon, iconX, waterY);
         }
     }
 
