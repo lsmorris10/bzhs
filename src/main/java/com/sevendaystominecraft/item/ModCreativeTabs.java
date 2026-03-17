@@ -110,7 +110,7 @@ public class ModCreativeTabs {
             () -> CreativeModeTab.builder()
                     .title(Component.translatable("creativetab.sevendaystominecraft.magazines"))
                     .icon(() -> {
-                        Supplier<Item> first = ModMagazines.getMagazineItem("pistol_pete", 1);
+                        Supplier<Item> first = ModMagazines.getMagazineItem("steady_steve", 1);
                         return first != null ? new ItemStack(first.get()) : new ItemStack(Items.BOOK);
                     })
                     .displayItems((params, output) -> {

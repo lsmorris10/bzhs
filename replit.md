@@ -324,12 +324,12 @@ Milestones 1-9 complete (except #4 Temperature which is partial). Milestone 3 (D
 ### Magazine / Skill Book System
 - **Package**: `com.sevendaystominecraft.magazine`
 - **MagazineSeries**: Record defining a series (id, displayName, issueCount, issueDescriptions, masteryDescription)
-- **MagazineRegistry**: Static registry of all 6 series (pistol_pete x7, bar_brawler x5, ranger_dan x7, the_fixer x5, wasteland_chef x5, urban_combat x7)
+- **MagazineRegistry**: Static registry of all 6 series (steady_steve x7, block_brawler x5, sharpshot_sam x7, the_tinkerer x5, overworld_chef x5, dungeon_tactician x7)
 - **MagazinePlayerData**: Per-player read tracking stored in `SevenDaysPlayerStats` → serialized to NBT under "Magazines" key
 - **MagazineItem**: Right-click to read; grants permanent passive bonus; consumes item; tracks completion; awards mastery on series completion
 - **ModMagazines**: DeferredRegister auto-generates all 36 item registrations from MagazineRegistry
 - **Creative tab**: "BZHS Magazines" tab shows all magazine items
-- Items: `magazine_<seriesId>_<issue>` (e.g., `magazine_pistol_pete_1` through `magazine_pistol_pete_7`)
+- Items: `magazine_<seriesId>_<issue>` (e.g., `magazine_steady_steve_1` through `magazine_steady_steve_7`)
 - Tooltips show series name, issue bonus, and mastery reward
 - Each magazine is stacksTo(1), consumed on use, cannot be re-read
 

@@ -7,7 +7,7 @@ public class MagazineRegistry {
     private static final Map<String, MagazineSeries> SERIES = new LinkedHashMap<>();
 
     static {
-        register(new MagazineSeries("pistol_pete", "Pistol Pete", 7,
+        register(new MagazineSeries("steady_steve", "Steady Steve", 7,
                 List.of(
                         "+3% pistol damage",
                         "+5% pistol reload speed",
@@ -20,7 +20,7 @@ public class MagazineRegistry {
                 "Mastery: 20% chance to not consume ammo with pistols"
         ));
 
-        register(new MagazineSeries("bar_brawler", "Bar Brawler", 5,
+        register(new MagazineSeries("block_brawler", "Block Brawler", 5,
                 List.of(
                         "+5% fist/club damage",
                         "+10% club knockback",
@@ -31,7 +31,7 @@ public class MagazineRegistry {
                 "Mastery: Power attacks have 25% chance to stun"
         ));
 
-        register(new MagazineSeries("ranger_dan", "Ranger Dan", 7,
+        register(new MagazineSeries("sharpshot_sam", "Sharpshot Sam", 7,
                 List.of(
                         "+3% rifle damage",
                         "+5% rifle reload speed",
@@ -44,7 +44,7 @@ public class MagazineRegistry {
                 "Mastery: 15% chance for headshots to deal double damage"
         ));
 
-        register(new MagazineSeries("the_fixer", "The Fixer", 5,
+        register(new MagazineSeries("the_tinkerer", "The Tinkerer", 5,
                 List.of(
                         "+5% repair speed",
                         "-5% repair material cost",
@@ -55,7 +55,7 @@ public class MagazineRegistry {
                 "Mastery: Repaired items gain +1 quality tier (max 5)"
         ));
 
-        register(new MagazineSeries("wasteland_chef", "Wasteland Chef", 5,
+        register(new MagazineSeries("overworld_chef", "Overworld Chef", 5,
                 List.of(
                         "+5% food restore from cooked items",
                         "+5% water restore from drinks",
@@ -66,7 +66,7 @@ public class MagazineRegistry {
                 "Mastery: Crafted food items restore 20% stamina on consumption"
         ));
 
-        register(new MagazineSeries("urban_combat", "Urban Combat", 7,
+        register(new MagazineSeries("dungeon_tactician", "Dungeon Tactician", 7,
                 List.of(
                         "+3% shotgun damage",
                         "+10% shotgun spread tightness",
