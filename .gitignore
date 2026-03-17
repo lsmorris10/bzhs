@@ -33,9 +33,10 @@ crash-reports/
 Thumbs.db
 desktop.ini
 
-# Landing page build artifacts (keep index.html tracked)
+# Landing page build artifacts (keep index.html and downloadable JARs tracked)
 public/*
 !public/index.html
+!public/BrutalZombieHordeSurvival-*.jar
 
 # Misc
 *.log
