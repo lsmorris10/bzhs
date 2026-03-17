@@ -54,7 +54,7 @@ public class ChargedZombie extends BaseSevenDaysZombie {
 
     private void triggerChainLightning(ServerLevel serverLevel, LivingEntity initialTarget) {
         ZombieConfig cfg = ZombieConfig.INSTANCE;
-        int maxChains = cfg.chargedChainTargets.get();
+        int maxChains = Math.min(cfg.chargedChainTargets.get(), 10);
         float chainDamage = cfg.chargedChainDamage.get().floatValue();
 
         AABB searchArea = initialTarget.getBoundingBox().inflate(3.0);
