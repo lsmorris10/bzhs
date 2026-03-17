@@ -66,7 +66,7 @@ public class BehemothZombie extends BaseSevenDaysZombie {
                 e -> e != this && e.isAlive() && !(e instanceof BaseSevenDaysZombie));
 
         for (LivingEntity target : targets) {
-            target.hurt(damageSources().mobAttack(this), damage);
+            target.hurtServer((ServerLevel) level(), damageSources().mobAttack(this), damage);
             Vec3 knockDir = target.position().subtract(position()).normalize().scale(1.5);
             target.push(knockDir.x, 0.5, knockDir.z);
         }

@@ -10,18 +10,26 @@ import com.sevendaystominecraft.config.HordeConfig;
 import com.sevendaystominecraft.config.LootConfig;
 import com.sevendaystominecraft.config.SurvivalConfig;
 import com.sevendaystominecraft.config.ZombieConfig;
+import com.sevendaystominecraft.client.CompassOverlay;
+import com.sevendaystominecraft.client.MinimapOverlay;
+import com.sevendaystominecraft.client.ModEntityRenderers;
+import com.sevendaystominecraft.client.ModScreens;
+import com.sevendaystominecraft.client.StatsHudOverlay;
 import com.sevendaystominecraft.horde.DayCycleHandler;
 import com.sevendaystominecraft.entity.ModEntities;
 import com.sevendaystominecraft.item.ModCreativeTabs;
 import com.sevendaystominecraft.item.ModItems;
 import com.sevendaystominecraft.menu.ModMenuTypes;
+import com.sevendaystominecraft.network.ModNetworking;
 
+import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.fml.ModContainer;
 import net.neoforged.fml.common.Mod;
 import net.neoforged.fml.config.ModConfig;
 import net.neoforged.fml.event.lifecycle.FMLClientSetupEvent;
 import net.neoforged.fml.event.lifecycle.FMLCommonSetupEvent;
+import net.neoforged.fml.loading.FMLEnvironment;
 import net.neoforged.neoforge.common.NeoForge;
 import net.neoforged.neoforge.event.RegisterCommandsEvent;
 import net.neoforged.neoforge.event.server.ServerStartingEvent;
@@ -55,6 +63,17 @@ public class SevenDaysToMinecraft {
 
         modEventBus.addListener(this::onCommonSetup);
         modEventBus.addListener(this::onClientSetup);
+
+        modEventBus.addListener(ModNetworking::onRegisterPayloads);
+        modEventBus.addListener(ModEntities.AttributeRegistration::onEntityAttributeCreation);
+
+        if (FMLEnvironment.dist == Dist.CLIENT) {
+            modEventBus.addListener(ModEntityRenderers::onRegisterRenderers);
+            modEventBus.addListener(ModScreens::onRegisterMenuScreens);
+            modEventBus.addListener(CompassOverlay::onRegisterGuiLayers);
+            modEventBus.addListener(StatsHudOverlay::onRegisterGuiLayers);
+            modEventBus.addListener(MinimapOverlay::onRegisterGuiLayers);
+        }
 
         NeoForge.EVENT_BUS.addListener(this::onServerStarting);
         NeoForge.EVENT_BUS.addListener(this::onRegisterCommands);

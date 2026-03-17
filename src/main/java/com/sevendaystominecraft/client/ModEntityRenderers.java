@@ -1,19 +1,13 @@
 package com.sevendaystominecraft.client;
 
-import com.sevendaystominecraft.SevenDaysToMinecraft;
 import com.sevendaystominecraft.entity.ModEntities;
 
-import net.neoforged.api.distmarker.Dist;
-import net.neoforged.bus.api.SubscribeEvent;
-import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.client.event.EntityRenderersEvent;
 
-@EventBusSubscriber(modid = SevenDaysToMinecraft.MOD_ID, bus = EventBusSubscriber.Bus.MOD, value = Dist.CLIENT)
 public class ModEntityRenderers {
 
     private static final float NAME_TAG_EXTRA_HEIGHT = 1.0f;
 
-    @SubscribeEvent
     public static void onRegisterRenderers(EntityRenderersEvent.RegisterRenderers event) {
         event.registerEntityRenderer(ModEntities.WALKER.get(), ctx -> new ScaledZombieRenderer(ctx, 1.0f, NAME_TAG_EXTRA_HEIGHT));
         event.registerEntityRenderer(ModEntities.CRAWLER.get(), ctx -> new ScaledZombieRenderer(ctx, 1.0f, NAME_TAG_EXTRA_HEIGHT));

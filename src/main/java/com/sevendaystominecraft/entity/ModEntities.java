@@ -8,8 +8,6 @@ import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.MobCategory;
-import net.neoforged.bus.api.SubscribeEvent;
-import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.event.entity.EntityAttributeCreationEvent;
 import net.neoforged.neoforge.registries.DeferredRegister;
 
@@ -119,9 +117,7 @@ public class ModEntities {
                     EntityType.Builder.<BehemothZombie>of(BehemothZombie::new, MobCategory.MONSTER)
                             .sized(1.6f, 3.0f).clientTrackingRange(10).build(key("behemoth")));
 
-    @EventBusSubscriber(modid = SevenDaysToMinecraft.MOD_ID, bus = EventBusSubscriber.Bus.MOD)
     public static class AttributeRegistration {
-        @SubscribeEvent
         public static void onEntityAttributeCreation(EntityAttributeCreationEvent event) {
             event.put(WALKER.get(), BaseSevenDaysZombie.createBaseZombieAttributes().build());
             event.put(CRAWLER.get(), BaseSevenDaysZombie.createBaseZombieAttributes().build());

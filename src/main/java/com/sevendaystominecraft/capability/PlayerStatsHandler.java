@@ -142,11 +142,11 @@ public class PlayerStatsHandler {
 
         if (worstPct <= 0) {
             float drain = (float) (cfg.cascadeHealthDrainFast.get() / 20.0);
-            player.hurt(player.damageSources().starve(), drain);
+            serverPlayer.hurtServer((ServerLevel) player.level(), player.damageSources().starve(), drain);
             applySpeedPenalty(player, cfg.cascadeSpeedPenalty.get().floatValue());
         } else if (worstPct < cfg.cascadeThreshold2.get().floatValue()) {
             float drain = (float) (cfg.cascadeHealthDrainSlow.get() / 20.0);
-            player.hurt(player.damageSources().starve(), drain);
+            serverPlayer.hurtServer((ServerLevel) player.level(), player.damageSources().starve(), drain);
             removeSpeedPenalty(player);
         } else {
             removeSpeedPenalty(player);
@@ -447,33 +447,30 @@ public class PlayerStatsHandler {
     }
 
     private static void applyDebuffEffects(Player player, SevenDaysPlayerStats stats) {
-        // Bleeding: −0.2 HP/3sec per stack (max 3 stacks)
+        ServerLevel serverLevel = (ServerLevel) player.level();
+
         if (stats.hasDebuff(SevenDaysPlayerStats.DEBUFF_BLEEDING)) {
             int stacks = Math.max(1, stats.getBleedingStacks());
             if (player.tickCount % 60 == 0) {
-                player.hurt(player.damageSources().magic(), 0.2f * stacks);
+                player.hurtServer(serverLevel, player.damageSources().magic(), 0.2f * stacks);
             }
         }
 
-        // Infection Stage 1: −25% stamina regen (applied in applyStaminaRegen)
-        // No direct damage, penalty handled via applyStaminaRegen
-
-        // Infection Stage 2: −0.1 HP/sec
         if (stats.hasDebuff(SevenDaysPlayerStats.DEBUFF_INFECTION_2)) {
             if (player.tickCount % 20 == 0) {
-                player.hurt(player.damageSources().magic(), 0.1f);
+                player.hurtServer(serverLevel, player.damageSources().magic(), 0.1f);
             }
         }
 
         if (stats.hasDebuff(SevenDaysPlayerStats.DEBUFF_BURN)) {
             if (player.tickCount % 10 == 0) {
-                player.hurt(player.damageSources().onFire(), 0.2f);
+                player.hurtServer(serverLevel, player.damageSources().onFire(), 0.2f);
             }
         }
 
         if (stats.hasDebuff(SevenDaysPlayerStats.DEBUFF_RADIATION)) {
             if (player.tickCount % 100 == 0) {
-                player.hurt(player.damageSources().magic(), 0.2f);
+                player.hurtServer(serverLevel, player.damageSources().magic(), 0.2f);
             }
         }
 

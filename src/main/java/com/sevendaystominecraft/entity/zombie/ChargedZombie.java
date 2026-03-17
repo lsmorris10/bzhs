@@ -76,7 +76,7 @@ public class ChargedZombie extends BaseSevenDaysZombie {
             if (clip.getType() == HitResult.Type.BLOCK) continue;
 
             DamageSource lightningDmg = level().damageSources().lightningBolt();
-            chainTarget.hurt(lightningDmg, chainDamage);
+            chainTarget.hurtServer(serverLevel, lightningDmg, chainDamage);
 
             chainTarget.setTicksFrozen(30);
 

@@ -11,13 +11,9 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.player.Player;
-import net.neoforged.api.distmarker.Dist;
-import net.neoforged.bus.api.SubscribeEvent;
-import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.client.event.RegisterGuiLayersEvent;
 import net.neoforged.neoforge.client.gui.VanillaGuiLayers;
 
-@EventBusSubscriber(modid = SevenDaysToMinecraft.MOD_ID, bus = EventBusSubscriber.Bus.MOD, value = Dist.CLIENT)
 public class StatsHudOverlay {
 
     private static final ResourceLocation OVERLAY_ID =
@@ -45,7 +41,6 @@ public class StatsHudOverlay {
     private static final int TEMP_NORMAL_COLOR = 0xFFAAFFAA;
     private static final int LEVEL_COLOR = 0xFFFFDD00;
 
-    @SubscribeEvent
     public static void onRegisterGuiLayers(RegisterGuiLayersEvent event) {
         event.registerAbove(VanillaGuiLayers.HOTBAR, OVERLAY_ID, StatsHudOverlay::render);
         SevenDaysToMinecraft.LOGGER.info("BZHS: Registered stats HUD overlay (vanilla hunger bar hidden)");

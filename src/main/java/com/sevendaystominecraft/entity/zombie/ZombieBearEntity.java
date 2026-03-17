@@ -59,7 +59,7 @@ public class ZombieBearEntity extends BaseSevenDaysZombie {
                     e -> e != this && e.isAlive() && !(e instanceof BaseSevenDaysZombie));
             for (LivingEntity entity : nearby) {
                 if (entity == target) continue;
-                entity.hurt(damageSources().mobAttack(this),
+                entity.hurtServer(serverLevel, damageSources().mobAttack(this),
                         (float) getAttribute(Attributes.ATTACK_DAMAGE).getValue() * 0.5f);
             }
         }
