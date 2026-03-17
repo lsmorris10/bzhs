@@ -106,10 +106,16 @@ src/main/java/com/sevendaystominecraft/
 │       └── ZombieDogEntity.java     — Pack spawns, fast (Wolf base)
 ├── item/
 │   ├── ModItems.java               — DeferredRegister for all items (materials, melee weapons, ranged weapons, ammo)
-│   ├── ModCreativeTabs.java        — Creative tabs: Materials, Workstations, Weapons, Loot Containers
+│   ├── ModCreativeTabs.java        — Creative tabs: Materials, Workstations, Weapons, Loot Containers, Magazines
 │   ├── QualityTier.java            — Quality tier enum (T1-T6: Poor → Legendary) with stat multipliers
 │   └── weapon/
 │       └── RangedWeaponItem.java   — Right-click-to-fire ranged weapon (ammo consumption, cooldown, durability)
+├── magazine/
+│   ├── MagazineRegistry.java       — Static registry of 6 series × 5-7 issues = 36 magazine definitions
+│   └── ModMagazines.java           — DeferredRegister auto-generating 36 magazine items from registry
+├── worldgen/
+│   ├── ModBiomes.java              — 7 ResourceKey<Biome> constants (Pine Forest, Forest, Plains, Desert, Snowy Tundra, Burned Forest, Wasteland)
+│   └── BiomeProperties.java        — Per-biome temp range, zombie density multiplier, loot tier bonus; cosine day/night temp curve; vanilla biome fallback mapping
 ├── loot/
 │   ├── LootStageCalculator.java    — Loot stage formula: floor((level×0.5) + (days×0.3) + biomeBonus + perkBonus)
 │   └── LootStageHandler.java       — Periodic loot stage sync to client
@@ -291,6 +297,9 @@ src/main/java/com/sevendaystominecraft/
 - `SavedData` uses `Factory<>` with constructor + load function for `computeIfAbsent`
 - `CanPlayerSleepEvent` is the correct hook for blocking sleep (not `PlayerSleepInBedEvent`)
 - Sprint detection: avoid speed-based heuristics; use `player.isSprinting()` directly and handle client-side via Mixin or sync packets
+- Currency item: `survivors_coin` (renamed from `dukes_casino_token` to avoid trademark)
+- Zombie display names renamed: Feral Wight→Feral Wraith, Frozen Lumberjack→Frostbitten Woodsman, Cop→Riot Husk, Screamer→Banshee, Demolisher→Wrecking Husk, Mutated Chuck→Mutated Brute, Spider Zombie→Wall Creeper, Bloated Walker→Bloated Shambler
+- 12 perk IDs renamed (e.g. `miner_69er`→`deep_striker`, `sexual_tyrannosaurus`→`unstoppable_force`) — see PerkRegistry.java for full list
 - Config pattern: Static `SPEC` + `INSTANCE` via `new ModConfigSpec.Builder().configure(Klass::new)`
 
 #### Weapons System — DONE

@@ -479,7 +479,7 @@
       <span class="badge">NeoForge 21.4.140</span>
       <span class="badge">No Dependencies</span>
       <span class="badge">Java 21</span>
-      <span class="badge">9 Milestones + Post-Milestone Polish</span>
+      <span class="badge">108 Tasks Merged</span>
     </div>
   </section>
 
@@ -544,6 +544,12 @@
         <li><span class="check">✓</span> Basic melee &amp; ranged weapons</li>
         <li><span class="check">✓</span> Icon-based HUD for health, armor, food &amp; water</li>
         <li><span class="check">✓</span> en_us.json language file (items, blocks, entities)</li>
+        <li><span class="check">✓</span> Sound system &amp; context-aware gameplay music</li>
+        <li><span class="check">✓</span> Territory POI system (star-rated difficulty)</li>
+        <li><span class="check">✓</span> 3D weapon animations via GeckoLib</li>
+        <li><span class="check">✓</span> Magazine / Skill Book system (6 series, 36 items)</li>
+        <li><span class="check">✓</span> Custom biomes (7 biomes with temperature &amp; density)</li>
+        <li><span class="check">✓</span> Sprint fix (client-side Mixin)</li>
       </ul>
 
       <p style="color:#999; font-size:0.82rem; margin-bottom:0.4rem; margin-top:0.75rem; text-transform:uppercase; letter-spacing:0.5px; font-weight:600;">Post-Milestone Improvements</p>
@@ -551,15 +557,11 @@
         <li><span class="check">✓</span> Vanilla damage scaling to 100 HP</li>
         <li><span class="check">✓</span> Doubled day cycle (slower-tick refactor)</li>
         <li><span class="check">✓</span> Dual zombie speed (night + darkness)</li>
-        <li><span class="check">✓</span> Coal vein rebalancing</li>
         <li><span class="check">✓</span> Mob damage scaling for all vanilla mobs</li>
-        <li><span class="check">✓</span> LevelTimeOfDayMixin crash fix</li>
-        <li><span class="check">✓</span> Mod JAR &amp; metadata rebrand</li>
         <li><span class="check">✓</span> Zombie AI completion (variant special abilities)</li>
         <li><span class="check">✓</span> Weapons system (melee &amp; ranged)</li>
-        <li><span class="check">✓</span> Workstation recipe processing</li>
-        <li><span class="check">✓</span> Icon-based HUD (health, armor, food &amp; water)</li>
-        <li><span class="check">✓</span> en_us.json language file</li>
+        <li><span class="check">✓</span> GeckoLib bundled via Jar-in-Jar (single-file distribution)</li>
+        <li><span class="check">✓</span> Trademark name sweep (zombie, perk &amp; currency renames)</li>
         <li><span class="check">✓</span> Deprecated API fixes (NeoForge 1.21.4)</li>
         <li><span class="check">✓</span> Legacy damage multiplier config cleanup</li>
       </ul>
@@ -567,9 +569,9 @@
       <div class="coming-section">
         <h3>Coming Next</h3>
         <ul class="coming-list">
-          <li>Sound system foundation — ambient audio, zombie groans, weapon sounds</li>
-          <li>Territory POI system — labeled points of interest with difficulty ratings</li>
-          <li>3D weapon animations with Geckolib — AK-47 bolt, reload, firing</li>
+          <li>Overworld biome placement — surface builder and noise router for custom biomes</li>
+          <li>Replace placeholder textures with real pixel art</li>
+          <li>Trader NPCs and quest system</li>
         </ul>
       </div>
     </div>
@@ -578,13 +580,13 @@
   <div class="section recent-section">
     <h2>Recent Changes</h2>
     <ul class="recent-list">
-      <li><span class="dot">●</span> Zombie AI variant abilities — Charged chain lightning, Infernal fire trail, Cop acid vomit, Demolisher explosion, Screamer flee behavior</li>
-      <li><span class="dot">●</span> Workstation recipe processing system — functional Forge, Workbench, and Chemistry Station crafting</li>
-      <li><span class="dot">●</span> Basic weapons system — Stone Club, Baseball Bat, Iron Sledgehammer, 9mm Pistol, AK-47 with ammo consumption</li>
-      <li><span class="dot">●</span> Icon-based HUD — heart icons for health, shield icons for armor, drumstick &amp; droplet icons for food and water</li>
-      <li><span class="dot">●</span> en_us.json language file — localized names for all mod items, blocks, entities, and creative tabs</li>
-      <li><span class="dot">●</span> Deprecated NeoForge API fixes and legacy damage multiplier config cleanup</li>
-      <li><span class="dot">●</span> Download button serves the .jar directly from this site</li>
+      <li><span class="dot">●</span> Magazine / Skill Book system — 6 series (Steady Steve, Block Brawler, Sharpshot Sam, The Tinkerer, Overworld Chef, Dungeon Tactician), 36 items with per-issue bonuses and series mastery tracking</li>
+      <li><span class="dot">●</span> Custom biomes — 7 biome definitions (Pine Forest, Forest, Plains, Desert, Snowy Tundra, Burned Forest, Wasteland) with temperature ranges, zombie density multipliers, and loot tier bonuses</li>
+      <li><span class="dot">●</span> Trademark name sweep — zombie display names (Feral Wraith, Banshee, Riot Husk, Wrecking Husk, etc.), 12 perk IDs renamed, currency changed to Survivor's Coin</li>
+      <li><span class="dot">●</span> 3D weapon animations via GeckoLib — AK-47 bolt action, 9mm Pistol slide, Grenade pull/throw with Jar-in-Jar bundling</li>
+      <li><span class="dot">●</span> Context-aware gameplay music — day, night, combat, and blood moon tracks with smooth crossfading</li>
+      <li><span class="dot">●</span> Territory POI system — star-rated points of interest with procedural structures and difficulty tiers</li>
+      <li><span class="dot">●</span> Sprint fix — client-side LocalPlayer.aiStep() Mixin prevents rubber-banding</li>
     </ul>
   </div>
 

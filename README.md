@@ -32,12 +32,12 @@ A total conversion mod for **Minecraft 1.21.4** (NeoForge) inspired by **7 Days 
 - **Fracture** — Fall 8+ blocks, -60% movement speed + sprint blocked for 60 minutes
 - **Concussion** — Explosion within 3 blocks, nausea/screen wobble for 45 seconds
 - **Electrocuted** — Charged zombie hit, 1.5 second movement freeze
-- **Stunned** — Cop bile or Cop/Demolisher explosion, 2 second movement freeze
+- **Stunned** — Riot Husk bile or Riot Husk/Wrecking Husk explosion, 2 second movement freeze
 - **Burn, Dysentery, Hypothermia, Hyperthermia, Radiation** — Various environmental triggers
 - All debuffs clear on death
 
 ### Zombie System (18 Variants + 3 Modifiers)
-- **Humanoid (15)**: Walker, Crawler, Soldier, Frozen Lumberjack, Bloated Walker, Spider Zombie, Feral Wight, Screamer, Cop, Demolisher, Nurse, Mutated Chuck, Behemoth, Charged, Infernal
+- **Humanoid (15)**: Walker, Crawler, Soldier, Frostbitten Woodsman, Bloated Shambler, Wall Creeper, Feral Wraith, Banshee, Riot Husk, Wrecking Husk, Nurse, Mutated Brute, Behemoth, Charged, Infernal
 - **Animals (3)**: Zombie Dog, Zombie Bear, Vulture
 - **Special Mechanics**: Explosions, acid spit projectiles, chain lightning, fire trails, wall climbing, healing aura, screamer spawning, flying dive attacks, ground pound AoE
 - **Modifiers**: Radiated (HP regen), Charged (chain lightning), Infernal (fire trail + burn)
@@ -48,7 +48,7 @@ A total conversion mod for **Minecraft 1.21.4** (NeoForge) inspired by **7 Days 
 ### Zombie AI Special Abilities
 - **Block breaking** — zombies path to and break blocks separating them from targets
 - **Heatmap investigation** — zombies in horde pathfinding mode route toward high-heat chunks
-- **Variant abilities**: Cop acid spit, Demolisher ground pound, Spider wall climbing, Charged chain lightning, Screamer horde spawning, Behemoth healing aura, Vulture dive attacks
+- **Variant abilities**: Riot Husk acid spit, Wrecking Husk ground pound, Wall Creeper wall climbing, Charged chain lightning, Banshee horde spawning, Behemoth healing aura, Vulture dive attacks
 - Fully layered priority behavior tree — target acquisition, ability selection, and movement all conditions-checked
 
 ### Basic Weapons System
@@ -69,7 +69,7 @@ A total conversion mod for **Minecraft 1.21.4** (NeoForge) inspired by **7 Days 
 - Player actions generate "heat" in nearby chunks (block breaking, torch placement, sprinting, explosions)
 - Heat threshold spawning:
   - 25+: Scout Walkers
-  - 50+: Screamer zombie
+  - 50+: Banshee zombie
   - 75+: Mini-horde (8-12 mixed zombies)
   - 100: Continuous wave mode until heat drops
 - Heat decays over time, radiates to neighboring chunks
@@ -77,7 +77,7 @@ A total conversion mod for **Minecraft 1.21.4** (NeoForge) inspired by **7 Days 
 - Zombies in horde mode investigate and route toward high-heat chunks
 
 ### Loot & Crafting
-- **17 Core Materials** + Dukes Casino Token currency
+- **17 Core Materials** + Survivor's Coin currency
 - **7 Workstations**: Campfire, Grill, Workbench, Forge, Cement Mixer, Chemistry Station, Advanced Workbench — all with functional GUIs and fuel-based processing
 - **8 Loot Containers**: Trash Pile, Cardboard Box, Gun Safe, Munitions Box, Supply Crate, Kitchen Cabinet, Medicine Cabinet, Bookshelf — loot scales with player level
 - **Quality Tiers**: T1 Poor (x0.7) through T6 Legendary (x1.5) with color codes and mod slot scaling
@@ -190,8 +190,11 @@ Copy the JAR into your Minecraft `mods/` folder (requires NeoForge 21.4.140 for 
 
 - Custom biomes: 7 biome definitions (Pine Forest, Forest, Plains, Desert, Snowy Tundra, Burned Forest, Wasteland) with per-biome temperature ranges, zombie density multipliers, and loot tier bonuses
 
+- Trademark name sweep: zombie display names, perk IDs, and currency renamed to avoid trademark conflicts
+
 ### Planned / Next
+- Overworld biome placement (custom biome definitions exist, surface builder / noise router pending)
 - Replace placeholder textures with real pixel art (prioritize HUD icons, weapons, workstations)
-- Full world generation pipeline (city grid, POI templates, biome placement in overworld)
+- Full world generation pipeline (city grid, POI templates)
 - Trader NPCs
 - Vehicle system

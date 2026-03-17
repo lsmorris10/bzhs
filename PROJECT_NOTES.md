@@ -43,28 +43,35 @@
 - Workstation recipe processing (#94) — all 7 workstations now process recipes with correct fuel logic and output
 - Basic weapons system (#95) — melee and ranged weapons implemented with damage, range, and attack speed
 - Placeholder texture audit (#97) — full audit run; 349 of 388 textures flagged as placeholder (report at `docs/texture_audit.md`)
+- Sound system foundation (#98) — 8 custom sound events, gated playback, subtitles
 - Icon-based HUD (#100) — stat bars replaced with icon rows (hearts, food, water, armor icons)
 - Texture processing tool (#101) — batch tool for generating and validating texture assets
-- Funding page (#104) — Ko-fi/Patreon support page added to landing site
+- Territory POI system (#102) — star-rated points of interest with procedural structures
+- 3D weapon animations (#103) via GeckoLib — AK-47, 9mm Pistol, Grenade with full animations
+- Funding page (#104) — Behind the Build support page added to landing site
+- GeckoLib Jar-in-Jar (#105) — single-file mod distribution, no external dependency needed
+- Sprint Mixin fix (#106) — client-side `LocalPlayer.aiStep()` Mixin prevents rubber-banding
+- Context-aware gameplay music (#107) — day/night/combat/blood moon tracks with crossfading
+- Magazine / Skill Book system (#108–#109) — 6 series (Steady Steve, Block Brawler, Sharpshot Sam, The Tinkerer, Overworld Chef, Dungeon Tactician), 36 items, per-issue bonuses, series mastery tracking, Minecraft-ified names
+- Custom biome system (#110) — 7 biomes (Pine Forest, Forest, Plains, Desert, Snowy Tundra, Burned Forest, Wasteland) with per-biome temperature ranges, zombie density multipliers, loot tier bonuses; integrated into PlayerStatsHandler, LootStageCalculator, TerritoryZombieSpawner
+- Trademark name sweep (#111) — Duke's Casino Token → Survivor's Coin; 8 zombie display names renamed (Feral Wight→Feral Wraith, Frozen Lumberjack→Frostbitten Woodsman, Cop→Riot Husk, Screamer→Banshee, Demolisher→Wrecking Husk, Mutated Chuck→Mutated Brute, Spider Zombie→Wall Creeper, Bloated Walker→Bloated Shambler); 12 perk IDs+names renamed
 
 **Current Focus / In Progress:**
-- Sound system foundation (in progress)
-- Territory POIs — location-specific points of interest for world generation
-- 3D weapon animations via Geckolib
+- Overworld biome placement — surface builder / noise router for custom biome definitions (definitions exist, placement pending)
 
 **Next Up:**
-- Merge sound system and territory POI tasks once complete
-- Geckolib integration for animated weapon/zombie models
-- Sprint bug fix (client-side Mixin on `LocalPlayer.aiStep()`)
 - Custom textures — replace 349 placeholder textures with real pixel art (prioritize HUD icons, weapons, workstations)
+- Full world generation pipeline (city grid, POI templates)
+- Trader NPCs and quest system
+- Vehicle system
 
 ---
 
 ## Known Bugs / Polish To Address
 
-1. **SPRINT BUG — FIX ANOTHER DAY** (unresolved since Milestone 2):
-   - Sprint can get stuck — holding W alone gives infinite sprint. Stamina drains but sprint doesn't cancel. Needs a client-side Mixin on `LocalPlayer.aiStep()`.
-   - **Not on today's test list.** This is a known issue that requires a proper client-side fix.
+1. **SPRINT BUG — FIXED** (Task #106):
+   - Sprint rubber-banding resolved via client-side `LocalPlayerSprintMixin` on `LocalPlayer.aiStep()`.
+   - Registered under `"client"` key in `sevendaystominecraft.mixins.json`.
 
 2. **F3 DEBUG SCREEN DAY COUNTER** (likely resolved):
    - After the slower-tick refactor (#60), `dayTime` stays on a vanilla 24k scale. F3 day counter should now match the HUD. Verify during next test session.
@@ -95,7 +102,7 @@
 
 ## Recent Completed Work
 
-**March 16–17 Session (Tasks #72–#104)**
+**March 16–17 Session (Tasks #72–#111)**
 - Zombie AI behavior tree refactored (#72)
 - Gameplay bugfixes (#76)
 - Textures/models/blockstates (#77)
@@ -113,9 +120,18 @@
 - Workstation recipe processing (#94)
 - Basic weapons system (#95)
 - Placeholder texture audit (#97) — `docs/texture_audit.md`
+- Sound system foundation (#98)
 - Icon-based HUD (#100)
 - Texture processing tool (#101)
+- Territory POI system (#102)
+- 3D weapon animations via GeckoLib (#103)
 - Funding page (#104)
+- GeckoLib Jar-in-Jar (#105)
+- Sprint Mixin fix (#106)
+- Context-aware gameplay music (#107)
+- Magazine / Skill Book system (#108–#109)
+- Custom biome system (#110)
+- Trademark name sweep (#111)
 
 **March 14–15 Session**
 - Download button upgraded to fetch latest JAR from GitHub Releases API (#55)

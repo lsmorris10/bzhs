@@ -304,12 +304,12 @@
         <div class="header-icon">&#x2694;</div>
         <h1>BZHS Development History</h1>
       </div>
-      <p>Brutal Zombie Horde Survival — March 12–17, 2026 — 100 tasks, 6 days of development</p>
+      <p>Brutal Zombie Horde Survival — March 12–17, 2026 — 111 tasks, 6 days of development</p>
     </div>
 
     <div class="top-stats">
-      <div class="stat-card"><div class="val" style="color:#22c55e">97</div><div class="lbl">Tasks Merged</div></div>
-      <div class="stat-card"><div class="val" style="color:#f97316">15/39</div><div class="lbl">Milestones Touched</div></div>
+      <div class="stat-card"><div class="val" style="color:#22c55e">108</div><div class="lbl">Tasks Merged</div></div>
+      <div class="stat-card"><div class="val" style="color:#f97316">17/39</div><div class="lbl">Milestones Touched</div></div>
       <div class="stat-card"><div class="val" style="color:#8b5cf6">6</div><div class="lbl">Dev Days</div></div>
       <div class="stat-card"><div class="val" style="color:#06b6d4">11</div><div class="lbl">Categories</div></div>
     </div>
@@ -454,14 +454,25 @@
       {id:90,title:"Update dashboard data with tasks #73-89 and accurate stats",category:"landing",status:"merged"},
       {id:91,title:"Fix deprecated API warnings (NeoForge 1.21.4)",category:"survival",status:"merged"},
       {id:92,title:"Legacy damage multiplier config cleanup for existing worlds",category:"survival",status:"merged"},
-      {id:93,title:"Zombie AI variant special abilities (Charged, Infernal, Cop, Demolisher, Screamer)",category:"zombies",status:"merged"},
+      {id:93,title:"Zombie AI variant special abilities (Charged, Infernal, Riot Husk, Wrecking Husk, Banshee)",category:"zombies",status:"merged"},
       {id:94,title:"Workstation recipe processing system (Forge, Workbench, Chemistry Station)",category:"loot",status:"merged"},
       {id:95,title:"Basic weapons system \u2014 melee and ranged (Stone Club, Baseball Bat, Sledgehammer, 9mm, AK-47)",category:"loot",status:"merged"},
       {id:96,title:"Push all commits to GitHub remote",category:"git",status:"merged"},
       {id:97,title:"Audit and flag placeholder textures",category:"docs",status:"merged"},
       {id:98,title:"Sound system foundation \u2014 sound registration infrastructure and placeholder events",category:"survival",status:"merged"},
       {id:99,title:"Build and publish latest JAR to landing page",category:"landing",status:"merged"},
-      {id:100,title:"Icon-based HUD for health, armor, food, and water",category:"hud",status:"merged"}
+      {id:100,title:"Icon-based HUD for health, armor, food, and water",category:"hud",status:"merged"},
+      {id:101,title:"Texture processing tool (batch texture generation)",category:"loot",status:"merged"},
+      {id:102,title:"Territory POI system (star-rated points of interest)",category:"zombies",status:"merged"},
+      {id:103,title:"3D weapon animations via GeckoLib (AK-47, 9mm, Grenade)",category:"loot",status:"merged"},
+      {id:104,title:"Behind the Build (funding) page",category:"landing",status:"merged"},
+      {id:105,title:"GeckoLib Jar-in-Jar bundling (single-file mod distribution)",category:"loot",status:"merged"},
+      {id:106,title:"Sprint Mixin fix (client-side LocalPlayer.aiStep)",category:"survival",status:"merged"},
+      {id:107,title:"Context-aware gameplay music system (day/night/combat/blood moon)",category:"survival",status:"merged"},
+      {id:108,title:"Magazine / Skill Book system (6 series, 36 items)",category:"loot",status:"merged"},
+      {id:109,title:"Magazine series Minecraft-ified names (Steady Steve, Block Brawler, etc.)",category:"loot",status:"merged"},
+      {id:110,title:"Custom biome system (7 biomes, temperature, density, loot bonuses)",category:"survival",status:"merged"},
+      {id:111,title:"Trademark name sweep (zombie names, perk IDs, currency)",category:"docs",status:"merged"}
     ]
   };
 
@@ -480,7 +491,7 @@
     {id:12,title:"XP/Level + Perk system",phase:2,status:"done",complexity:4},
     {id:13,title:"Melee + ranged weapons",phase:2,status:"done",complexity:3},
     {id:14,title:"Armor system + clothing",phase:2,status:"not-started",complexity:3},
-    {id:15,title:"World gen (biomes + city/POI)",phase:2,status:"not-started",complexity:5},
+    {id:15,title:"World gen (biomes + city/POI)",phase:2,status:"partial",complexity:5},
     {id:16,title:"All zombie variants",phase:2,status:"done",complexity:4},
     {id:17,title:"Building + block upgrades + traps",phase:2,status:"not-started",complexity:3},
     {id:18,title:"Loot tables + containers",phase:2,status:"partial",complexity:3},
@@ -488,13 +499,13 @@
     {id:20,title:"Vehicles + vehicle mods",phase:2,status:"not-started",complexity:5},
     {id:21,title:"Electricity system",phase:2,status:"not-started",complexity:4},
     {id:22,title:"Farming + cooking + Dew Collector",phase:2,status:"not-started",complexity:2},
-    {id:23,title:"Skill book / magazine system",phase:2,status:"not-started",complexity:2},
+    {id:23,title:"Skill book / magazine system",phase:2,status:"done",complexity:2},
     {id:24,title:"Stealth system",phase:2,status:"not-started",complexity:3},
     {id:25,title:"Inventory UI overhaul",phase:2,status:"not-started",complexity:4},
     {id:26,title:"Map system",phase:2,status:"not-started",complexity:3},
     {id:27,title:"Multiplayer sync + balancing",phase:3,status:"not-started",complexity:4},
     {id:28,title:"Performance optimization",phase:3,status:"not-started",complexity:5},
-    {id:29,title:"Audio overhaul",phase:3,status:"not-started",complexity:2},
+    {id:29,title:"Audio overhaul",phase:3,status:"partial",complexity:2},
     {id:30,title:"Config GUI (Mod Menu compat)",phase:3,status:"not-started",complexity:2},
     {id:31,title:"Admin commands",phase:3,status:"not-started",complexity:1},
     {id:32,title:"QA, bug fixing, balancing pass",phase:3,status:"not-started",complexity:3},
@@ -708,11 +719,11 @@
     ];
     var remaining = [
       {title:"Custom A* Pathfinder",desc:"Block-break cost weighting: cost = baseCost + (blockHP / zombieDamage) x 0.5. Zombies prefer paths through weakest blocks (doors > windows > drywall > concrete)."},
-      {title:"Spider Zombie Wall Climbing",desc:"Add vertical edges to pathfinding graph for SpiderZombie variant. Enables climbing walls and navigating vertical surfaces."},
+      {title:"Wall Creeper Wall Climbing",desc:"Add vertical edges to pathfinding graph for Wall Creeper variant. Enables climbing walls and navigating vertical surfaces."},
       {title:"Group Coordination",desc:"When 3+ zombies target the same block, damage stacks to simulate coordinated bashing. Faster block destruction in groups."},
       {title:"Charged Zombie Chain Lightning",desc:"On melee hit, scan 3-block radius for additional LivingEntity targets (max 3 chains). Each chain deals 5 HP + Electrocuted debuff (1.5s stun)."},
       {title:"Infernal Zombie Fire Trail",desc:"Every 20 ticks while moving, place a fire trail block at current position. Burns for 5 sec, deals 2 HP/sec. Melee hit applies Burn debuff (5s)."},
-      {title:"Screamer Flee AI",desc:"After screaming to summon reinforcements, Screamer flees from player when within 5 blocks. Priority 1 behavior in the behavior tree."},
+      {title:"Banshee Flee AI",desc:"After screaming to summon reinforcements, Banshee flees from player when within 5 blocks. Priority 1 behavior in the behavior tree."},
       {title:"Smell System Placeholder Hooks",desc:"Register SmellCapability on players. Zombies within 20 blocks detect smell > 15. Gated behind config smell.enabled (default false). Deferred to 3.0."},
       {title:"Spawn Rule Enforcement",desc:"Day/night spawn rates (night = x3), spawn cap formula: maxZombies = baseMax + (dayNumber x 2), capped at config max (default 64 per player)."},
       {title:"POI Zombie Population",desc:"Fill percentage by POI tier (Tier 1: 20-40% to Tier 5: 70-100%), scaled by game day bonus and biome density multiplier per spec section 3.2.1."}
@@ -815,9 +826,9 @@
         "Level up and invest in combat perks"
       ],
       threats: [
-        "Bloated Walkers appear (high HP, area damage on death)",
-        "Spider Zombies can climb walls",
-        "Heatmap is rising \u2014 Screamer scouts may appear",
+        "Bloated Shamblers appear (high HP, area damage on death)",
+        "Wall Creepers can climb walls",
+        "Heatmap is rising \u2014 Banshee scouts may appear",
         "Temperature extremes cause hypothermia or heatstroke"
       ],
       systems: ["Perk Unlocks", "Quality Tiers on Crafted Items", "Temperature Extremes"],
@@ -838,9 +849,9 @@
       ],
       threats: [
         "Zombie block-breaking AI \u2014 they smash through walls",
-        "Bloated Walkers, Spider Zombies, Cop Zombies in the mix",
+        "Bloated Shamblers, Wall Creepers, Riot Husks in the mix",
         "Group coordination \u2014 multiple zombies focus weak points",
-        "Screamer Zombies call reinforcements before fleeing",
+        "Banshee Zombies call reinforcements before fleeing",
         "Running out of ammo or stamina mid-fight"
       ],
       systems: ["Blood Moon Horde", "Block Breaking AI", "Zombie Variants", "Horde Pathfinding"],
@@ -862,7 +873,7 @@
       ],
       threats: [
         "Soldier Zombies (armored, high damage)",
-        "Feral Wight (fast, 60 HP, relentless pursuit)",
+        "Feral Wraith (fast, 60 HP, relentless pursuit)",
         "Nurse Zombies heal nearby undead",
         "POI interiors are dark and densely populated"
       ],
@@ -906,9 +917,9 @@
         "Establish farming for sustainable food and medicine"
       ],
       threats: [
-        "Frozen Lumberjack Zombies (30 HP, cold biome ambush)",
-        "Cop Zombies vomit acid at range",
-        "Mutated Chuck (50 HP, area slam attack)",
+        "Frostbitten Woodsman Zombies (30 HP, cold biome ambush)",
+        "Riot Husk Zombies vomit acid at range",
+        "Mutated Brute (50 HP, area slam attack)",
         "Stealth detection \u2014 zombies can smell careless players"
       ],
       systems: ["Vehicles", "Electricity", "Stealth System", "Farming & Cooking"],
@@ -930,7 +941,7 @@
       ],
       threats: [
         "Behemoth Zombie (400 HP, devastating melee, extreme knockback)",
-        "Demolisher Zombie (160 HP, explosive charge destroys structures)",
+        "Wrecking Husk (160 HP, explosive charge destroys structures)",
         "Extended horde range \u2014 128-block detection radius",
         "All zombie variants active simultaneously",
         "Horde waves last longer and hit harder"
