@@ -1,11 +1,10 @@
 package com.sevendaystominecraft.loot;
 
 import com.sevendaystominecraft.SevenDaysConstants;
+import com.sevendaystominecraft.worldgen.BiomeProperties;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.core.Holder;
-import net.minecraft.core.registries.Registries;
-import net.minecraft.resources.ResourceLocation;
 
 public class LootStageCalculator {
 
@@ -22,21 +21,6 @@ public class LootStageCalculator {
 
     private static int getBiomeBonus(ServerPlayer player) {
         Holder<Biome> biomeHolder = player.level().getBiome(player.blockPosition());
-
-        ResourceLocation biomeLoc = player.level().registryAccess()
-                .lookupOrThrow(Registries.BIOME)
-                .getKey(biomeHolder.value());
-
-        if (biomeLoc == null) return 0;
-
-        String biomeName = biomeLoc.getPath().toLowerCase();
-
-        if (biomeName.contains("wasteland") || biomeName.contains("badlands")) return 25;
-        if (biomeName.contains("burn") || biomeName.contains("charred")) return 15;
-        if (biomeName.contains("desert")) return 10;
-        if (biomeName.contains("snow") || biomeName.contains("frozen") || biomeName.contains("ice")) return 10;
-        if (biomeName.contains("forest") && !biomeName.contains("pine") && !biomeName.contains("taiga")) return 5;
-
-        return 0;
+        return (int) BiomeProperties.getBiomeLootBonus(biomeHolder);
     }
 }

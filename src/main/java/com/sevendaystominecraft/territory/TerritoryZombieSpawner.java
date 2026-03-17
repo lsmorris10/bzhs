@@ -2,10 +2,13 @@ package com.sevendaystominecraft.territory;
 
 import com.sevendaystominecraft.SevenDaysToMinecraft;
 import com.sevendaystominecraft.entity.zombie.BaseSevenDaysZombie;
+import com.sevendaystominecraft.worldgen.BiomeProperties;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Holder;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.EntitySpawnReason;
 import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.block.state.BlockState;
 
 import java.util.List;
@@ -22,7 +25,11 @@ public class TerritoryZombieSpawner {
         Supplier<EntityType<? extends BaseSevenDaysZombie>>[] pool = tier.getZombiePool();
         if (pool.length == 0) return;
 
-        int count = Math.min(tier.getMaxZombies(), Math.max(1, spawnPositions.size()));
+        BlockPos center = spawnPositions.isEmpty() ? record.getOrigin() : spawnPositions.get(0);
+        Holder<Biome> biomeHolder = level.getBiome(center);
+        float densityMult = BiomeProperties.getStats(biomeHolder).zombieDensityMultiplier();
+        int baseCount = Math.min(tier.getMaxZombies(), Math.max(1, spawnPositions.size()));
+        int count = Math.max(1, Math.round(baseCount * densityMult));
         int spawned = 0;
 
         for (int i = 0; i < spawnPositions.size() && spawned < count; i++) {

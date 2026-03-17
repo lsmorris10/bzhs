@@ -188,8 +188,10 @@ Copy the JAR into your Minecraft `mods/` folder (requires NeoForge 21.4.140 for 
 - Sprint fix: client-side `LocalPlayer.aiStep()` mixin prevents rubber-banding
 - Skill books / magazines: 6 series (36 items), per-issue bonuses, series mastery tracking
 
+- Custom biomes: 7 biome definitions (Pine Forest, Forest, Plains, Desert, Snowy Tundra, Burned Forest, Wasteland) with per-biome temperature ranges, zombie density multipliers, and loot tier bonuses
+
 ### Planned / Next
 - Replace placeholder textures with real pixel art (prioritize HUD icons, weapons, workstations)
-- World generation (custom biomes, structures, POIs)
+- Full world generation pipeline (city grid, POI templates, biome placement in overworld)
 - Trader NPCs
 - Vehicle system

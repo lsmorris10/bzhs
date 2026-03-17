@@ -319,7 +319,16 @@ src/main/java/com/sevendaystominecraft/
 
 ## Spec / Roadmap
 The full implementation is tracked in `docs/bzhs_final_spec.md` with 19 phases.
-Milestones 1-9 complete (except #4 Temperature which is partial). Milestone 3 (Debuffs): DONE — all 12 debuff types. Milestone 5 (Heatmap): DONE. Milestone 6 (Loot & Crafting): DONE — workstations, loot containers, scrapping, quality tiers. Milestone 7 (XP/Leveling/Perks): DONE — full perk registry, level-up system, commands, HUD XP bar. Milestone 8 (Blood Moon/Horde Night): DONE. Milestone 9 (HUD): DONE — compass, minimap, player tracking, stats overlay. Milestone 10 (Weapons): DONE — melee + ranged weapons, ammo, crafting recipes. Milestone 11 (Skill Books/Magazines): DONE — 6 series, 36 items, mastery tracking. Next priorities: custom textures/models, world generation, traders.
+Milestones 1-9 complete (except #4 Temperature which is partial). Milestone 3 (Debuffs): DONE — all 12 debuff types. Milestone 5 (Heatmap): DONE. Milestone 6 (Loot & Crafting): DONE — workstations, loot containers, scrapping, quality tiers. Milestone 7 (XP/Leveling/Perks): DONE — full perk registry, level-up system, commands, HUD XP bar. Milestone 8 (Blood Moon/Horde Night): DONE. Milestone 9 (HUD): DONE — compass, minimap, player tracking, stats overlay. Milestone 10 (Weapons): DONE — melee + ranged weapons, ammo, crafting recipes. Milestone 11 (Skill Books/Magazines): DONE — 6 series, 36 items, mastery tracking. Milestone 15 (World Gen — Biomes): PARTIAL — 7 biome definitions with gameplay properties, integrated into temperature/loot/spawning; full world gen pipeline (city grid, POI templates, overworld biome placement) still needed. Next priorities: full world gen pipeline, custom textures/models, traders.
+
+### Biome System (Spec §2)
+- **Package**: `com.sevendaystominecraft.worldgen`
+- **ModBiomes**: 7 ResourceKey<Biome> definitions (pine_forest, forest, plains, desert, snowy_tundra, burned_forest, wasteland)
+- **BiomeProperties**: Gameplay stats per biome — temperature range (°F), zombie density multiplier, loot tier range; fallback mapping for vanilla biomes via `getBaseTemperature()`
+- **BiomeStats.ambientTemperature(dayFraction)**: Calculates ambient temp from biome range + time-of-day modulation
+- **Integration**: `PlayerStatsHandler.estimateAmbientTemperature()` now uses BiomeProperties; `LootStageCalculator.getBiomeBonus()` uses BiomeProperties; `TerritoryZombieSpawner.populate()` scales spawn count by biome density multiplier
+- **Data files**: 7 biome JSONs in `data/sevendaystominecraft/worldgen/biome/` with appropriate temperature, precipitation, sky/fog/water/grass colors, carvers, and vegetation features
+- **Not yet implemented**: Overworld biome source replacement (biomes exist as data but don't yet generate in-world); city/road grid; POI template system; wasteland weather events
 
 ### Magazine / Skill Book System
 - **Package**: `com.sevendaystominecraft.magazine`

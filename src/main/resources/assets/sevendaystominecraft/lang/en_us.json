@@ -109,5 +109,12 @@
   "item.sevendaystominecraft.magazine_dungeon_tactician_4": "Dungeon Tactician #4",
   "item.sevendaystominecraft.magazine_dungeon_tactician_5": "Dungeon Tactician #5",
   "item.sevendaystominecraft.magazine_dungeon_tactician_6": "Dungeon Tactician #6",
-  "item.sevendaystominecraft.magazine_dungeon_tactician_7": "Dungeon Tactician #7"
+  "item.sevendaystominecraft.magazine_dungeon_tactician_7": "Dungeon Tactician #7",
+  "biome.sevendaystominecraft.pine_forest": "Pine Forest",
+  "biome.sevendaystominecraft.forest": "Forest",
+  "biome.sevendaystominecraft.plains": "Plains",
+  "biome.sevendaystominecraft.desert": "Desert",
+  "biome.sevendaystominecraft.snowy_tundra": "Snowy Tundra",
+  "biome.sevendaystominecraft.burned_forest": "Burned Forest",
+  "biome.sevendaystominecraft.wasteland": "Wasteland"
 }

@@ -6,6 +6,9 @@ import com.sevendaystominecraft.block.ModBlocks;
 import com.sevendaystominecraft.config.SurvivalConfig;
 import com.sevendaystominecraft.network.SyncPlayerStatsPayload;
 import com.sevendaystominecraft.perk.Attribute;
+import com.sevendaystominecraft.worldgen.BiomeProperties;
+
+import net.minecraft.core.Holder;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
@@ -564,14 +567,12 @@ public class PlayerStatsHandler {
 
     private static float estimateAmbientTemperature(Player player, boolean nearHeatSource) {
         SurvivalConfig cfg = SurvivalConfig.INSTANCE;
-        float biomeTemp = player.level().getBiome(player.blockPosition()).value().getBaseTemperature();
+        Holder<Biome> biomeHolder = player.level().getBiome(player.blockPosition());
+        BiomeProperties.BiomeStats biomeStats = BiomeProperties.getStats(biomeHolder);
 
-        float fahrenheit = 10.0f + (biomeTemp * 55.0f);
-
-        long dayTime = player.level().getDayTime() % SevenDaysConstants.DAY_LENGTH;
-        if (dayTime > SevenDaysConstants.NIGHT_START && dayTime < SevenDaysConstants.NIGHT_END) {
-            fahrenheit -= 10.0f;
-        }
+        long dayTimeFull = player.level().getDayTime() % SevenDaysConstants.DAY_LENGTH;
+        float dayFraction = (float) dayTimeFull / SevenDaysConstants.DAY_LENGTH;
+        float fahrenheit = biomeStats.ambientTemperature(dayFraction);
 
         double altitude = player.getY();
         if (altitude > 64) {
