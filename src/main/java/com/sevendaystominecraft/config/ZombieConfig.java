@@ -207,7 +207,7 @@ public class ZombieConfig {
         copDamage = builder.defineInRange("damage", 0.6, 0.1, 200.0);
         copSpeed = builder.defineInRange("speed", 1.2, 0.1, 5.0);
         copBileDamage = builder.defineInRange("bileDamage", 5.0, 0.1, 100.0);
-        copBileRange = builder.defineInRange("bileRange", 8, 4, 20);
+        copBileRange = builder.defineInRange("bileRange", 10, 4, 20);
         builder.pop();
 
         builder.push("screamer");
@@ -295,7 +295,7 @@ public class ZombieConfig {
         chargedDamageMult = builder.defineInRange("damageMultiplier", 1.3, 1.0, 5.0);
         chargedSpeedMult = builder.defineInRange("speedMultiplier", 1.2, 1.0, 3.0);
         chargedChainTargets = builder.defineInRange("chainTargets", 3, 1, 8);
-        chargedChainDamage = builder.defineInRange("chainDamage", 1.0, 0.1, 50.0);
+        chargedChainDamage = builder.defineInRange("chainDamage", 5.0, 0.1, 50.0);
         builder.pop();
 
         builder.push("infernal");

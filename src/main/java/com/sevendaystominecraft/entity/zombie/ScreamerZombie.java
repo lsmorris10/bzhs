@@ -142,7 +142,7 @@ public class ScreamerZombie extends BaseSevenDaysZombie {
             if (screamer.totalScreams <= 0) return false;
             if (screamer.screamCooldown < SCREAM_COOLDOWN_TICKS - 10) return false;
             LivingEntity target = screamer.getTarget();
-            return target != null && target.isAlive() && screamer.distanceTo(target) < 10.0;
+            return target != null && target.isAlive() && screamer.distanceTo(target) < 5.0;
         }
 
         @Override

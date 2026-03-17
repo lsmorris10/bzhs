@@ -89,6 +89,11 @@ public class CopZombie extends BaseSevenDaysZombie {
         projectile.setPos(getX(), getEyeY() - 0.1, getZ());
         level().addFreshEntity(projectile);
 
+        float bileDamage = ZombieConfig.INSTANCE.copBileDamage.get().floatValue();
+        if (level() instanceof ServerLevel sl) {
+            target.hurtServer(sl, damageSources().mobAttack(this), bileDamage);
+        }
+
         playSound(SoundEvents.LLAMA_SPIT, 1.5f, 0.5f);
         bileCooldown = 60;
     }
