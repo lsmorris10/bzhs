@@ -18,9 +18,10 @@ A total conversion mod for **Minecraft 1.21.4** (NeoForge) inspired by **7 Days 
 
 ### Survival Stats & HUD
 - Custom **Food**, **Water**, **Stamina**, and **Temperature** systems replacing vanilla hunger/regen
-- Full HUD overlay with stat bars, day counter, temperature readout, debuff display, and XP bar
+- **Icon-based HUD** — hearts, food, water, and armor rendered as icon rows (replaces old stat bars)
 - 360° **compass strip** at top-center with cardinal/intercardinal markers and heat level indicator
 - **Minimap** in top-right corner with terrain colors, player dot, and nearby player tracking
+- Day counter, temperature readout, debuff display, and XP bar
 - Player base health set to **100 HP** (50 hearts) for balanced combat against custom zombies
 - Vanilla hunger bar, health hearts, and passive regen disabled via Mixins
 
@@ -44,6 +45,18 @@ A total conversion mod for **Minecraft 1.21.4** (NeoForge) inspired by **7 Days 
 - Zombies do NOT burn in sunlight
 - Name tags and HP bars only visible with line-of-sight (not through walls)
 
+### Zombie AI Special Abilities
+- **Block breaking** — zombies path to and break blocks separating them from targets
+- **Heatmap investigation** — zombies in horde pathfinding mode route toward high-heat chunks
+- **Variant abilities**: Cop acid spit, Demolisher ground pound, Spider wall climbing, Charged chain lightning, Screamer horde spawning, Behemoth healing aura, Vulture dive attacks
+- Fully layered priority behavior tree — target acquisition, ability selection, and movement all conditions-checked
+
+### Basic Weapons System
+- **Melee**: Stone Axe, Wooden Club, Baseball Bat, Sledgehammer, Hunting Knife, Machete, Iron Spear, Stun Baton, Steel Knuckles, Wrench, Nailgun
+- **Ranged**: Blunderbuss, Pipe Pistol, Pipe Rifle, Pipe Shotgun, Wooden Bow, Primitive Bow, Compound Bow, Compound Crossbow, Pistol, SMG, Shotgun, Hunting Rifle, AK-47, M60, Rocket Launcher
+- All weapons use quality tier stat multipliers (×0.70 Poor → ×1.50 Legendary)
+- Ranged weapons consume ammo (crafted at Workbench or directly from inventory)
+
 ### Blood Moon / Horde Night
 - Every 7th night triggers a blood moon with escalating zombie waves
 - Full timeline: warning at Day 6 evening → red sky → siren → horde waves → dawn cleanup
@@ -61,6 +74,7 @@ A total conversion mod for **Minecraft 1.21.4** (NeoForge) inspired by **7 Days 
   - 100: Continuous wave mode until heat drops
 - Heat decays over time, radiates to neighboring chunks
 - Spawning paused during blood moon
+- Zombies in horde mode investigate and route toward high-heat chunks
 
 ### Loot & Crafting
 - **17 Core Materials** + Dukes Casino Token currency
@@ -126,6 +140,8 @@ Five server-side config files are generated in the `serverconfig/` folder:
 |-------|-------------|
 | [`docs/heatmap_guide.md`](docs/heatmap_guide.md) | Heatmap system mechanics with exact values |
 | [`docs/debuffs_guide.md`](docs/debuffs_guide.md) | All 12 debuffs with triggers, effects, and durations |
+| [`docs/crafting_guide.md`](docs/crafting_guide.md) | Full crafting system: workstations, recipes, quality tiers, materials |
+| [`docs/texture_audit.md`](docs/texture_audit.md) | Placeholder texture audit report (349 of 388 textures need replacement) |
 | [`docs/edge-case-testing.md`](docs/edge-case-testing.md) | Edge case testing scenarios |
 | [`docs/bzhs_final_spec.md`](docs/bzhs_final_spec.md) | Full implementation spec (2273 lines, 20 sections) |
 
@@ -151,21 +167,28 @@ Copy the JAR into your Minecraft `mods/` folder (requires NeoForge 21.4.140 for 
 - Core survival stats & HUD
 - 12 debuff types with triggers and effects
 - 18 zombie variants with special mechanics
+- Zombie AI special abilities (block breaking, heatmap investigation, horde pathfinding, variant abilities)
 - Blood moon / horde night system
 - Heatmap activity-based spawning
-- Loot containers, workstations, and crafting
+- Loot containers, workstations, and crafting (all 7 workstations processing recipes)
 - XP, leveling, and 45-perk system
+- Basic weapons system (melee + ranged, quality-scaled)
+- Icon-based HUD (hearts, food, water, armor icon rows)
 - Compass, minimap, and player tracking
 - Extended day cycle via slower-tick refactor (TIME_SCALE=2, vanilla 24k dayTime preserved)
 - 100 HP player base health
-- Vanilla mob damage scaling for all mobs (fall, drowning, fire, lava, cactus, plus all vanilla mob attacks proportionally scaled to 100 HP)
-- LevelTimeOfDayMixin crash fix (target corrected to `getSunAngle`)
-- Mod JAR and metadata renamed to match BZHS branding
-- Landing page download button with GitHub Releases API integration
+- Vanilla mob damage scaling for all mobs
+- Placeholder texture audit (`docs/texture_audit.md`)
 
-### In Progress / Next
-- Sprint bug fix (client-side Mixin)
-- Custom textures and models for zombie variants
+### In Progress
+- Sound system foundation
+- Territory POIs (location-specific world generation points of interest)
+- 3D weapon animations via Geckolib
+
+### Planned / Next
+- Replace 349 placeholder textures with real pixel art (prioritize HUD icons, weapons, workstations)
+- Sprint bug fix (client-side Mixin on `LocalPlayer.aiStep()`)
 - World generation (custom biomes, structures, POIs)
 - Skill books
 - Trader NPCs
+- Vehicle system

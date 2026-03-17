@@ -25,25 +25,38 @@
 
 **Completed Milestones:** 1 (Scaffold), 2 (Player Stats), 3 (Debuffs — all 12 types), 4 (Temperature — partial), 5 (Heatmap), 6 (Loot & Crafting), 7 (XP/Leveling/Perks), 8 (Blood Moon/Horde Night), 9 (HUD — compass, minimap, stats overlay).
 
-**March 13–15 Completed Work:**
-- Vanilla damage scaling to 100 HP — fall damage, drowning, fire, lava, cactus all proportionally scaled so 100 HP feels equivalent to vanilla 20 HP.
-- Day cycle doubled via slower-tick refactor (TIME_SCALE=2) — game time advances 1 tick per 2 server ticks, keeping vanilla 24k dayTime scale intact. Sky rendering, F3 day counter, and all vanilla time logic work natively.
-- Dual zombie speed system — zombies get a night speed bonus when dayTime is in the night range (13000–23000), AND a separate darkness speed bonus when both block light and sky light are ≤ 7. When both conditions are true, the higher bonus is used (not additive). This replaced the old tick-based night-only speed system.
-- Coal vein nerf — reduced coal ore vein sizes to balance resource acquisition.
-- Project rebranded to "Brutal Zombie Horde Survival" (BZHS) — mod ID, display name, and all user-facing references updated (#43).
-- Landing page created and published, then upgraded to V2 with improved design (#40, #41, #45).
-- `.gitignore` updated to exclude `public/` folder artifacts (#46).
-- README.md status section restructured for clarity (#47).
-- Download button upgraded to fetch latest JAR directly from GitHub Releases API (#55, #56, #58).
-- Mod JAR and metadata renamed to match BZHS branding (#57).
-- LevelTimeOfDayMixin crash fix — target corrected from `getTimeOfDay` to `getSunAngle` (#59).
-- Day cycle refactored to slower-tick approach — vanilla `setDayTime` incremented at 0.5 ticks/server tick, eliminating need for custom sky rendering (#60).
-- Vanilla mob damage scaling extended to all vanilla mobs — all mob attack damage proportionally scaled for 100 HP balance (#61).
+**March 16–17 Major Completed Work:**
+- Zombie AI behavior tree refactored (#72) — fully layered, priority-ordered, conditions-checked AI system
+- Gameplay bugfixes (#76) — assorted client/server crashes and balance corrections
+- Textures, models, and blockstates added and organized (#77)
+- New world startup fixes — mod now correctly initializes a fresh world without errors (#78)
+- Zombie block breaking AI fix (#79) — path-to-target correctly triggers block break behavior
+- Minimap fix (#80) — terrain rendering and player tracking corrected
+- HP display fix (#81) — health readout now accurate at all HP values
+- Health and combat rebalance (#82, #83) — zombie HP/damage tuned, player survivability improved
+- Item texture fixes (#84) — missing/broken item textures resolved
+- Container GUI fixes (#85) — workstation and loot container GUIs stable
+- Language file updates (#89) — all new items, blocks, and UI strings localized
+- Deprecated API fixes (#91) — NeoForge API call sites updated to current 1.21.4 signatures
+- Legacy config cleanup (#92) — stale config keys removed, config files reorganized
+- Zombie AI special abilities (#93) — block breaking, heatmap investigation trigger, horde pathfinding, variant-specific abilities (acid spit, charge, ground pound, etc.)
+- Workstation recipe processing (#94) — all 7 workstations now process recipes with correct fuel logic and output
+- Basic weapons system (#95) — melee and ranged weapons implemented with damage, range, and attack speed
+- Placeholder texture audit (#97) — full audit run; 349 of 388 textures flagged as placeholder (report at `docs/texture_audit.md`)
+- Icon-based HUD (#100) — stat bars replaced with icon rows (hearts, food, water, armor icons)
+- Texture processing tool (#101) — batch tool for generating and validating texture assets
+- Funding page (#104) — Ko-fi/Patreon support page added to landing site
 
-**Next Tasks:**
-- **Sprint bug fix** — Client-side Mixin on `LocalPlayer.aiStep()` to properly cancel sprint when stamina is depleted.
-- **Custom textures & models** — Replace scaled zombie renderers with proper custom models and textures for each variant.
-- **World generation** — Custom biomes, structures, and POI generation per the spec.
+**Current Focus / In Progress:**
+- Sound system foundation (in progress)
+- Territory POIs — location-specific points of interest for world generation
+- 3D weapon animations via Geckolib
+
+**Next Up:**
+- Merge sound system and territory POI tasks once complete
+- Geckolib integration for animated weapon/zombie models
+- Sprint bug fix (client-side Mixin on `LocalPlayer.aiStep()`)
+- Custom textures — replace 349 placeholder textures with real pixel art (prioritize HUD icons, weapons, workstations)
 
 ---
 
@@ -54,27 +67,55 @@
    - **Not on today's test list.** This is a known issue that requires a proper client-side fix.
 
 2. **F3 DEBUG SCREEN DAY COUNTER** (likely resolved):
-   - Previously showed ~2x the actual day when the day cycle used a raw 48k-tick `dayTime`. After the slower-tick refactor (#60), `dayTime` stays on a vanilla 24k scale (time advances 1 tick every 2 server ticks via TIME_SCALE=2). F3 day counter should now match the HUD. Verify during next test session.
+   - After the slower-tick refactor (#60), `dayTime` stays on a vanilla 24k scale. F3 day counter should now match the HUD. Verify during next test session.
+
+3. **PLACEHOLDER TEXTURES (349 of 388)** — Most item, GUI, and some block textures are auto-generated colored squares. Gameplay is functional but visually unpolished. Full list in `docs/texture_audit.md`.
 
 ---
 
-## Next Session — Debug & Test Checklist (March 16+)
+## Next Session — Debug & Test Checklist (March 17+)
 
-- **P1 (game-breaking):** Does the mod build and launch without crashes? Verify LevelTimeOfDayMixin crash fix (#59) — no more startup crash on `getSunAngle`.
-- **P2 (core — day cycle):** Slower-tick day cycle (TIME_SCALE=2) — game time advances 1 tick every 2 server ticks, so one full day takes ~40 real minutes instead of ~20. Verify: sun/moon visual cycle uses vanilla 24k rendering naturally (no custom sky code). F3 day counter should now be correct (dayTime is still 24k-based). HUD day counter should also match.
-- **P3 (core — mob damage):** Vanilla mob damage scaling — do all vanilla mob attacks (zombies, skeletons, spiders, creeper explosions, etc.) feel proportional to 100 HP? Environmental damage (fall, drowning, fire, lava, cactus) still correct?
-- **P4 (core — dual zombie speed):** Dual speed system — do zombies get the night speed bonus during nighttime (dayTime 13000–23000)? Do they also get the darkness speed bonus in dark caves (block light + sky light ≤ 7) during daytime? Do torches slow them down? When both night and darkness apply, verify max bonus is used (not additive).
-- **P5 (HUD):** Compass at top-center showing cardinal directions? Minimap in top-right showing terrain + player dots? Stats bars (HP/Food/Water/Stamina) rendering without overlap?
-- **P6 (heatmap):** Mining/torches/sprinting raise chunk heat? Scouts at 25, Screamer at 50, mini-horde at 75, waves at 100?
-- **P7 (combat):** Zombie name tags + HP bars hidden behind walls? Sunlight doesn't burn BZHS zombies?
-- **P8 (survival stats):** Sprint bug still present (known, deferred)? Stamina drain/regen rates feel correct? Food/water drain working?
-- **P9 (blood moon):** Every 7 days, warning → red sky → siren → horde → dawn burn sequence works? Blood moon timing correct with slower-tick cycle?
-- **P10 (debuffs):** Bleeding/Infection/Fracture/etc. apply and clear correctly? `/bzhs cleardebuffs` works?
-- **P11 (landing page):** Verify published landing page loads correctly, download button fetches latest release JAR, and links work.
+- **P1 — Build & Launch:** Does the mod build cleanly? Any Mixin or registry errors on startup?
+- **P2 — Basic Weapons (melee):** Stone Axe, Wooden Club, Baseball Bat, Sledgehammer — do they deal correct damage with quality scaling? Attack speed correct?
+- **P3 — Basic Weapons (ranged):** Pipe Pistol, Primitive Bow — do they fire? Ammo consumption correct? Hit detection working?
+- **P4 — Workstation Recipe Processing:** Campfire, Forge, Workbench — do recipes process with correct fuel consumption and output? Does Forge smelting take the right time?
+- **P5 — Zombie AI Special Abilities:** Cop acid spit, Demolisher ground pound, Spider climbing, Charged chain lightning — do variant abilities trigger correctly? Does block breaking AI activate on targeted blocks?
+- **P6 — Icon-Based HUD:** Hearts, food, water, armor shown as icon rows (not stat bars)? Icons update correctly as values change? No overlap with compass or minimap?
+- **P7 — Heatmap + Zombie Investigation:** Does horde pathfinding respond to heat? Do zombies investigate high-heat areas?
+- **P8 — Container GUIs:** Open all workstation and loot container GUIs — do they render correctly and accept/process items?
+- **P9 — World Startup:** Does a fresh new world generate and load without errors or crashes?
+- **P10 — Blood Moon:** Every 7th night still triggers correctly with the rebalanced zombie HP/damage?
+- **P11 — Territory POIs (once merged):** Do POI structures spawn in expected locations and biomes?
+- **P12 — Sound System (once merged):** Do zombie sounds, combat sounds, and ambient sounds play correctly? Any missing sound events?
+- **P13 — Geckolib Animations (once merged):** Do animated weapon and zombie models render without errors?
+- **P14 — Sprint Bug (deferred):** Sprint still broken? (Expected — not fixed yet.)
+- **P15 — Landing Page + Funding:** Funding page loads? Ko-fi/Patreon links work?
 
 ---
 
 ## Recent Completed Work
+
+**March 16–17 Session (Tasks #72–#104)**
+- Zombie AI behavior tree refactored (#72)
+- Gameplay bugfixes (#76)
+- Textures/models/blockstates (#77)
+- New world startup fixes (#78)
+- Zombie block breaking AI fix (#79)
+- Minimap fix (#80)
+- HP display fix (#81)
+- Health and combat rebalance (#82, #83)
+- Item texture fixes (#84)
+- Container GUI fixes (#85)
+- Language file updates (#89)
+- Deprecated API fixes (#91)
+- Legacy config cleanup (#92)
+- Zombie AI special abilities (#93)
+- Workstation recipe processing (#94)
+- Basic weapons system (#95)
+- Placeholder texture audit (#97) — `docs/texture_audit.md`
+- Icon-based HUD (#100)
+- Texture processing tool (#101)
+- Funding page (#104)
 
 **March 14–15 Session**
 - Download button upgraded to fetch latest JAR from GitHub Releases API (#55)
@@ -95,8 +136,8 @@
 
 **March 13 Session**
 - Vanilla damage scaling to 100 HP (fall, drowning, fire, lava, cactus proportionally scaled)
-- 48,000-tick day cycle sky fix (sun/moon visual rotation corrected) — **superseded by slower-tick refactor (#60); dayTime now uses vanilla 24k scale**
-- Darkness-based zombie speed (light-level-based, replaces tick-based night speed) — **later expanded to dual system: night dayTime check + darkness light-level check (#66)**
+- 48,000-tick day cycle sky fix — **superseded by slower-tick refactor (#60)**
+- Darkness-based zombie speed — **later expanded to dual system: night dayTime check + darkness light-level check (#66)**
 - Coal vein nerf (reduced ore vein sizes)
 
 **March 12 Late-Session Work [MERGED]**
@@ -109,7 +150,7 @@
 - Debuffs system — Bleeding, Infection, Dysentery, Sprain, Fracture with triggers and cures
 - Stats HUD overlap fix (moved down below compass, removed background)
 - Night zombie speed increased to 2.25x
-- Day cycle doubled to 48,000 ticks — **superseded by slower-tick refactor (#60); dayTime now stays on vanilla 24k scale, time advances at half speed via TIME_SCALE=2**
+- Day cycle doubled to 48,000 ticks — **superseded by slower-tick refactor (#60)**
 - Debuffs persistence bug fixed (twice — `/bzhs cleardebuffs` command + `copyOnDeath` removal)
 - Debuffs guide created (`docs/debuffs_guide.md`)
 - Player base health set to 100 HP
