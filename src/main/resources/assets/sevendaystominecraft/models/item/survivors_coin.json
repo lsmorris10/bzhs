@@ -1,6 +1,6 @@
 {
   "parent": "minecraft:item/generated",
   "textures": {
-    "layer0": "sevendaystominecraft:item/dukes_casino_token"
+    "layer0": "sevendaystominecraft:item/survivors_coin"
   }
 }

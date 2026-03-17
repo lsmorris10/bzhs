@@ -172,12 +172,12 @@ public class LootContainerBlockEntity extends BlockEntity {
             case CARDBOARD_BOX -> pickRandom(random, lootStage,
                     ModItems.IRON_SCRAP, ModItems.MECHANICAL_PARTS, ModItems.DUCT_TAPE, ModItems.POLYMER);
             case GUN_SAFE -> pickRandom(random, lootStage,
-                    ModItems.MECHANICAL_PARTS, ModItems.FORGED_IRON, ModItems.FORGED_STEEL, ModItems.DUKES_CASINO_TOKEN);
+                    ModItems.MECHANICAL_PARTS, ModItems.FORGED_IRON, ModItems.FORGED_STEEL, ModItems.SURVIVORS_COIN);
             case MUNITIONS_BOX -> pickRandom(random, lootStage,
                     ModItems.IRON_SCRAP, ModItems.LEAD, ModItems.NITRATE, ModItems.MECHANICAL_PARTS, ModItems.FORGED_STEEL);
             case SUPPLY_CRATE -> pickRandom(random, lootStage,
                     ModItems.FORGED_IRON, ModItems.FORGED_STEEL, ModItems.MECHANICAL_PARTS,
-                    ModItems.ELECTRICAL_PARTS, ModItems.POLYMER, ModItems.DUKES_CASINO_TOKEN);
+                    ModItems.ELECTRICAL_PARTS, ModItems.POLYMER, ModItems.SURVIVORS_COIN);
             case KITCHEN_CABINET -> pickRandomVanilla(random,
                     Items.BREAD, Items.APPLE, Items.COOKED_BEEF, Items.CARROT);
             case MEDICINE_CABINET -> pickRandomVanilla(random,

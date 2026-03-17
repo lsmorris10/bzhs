@@ -343,7 +343,7 @@ Milestones 1-9 complete (except #4 Temperature which is partial). Milestone 3 (D
 - Each magazine is stacksTo(1), consumed on use, cannot be re-read
 
 ## Loot & Crafting System (Spec §6) — DONE
-- **Items**: 17 core materials + Dukes Casino Token registered via ModItems with creative tabs
+- **Items**: 17 core materials + Survivor's Coin registered via ModItems with creative tabs
 - **Quality Tiers**: T1 (Poor, ×0.7) → T6 (Legendary, ×1.5) with color codes and mod slot scaling
 - **Workstations**: 7 workstation blocks (Campfire, Grill, Workbench, Forge, Cement Mixer, Chemistry Station, Advanced Workbench) with block entities, container menus, and GUI screens; fuel-based workstations tick to process items
 - **Loot Containers**: 8 loot container blocks (Trash Pile, Cardboard Box, Gun Safe, Munitions Box, Supply Crate, Kitchen Cabinet, Medicine Cabinet, Bookshelf) with loot generation scaled by player loot stage and configurable respawn timers
@@ -359,17 +359,17 @@ Milestones 1-9 complete (except #4 Temperature which is partial). Milestone 3 (D
   - Formula: `XP_to_next = floor(1000 × level ^ 1.05)` — handles multi-level gains
   - Each level-up: +1 perk point; every 10 levels: +1 bonus attribute point
 - **PerkRegistry**: 45 perks total (8 per attribute tree + 5 Tier-10 masteries)
-  - Strength: Brawler, Pummel Pete, Skull Crusher, Sexual Tyrannosaurus, Master Chef, Pack Mule, Miner 69er, Mother Lode, Titan
-  - Perception: Archery, Gunslinger, Rifle Guy, Demolitions Expert, Lock Picking, Lucky Looter, Treasure Hunter, Spear Master, Eagle Eye
-  - Fortitude: Healing Factor, Iron Gut, Rule 1 Cardio, Living Off the Land, Pain Tolerance, Heavy Armor, Well Insulated, Self-Medicated, Unkillable
-  - Agility: Light Armor, Parkour, Hidden Strike, From the Shadows, Deep Cuts, Run and Gun, Flurry of Blows, Gunslinger (Agility), Ghost
-  - Intellect: Advanced Engineering, Grease Monkey, Better Barter, Daring Adventurer, Physician, Electrocutioner, Robotics Inventor, Charismatic Nature, Mastermind
+  - Strength: Brawler, Iron Fists, Skull Crusher, Unstoppable Force, Campfire Cook, Pack Mule, Deep Striker, Deep Veins, Titan
+  - Perception: Archery, Gunslinger, Rifle Guy, Demolitions Expert, Lock Picking, Keen Scavenger, Treasure Hunter, Spear Master, Eagle Eye
+  - Fortitude: Healing Factor, Iron Gut, Rule 1 Cardio, Green Thumb, Pain Tolerance, Heavy Armor, Well Insulated, Field Medic, Unkillable
+  - Agility: Light Armor, Parkour, Shadow Strike, Nightstalker, Deep Cuts, Run and Gun, Flurry of Blows, Gunslinger (Agility), Ghost
+  - Intellect: Advanced Engineering, Gearhead, Better Barter, Bold Explorer, Physician, Electrocutioner, Robotics Inventor, Charismatic Nature, Mastermind
 - **Active perk effects**:
   - Healing Factor: +20% health regen per rank
   - Rule 1 Cardio: +10% stamina regen + 5% sprint speed per rank
-  - Sexual Tyrannosaurus: -15% stamina cost on all actions per rank
+  - Unstoppable Force: -15% stamina cost on all actions per rank
   - Pain Tolerance: -10% damage taken per rank
-  - Miner 69er: +15% mining speed per rank
+  - Deep Striker: +15% mining speed per rank
   - Well Insulated: ±10°F comfort zone per rank
   - Unkillable (Fortitude T10): Fatal damage → survive at 1 HP + 10s invulnerability (60 min cooldown)
   - Ghost (AGI T10): Stealth kills produce zero heatmap noise

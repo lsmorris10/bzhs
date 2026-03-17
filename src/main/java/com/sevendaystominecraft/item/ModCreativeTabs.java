@@ -47,7 +47,7 @@ public class ModCreativeTabs {
                         output.accept(ModItems.FORGED_STEEL.get());
                         output.accept(ModItems.ACID.get());
                         output.accept(ModItems.POLYMER.get());
-                        output.accept(ModItems.DUKES_CASINO_TOKEN.get());
+                        output.accept(ModItems.SURVIVORS_COIN.get());
                         output.accept(ModItems.CONCRETE_MIX.get());
                         output.accept(ModItems.ANTIBIOTICS.get());
                         output.accept(Items.GUNPOWDER);

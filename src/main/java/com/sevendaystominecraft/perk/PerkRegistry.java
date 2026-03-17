@@ -19,25 +19,25 @@ public class PerkRegistry {
         register(new PerkDefinition("brawler", "Brawler", Attribute.STRENGTH,
                 5, new int[]{1, 2, 3, 5, 7},
                 "+10% fist/knuckle damage per rank", false));
-        register(new PerkDefinition("pummel_pete", "Pummel Pete", Attribute.STRENGTH,
+        register(new PerkDefinition("iron_fists", "Iron Fists", Attribute.STRENGTH,
                 5, new int[]{1, 2, 4, 6, 8},
                 "+10% club damage per rank, rank 5: 25% knockdown chance", false));
         register(new PerkDefinition("skull_crusher", "Skull Crusher", Attribute.STRENGTH,
                 5, new int[]{1, 3, 5, 7, 9},
                 "+10% sledgehammer damage, +1 block damage per rank", false));
-        register(new PerkDefinition("sexual_tyrannosaurus", "Sexual Tyrannosaurus", Attribute.STRENGTH,
+        register(new PerkDefinition("unstoppable_force", "Unstoppable Force", Attribute.STRENGTH,
                 4, new int[]{2, 4, 6, 8},
                 "-15% stamina cost on power attacks per rank", false));
-        register(new PerkDefinition("master_chef", "Master Chef", Attribute.STRENGTH,
+        register(new PerkDefinition("campfire_cook", "Campfire Cook", Attribute.STRENGTH,
                 4, new int[]{1, 3, 5, 7},
                 "Unlock cooking recipes per rank", false));
         register(new PerkDefinition("pack_mule", "Pack Mule", Attribute.STRENGTH,
                 4, new int[]{1, 3, 5, 7},
                 "+10 slots carry capacity per rank", false));
-        register(new PerkDefinition("miner_69er", "Miner 69er", Attribute.STRENGTH,
+        register(new PerkDefinition("deep_striker", "Deep Striker", Attribute.STRENGTH,
                 5, new int[]{1, 2, 4, 6, 8},
                 "+15% mining speed, +1 block damage per rank", false));
-        register(new PerkDefinition("mother_lode", "Mother Lode", Attribute.STRENGTH,
+        register(new PerkDefinition("deep_veins", "Deep Veins", Attribute.STRENGTH,
                 3, new int[]{3, 5, 7},
                 "+20% ore yield per rank", false));
     }
@@ -58,7 +58,7 @@ public class PerkRegistry {
         register(new PerkDefinition("lock_picking", "Lock Picking", Attribute.PERCEPTION,
                 3, new int[]{3, 5, 7},
                 "Pick locks faster, higher tier locks per rank", false));
-        register(new PerkDefinition("lucky_looter", "Lucky Looter", Attribute.PERCEPTION,
+        register(new PerkDefinition("keen_scavenger", "Keen Scavenger", Attribute.PERCEPTION,
                 5, new int[]{1, 2, 4, 6, 8},
                 "+10% loot quality bonus per rank", false));
         register(new PerkDefinition("treasure_hunter", "Treasure Hunter", Attribute.PERCEPTION,
@@ -79,7 +79,7 @@ public class PerkRegistry {
         register(new PerkDefinition("rule1_cardio", "Rule 1: Cardio", Attribute.FORTITUDE,
                 3, new int[]{1, 3, 5},
                 "+10% stamina regen, +5% sprint speed per rank", false));
-        register(new PerkDefinition("living_off_the_land", "Living Off the Land", Attribute.FORTITUDE,
+        register(new PerkDefinition("green_thumb", "Green Thumb", Attribute.FORTITUDE,
                 3, new int[]{1, 3, 5},
                 "+1 crop yield per rank from farming", false));
         register(new PerkDefinition("pain_tolerance", "Pain Tolerance", Attribute.FORTITUDE,
@@ -91,7 +91,7 @@ public class PerkRegistry {
         register(new PerkDefinition("well_insulated", "Well Insulated", Attribute.FORTITUDE,
                 3, new int[]{3, 5, 7},
                 "+-10F comfort zone expansion per rank", false));
-        register(new PerkDefinition("self_medicated", "Self-Medicated", Attribute.FORTITUDE,
+        register(new PerkDefinition("field_medic", "Field Medic", Attribute.FORTITUDE,
                 4, new int[]{2, 4, 6, 8},
                 "Medical items +25% effectiveness per rank", false));
     }
@@ -103,10 +103,10 @@ public class PerkRegistry {
         register(new PerkDefinition("parkour", "Parkour", Attribute.AGILITY,
                 4, new int[]{1, 3, 5, 7},
                 "-25% fall damage, +0.5 jump height at rank 4", false));
-        register(new PerkDefinition("hidden_strike", "Hidden Strike", Attribute.AGILITY,
+        register(new PerkDefinition("shadow_strike", "Shadow Strike", Attribute.AGILITY,
                 5, new int[]{1, 2, 4, 6, 8},
                 "+20% sneak attack multiplier per rank", false));
-        register(new PerkDefinition("from_the_shadows", "From the Shadows", Attribute.AGILITY,
+        register(new PerkDefinition("nightstalker", "Nightstalker", Attribute.AGILITY,
                 3, new int[]{3, 5, 7},
                 "Reduce detection range by 20% per rank", false));
         register(new PerkDefinition("deep_cuts", "Deep Cuts", Attribute.AGILITY,
@@ -127,13 +127,13 @@ public class PerkRegistry {
         register(new PerkDefinition("advanced_engineering", "Advanced Engineering", Attribute.INTELLECT,
                 5, new int[]{1, 2, 4, 6, 8},
                 "Unlock workstation tiers + craft quality bonus per rank", false));
-        register(new PerkDefinition("grease_monkey", "Grease Monkey", Attribute.INTELLECT,
+        register(new PerkDefinition("gearhead", "Gearhead", Attribute.INTELLECT,
                 5, new int[]{1, 3, 5, 7, 9},
                 "Unlock vehicle tiers per rank", false));
         register(new PerkDefinition("better_barter", "Better Barter", Attribute.INTELLECT,
                 5, new int[]{1, 2, 3, 5, 7},
                 "-5% trader prices per rank, secret stock at rank 5", false));
-        register(new PerkDefinition("daring_adventurer", "Daring Adventurer", Attribute.INTELLECT,
+        register(new PerkDefinition("bold_explorer", "Bold Explorer", Attribute.INTELLECT,
                 4, new int[]{1, 3, 5, 7},
                 "Better quest rewards, +1 quest choice at rank 4", false));
         register(new PerkDefinition("physician", "Physician", Attribute.INTELLECT,

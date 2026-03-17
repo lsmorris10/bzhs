@@ -378,7 +378,7 @@ public class PlayerStatsHandler {
     }
 
     public static float getMiningSpeedMultiplier(SevenDaysPlayerStats stats) {
-        int minerRank = stats.getPerkRank("miner_69er");
+        int minerRank = stats.getPerkRank("deep_striker");
         if (minerRank > 0) {
             return 1.0f + (0.15f * minerRank);
         }
@@ -386,9 +386,9 @@ public class PlayerStatsHandler {
     }
 
     private static float getStaminaCostMultiplier(SevenDaysPlayerStats stats) {
-        int sexTrexRank = stats.getPerkRank("sexual_tyrannosaurus");
-        if (sexTrexRank > 0) {
-            return 1.0f - (0.15f * sexTrexRank);
+        int unstoppableRank = stats.getPerkRank("unstoppable_force");
+        if (unstoppableRank > 0) {
+            return 1.0f - (0.15f * unstoppableRank);
         }
         return 1.0f;
     }
