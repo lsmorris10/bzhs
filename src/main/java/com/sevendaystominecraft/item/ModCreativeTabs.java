@@ -9,6 +9,7 @@ import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
 import net.neoforged.neoforge.registries.DeferredRegister;
 
 import java.util.function.Supplier;
@@ -29,7 +30,7 @@ public class ModCreativeTabs {
                     .icon(() -> new ItemStack(ModItems.IRON_SCRAP.get()))
                     .displayItems((params, output) -> {
                         output.accept(ModItems.IRON_SCRAP.get());
-                        output.accept(ModItems.IRON_INGOT.get());
+                        output.accept(Items.IRON_INGOT);
                         output.accept(ModItems.LEAD.get());
                         output.accept(ModItems.NITRATE.get());
                         output.accept(ModItems.COAL.get());

@@ -30,9 +30,6 @@ public class ModItems {
     public static final Supplier<Item> IRON_SCRAP = ITEMS.register("iron_scrap",
             () -> new Item(new Item.Properties().setId(key("iron_scrap")).stacksTo(64)));
 
-    public static final Supplier<Item> IRON_INGOT = ITEMS.register("iron_ingot",
-            () -> new Item(new Item.Properties().setId(key("iron_ingot")).stacksTo(64)));
-
     public static final Supplier<Item> LEAD = ITEMS.register("lead",
             () -> new Item(new Item.Properties().setId(key("lead")).stacksTo(64)));
 

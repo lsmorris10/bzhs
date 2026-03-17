@@ -47,8 +47,8 @@ public final class WorkstationRecipes {
 
     private static void registerForgeRecipes() {
         List<WorkstationRecipe> recipes = new ArrayList<>();
-        recipes.add(recipe(List.of(ing(ModItems.IRON_SCRAP.get(), 1)), new ItemStack(ModItems.IRON_INGOT.get()), 200));
-        recipes.add(recipe(List.of(ing(ModItems.IRON_INGOT.get(), 1)), new ItemStack(ModItems.FORGED_IRON.get()), 300));
+        recipes.add(recipe(List.of(ing(ModItems.IRON_SCRAP.get(), 1)), new ItemStack(Items.IRON_INGOT), 200));
+        recipes.add(recipe(List.of(ing(Items.IRON_INGOT, 1)), new ItemStack(ModItems.FORGED_IRON.get()), 300));
         recipes.add(recipe(List.of(ing(ModItems.LEAD.get(), 1)), new ItemStack(ModItems.FORGED_LEAD.get()), 250));
         recipes.add(recipe(List.of(ing(ModItems.SAND.get(), 2), ing(ModItems.CLAY.get(), 1)), new ItemStack(ModItems.GLASS_JAR.get(), 3), 200));
         recipes.add(recipe(List.of(ing(ModItems.FORGED_IRON.get(), 2)), new ItemStack(ModItems.NAIL.get(), 4), 100));
