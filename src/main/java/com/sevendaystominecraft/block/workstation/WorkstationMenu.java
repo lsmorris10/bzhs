@@ -25,8 +25,14 @@ public class WorkstationMenu extends AbstractContainerMenu {
         this.blockEntity = blockEntity;
 
         this.data = new ContainerData() {
+            private final int[] clientCache = new int[4];
+
             @Override
             public int get(int index) {
+                if (index < 0 || index >= 4) return 0;
+                if (playerInv.player.level().isClientSide) {
+                    return clientCache[index];
+                }
                 return switch (index) {
                     case 0 -> blockEntity.getBurnTime();
                     case 1 -> blockEntity.getBurnTimeTotal();
@@ -37,7 +43,11 @@ public class WorkstationMenu extends AbstractContainerMenu {
             }
 
             @Override
-            public void set(int index, int value) {}
+            public void set(int index, int value) {
+                if (index >= 0 && index < 4) {
+                    clientCache[index] = value;
+                }
+            }
 
             @Override
             public int getCount() { return 4; }
@@ -69,7 +79,7 @@ public class WorkstationMenu extends AbstractContainerMenu {
         if (type.usesFuel()) {
             int fuelY = workstationBottom + 4;
             for (int i = 0; i < type.getFuelSlots(); i++) {
-                addSlot(new WorkstationSlot(container, slotIndex++, 26 + i * 18, fuelY, true));
+                addSlot(new FuelSlot(container, slotIndex++, 26 + i * 18, fuelY));
             }
             workstationBottom = fuelY + 18;
         }
@@ -150,6 +160,17 @@ public class WorkstationMenu extends AbstractContainerMenu {
         @Override
         public boolean mayPlace(ItemStack stack) {
             return isInput;
+        }
+    }
+
+    private static class FuelSlot extends Slot {
+        public FuelSlot(WorkstationSlotContainer container, int index, int x, int y) {
+            super(container, index, x, y);
+        }
+
+        @Override
+        public boolean mayPlace(ItemStack stack) {
+            return WorkstationBlockEntity.isValidFuel(stack);
         }
     }
 

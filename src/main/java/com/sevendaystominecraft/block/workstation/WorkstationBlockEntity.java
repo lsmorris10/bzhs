@@ -108,10 +108,13 @@ public class WorkstationBlockEntity extends BlockEntity {
             if (fuelSlot < items.size()) {
                 ItemStack fuel = items.get(fuelSlot);
                 if (!fuel.isEmpty()) {
-                    burnTimeTotal = getFuelBurnTime(fuel);
-                    burnTime = burnTimeTotal;
-                    fuel.shrink(1);
-                    setChanged();
+                    int fuelTime = getFuelBurnTime(fuel);
+                    if (fuelTime > 0) {
+                        burnTimeTotal = fuelTime;
+                        burnTime = burnTimeTotal;
+                        fuel.shrink(1);
+                        setChanged();
+                    }
                 }
             }
         }
@@ -251,7 +254,19 @@ public class WorkstationBlockEntity extends BlockEntity {
         if (fuel.is(Items.STICK)) return 100;
         if (fuel.is(Items.DRIED_KELP_BLOCK)) return 4000;
         if (fuel.is(Items.BLAZE_ROD)) return 2400;
-        return 200;
+        return 0;
+    }
+
+    public static boolean isValidFuel(ItemStack stack) {
+        if (stack.isEmpty()) return false;
+        return stack.is(Items.COAL) || stack.is(Items.CHARCOAL) || stack.is(Items.COAL_BLOCK)
+            || stack.is(Items.LAVA_BUCKET) || stack.is(Items.STICK)
+            || stack.is(Items.DRIED_KELP_BLOCK) || stack.is(Items.BLAZE_ROD)
+            || stack.is(Items.OAK_LOG) || stack.is(Items.BIRCH_LOG) || stack.is(Items.SPRUCE_LOG)
+            || stack.is(Items.DARK_OAK_LOG) || stack.is(Items.JUNGLE_LOG) || stack.is(Items.ACACIA_LOG)
+            || stack.is(Items.MANGROVE_LOG) || stack.is(Items.CHERRY_LOG)
+            || stack.is(Items.OAK_PLANKS) || stack.is(Items.BIRCH_PLANKS) || stack.is(Items.SPRUCE_PLANKS)
+            || stack.is(Items.DARK_OAK_PLANKS) || stack.is(Items.JUNGLE_PLANKS) || stack.is(Items.ACACIA_PLANKS);
     }
 
     @Override
