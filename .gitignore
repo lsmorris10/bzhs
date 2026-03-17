@@ -36,6 +36,8 @@ desktop.ini
 # Landing page build artifacts (keep index.html and downloadable JARs tracked)
 public/*
 !public/index.html
+!public/dashboard.html
+!public/funding.html
 !public/BrutalZombieHordeSurvival-*.jar
 
 # Misc

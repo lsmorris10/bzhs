@@ -1,0 +1,979 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>BZHS Dev History Dashboard</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    html, body { height: 100%; }
+    body {
+      background: #0a0a0f;
+      color: #e2e8f0;
+      font-family: 'Inter', -apple-system, sans-serif;
+      line-height: 1.6;
+    }
+    .container { max-width: 1100px; margin: 0 auto; padding: 32px 24px; }
+    .back-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      color: #64748b;
+      text-decoration: none;
+      font-size: 13px;
+      margin-bottom: 20px;
+      transition: color 0.2s;
+    }
+    .back-link:hover { color: #94a3b8; }
+    .header { margin-bottom: 32px; }
+    .header-row { display: flex; align-items: center; gap: 12px; margin-bottom: 8px; }
+    .header-icon {
+      width: 36px; height: 36px; border-radius: 8px;
+      background: linear-gradient(135deg, #ef4444, #dc2626);
+      display: flex; align-items: center; justify-content: center; font-size: 18px;
+    }
+    .header h1 {
+      font-size: 26px; font-weight: 800; margin: 0;
+      background: linear-gradient(135deg, #ef4444, #f97316, #eab308);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+      background-clip: text; letter-spacing: -0.5px;
+    }
+    .header p { font-size: 14px; color: #64748b; }
+    .top-stats { display: flex; flex-wrap: wrap; gap: 12px; margin-bottom: 24px; }
+    .stat-card {
+      background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 12px; padding: 20px 24px; text-align: center; flex: 1 1 160px; min-width: 140px;
+    }
+    .stat-card .val { font-size: 32px; font-weight: 700; font-family: 'JetBrains Mono', monospace; }
+    .stat-card .lbl { font-size: 13px; color: #94a3b8; margin-top: 4px; font-weight: 500; }
+    .tabs {
+      display: flex; gap: 4px; margin-bottom: 24px;
+      background: rgba(255,255,255,0.03); border-radius: 10px; padding: 4px;
+      border: 1px solid rgba(255,255,255,0.06);
+    }
+    .tab-btn {
+      flex: 1; padding: 10px 16px; border-radius: 8px; border: none; cursor: pointer;
+      font-size: 14px; font-weight: 400; background: transparent; color: #64748b;
+      transition: all 0.15s ease; font-family: inherit;
+    }
+    .tab-btn.active { font-weight: 600; background: rgba(255,255,255,0.08); color: #e2e8f0; }
+    .section { display: none; }
+    .section.active { display: block; }
+    .cat-legend { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 20px; }
+    .cat-btn {
+      padding: 4px 12px; border-radius: 6px; border: 1px solid rgba(255,255,255,0.08);
+      background: rgba(255,255,255,0.03); color: #94a3b8; font-size: 12px; cursor: pointer;
+      font-weight: 400; transition: all 0.15s ease; font-family: inherit;
+    }
+    .cat-btn.active { font-weight: 600; }
+    .cat-dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; margin-right: 6px; }
+    .day-card {
+      background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.06);
+      border-radius: 12px; overflow: hidden; margin-bottom: 16px;
+    }
+    .day-header {
+      width: 100%; display: flex; align-items: center; justify-content: space-between;
+      padding: 16px 20px; background: none; border: none; cursor: pointer; color: #e2e8f0;
+      font-family: inherit;
+    }
+    .day-header-left { display: flex; align-items: center; gap: 12px; }
+    .day-num {
+      width: 40px; height: 40px; border-radius: 10px;
+      background: linear-gradient(135deg, #3b82f6, #8b5cf6);
+      display: flex; align-items: center; justify-content: center;
+      font-weight: 700; font-size: 14px; font-family: 'JetBrains Mono', monospace; color: #fff;
+    }
+    .day-title { text-align: left; }
+    .day-title-main { font-weight: 600; font-size: 15px; }
+    .day-title-sub { font-size: 12px; color: #64748b; }
+    .day-header-right { display: flex; align-items: center; gap: 8px; }
+    .cat-bars { display: flex; gap: 3px; }
+    .cat-bar { height: 6px; border-radius: 3px; opacity: 0.7; }
+    .chevron { font-size: 18px; color: #64748b; transition: transform 0.2s; }
+    .chevron.open { transform: rotate(180deg); }
+    .day-tasks { padding: 0 20px 16px; display: none; }
+    .day-tasks.open { display: block; }
+    .task-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 8px; }
+    .task-item { display: flex; align-items: center; gap: 10px; padding: 10px 14px; border-radius: 8px; }
+    .task-id { font-family: 'JetBrains Mono', monospace; font-size: 11px; color: #64748b; min-width: 28px; }
+    .task-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+    .task-name { font-size: 13px; color: #e2e8f0; font-weight: 500; }
+    .task-name.cancelled { color: #64748b; text-decoration: line-through; }
+    .cancelled-badge {
+      font-size: 10px; color: #ef4444; background: rgba(239,68,68,0.15);
+      padding: 2px 6px; border-radius: 4px; margin-left: auto; font-weight: 600;
+    }
+    .task-empty { color: #475569; font-size: 13px; padding: 12px; font-style: italic; }
+    .phase-card {
+      background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.06);
+      border-radius: 12px; padding: 20px; margin-bottom: 16px;
+    }
+    .phase-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; }
+    .phase-label-row { display: flex; align-items: center; gap: 10px; }
+    .phase-tag {
+      font-family: 'JetBrains Mono', monospace; font-size: 11px; font-weight: 700;
+      padding: 3px 8px; border-radius: 4px;
+    }
+    .phase-name { font-size: 14px; font-weight: 600; color: #e2e8f0; }
+    .phase-count { font-size: 13px; color: #94a3b8; font-family: 'JetBrains Mono', monospace; }
+    .progress-track { width: 100%; height: 6px; border-radius: 3px; background: rgba(255,255,255,0.06); margin-bottom: 16px; }
+    .progress-fill { height: 100%; border-radius: 3px; transition: width 0.5s ease; }
+    .milestone-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 8px; }
+    .milestone-item { display: flex; align-items: center; gap: 10px; padding: 8px 12px; border-radius: 8px; }
+    .milestone-icon { font-size: 14px; width: 20px; text-align: center; font-weight: 700; }
+    .milestone-id { font-family: 'JetBrains Mono', monospace; font-size: 11px; color: #64748b; min-width: 24px; }
+    .milestone-name { font-size: 13px; font-weight: 500; }
+    .stars { margin-left: auto; display: flex; gap: 2px; }
+    .star { font-size: 8px; }
+    .stats-bars {
+      background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.06);
+      border-radius: 12px; padding: 24px; margin-bottom: 24px;
+    }
+    .stats-bars h3 { font-size: 15px; font-weight: 600; color: #e2e8f0; margin-bottom: 20px; }
+    .bar-row { display: flex; align-items: center; gap: 12px; margin-bottom: 10px; }
+    .bar-label { font-size: 12px; color: #94a3b8; min-width: 100px; text-align: right; font-weight: 500; }
+    .bar-track { flex: 1; height: 20px; border-radius: 4px; background: rgba(255,255,255,0.04); }
+    .bar-fill {
+      height: 100%; border-radius: 4px; display: flex; align-items: center;
+      justify-content: flex-end; padding-right: 8px; transition: width 0.5s ease; min-width: 30px;
+    }
+    .bar-val { font-size: 11px; font-weight: 700; color: #fff; font-family: 'JetBrains Mono', monospace; }
+    .daily-chart {
+      background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.06);
+      border-radius: 12px; padding: 24px;
+    }
+    .daily-chart h3 { font-size: 15px; font-weight: 600; color: #e2e8f0; margin-bottom: 20px; }
+    .chart-row { display: flex; align-items: flex-end; gap: 16px; height: 160px; }
+    .chart-col { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 8px; }
+    .chart-val { font-family: 'JetBrains Mono', monospace; font-size: 13px; font-weight: 700; color: #8b5cf6; }
+    .chart-bar { width: 100%; max-width: 80px; border-radius: 8px 8px 4px 4px; background: linear-gradient(180deg, #8b5cf6, #3b82f6); opacity: 0.8; }
+    .chart-label { font-size: 12px; color: #94a3b8; font-weight: 500; }
+    .chart-footer { text-align: center; font-size: 12px; color: #475569; margin-top: 8px; }
+    .footer-bar {
+      margin-top: 32px; padding: 16px 20px; border-radius: 10px;
+      background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.05);
+      display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px;
+    }
+    .footer-bar span { font-size: 12px; }
+    .footer-left { color: #475569; }
+    .footer-right { color: #334155; font-family: 'JetBrains Mono', monospace; }
+    .roadmap-section {
+      background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.06);
+      border-radius: 12px; padding: 20px; margin-bottom: 16px;
+    }
+    .roadmap-section h3 {
+      font-size: 15px; font-weight: 600; margin-bottom: 16px; display: flex; align-items: center; gap: 8px;
+    }
+    .roadmap-count {
+      font-family: 'JetBrains Mono', monospace; font-size: 12px; font-weight: 500;
+      padding: 2px 8px; border-radius: 4px;
+    }
+    .roadmap-item {
+      display: flex; align-items: flex-start; gap: 12px; padding: 12px 16px;
+      border-radius: 8px; margin-bottom: 6px;
+    }
+    .roadmap-icon { font-size: 16px; width: 22px; text-align: center; flex-shrink: 0; margin-top: 1px; }
+    .roadmap-content { flex: 1; }
+    .roadmap-title { font-size: 14px; font-weight: 600; }
+    .roadmap-desc { font-size: 12px; color: #94a3b8; margin-top: 2px; line-height: 1.5; }
+    .roadmap-progress {
+      background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.06);
+      border-radius: 12px; padding: 20px; margin-bottom: 20px;
+    }
+    .roadmap-progress-header {
+      display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px;
+    }
+    .roadmap-progress-label { font-size: 15px; font-weight: 600; color: #e2e8f0; }
+    .roadmap-progress-pct { font-family: 'JetBrains Mono', monospace; font-size: 14px; color: #22c55e; font-weight: 700; }
+    .arc-intro {
+      background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.06);
+      border-radius: 12px; padding: 20px; margin-bottom: 24px;
+    }
+    .arc-intro-title { font-size: 16px; font-weight: 700; color: #e2e8f0; margin-bottom: 6px; }
+    .arc-intro-desc { font-size: 13px; color: #94a3b8; line-height: 1.6; }
+    .arc-timeline { position: relative; padding-left: 36px; }
+    .arc-timeline::before {
+      content: ''; position: absolute; left: 15px; top: 0; bottom: 0; width: 2px;
+      background: linear-gradient(180deg, #ef4444, #f97316, #eab308, #22c55e, #3b82f6, #8b5cf6, #ef4444, #ec4899);
+    }
+    .arc-stage { position: relative; margin-bottom: 24px; }
+    .arc-marker {
+      position: absolute; left: -36px; top: 0;
+      width: 32px; height: 32px; border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 14px; font-weight: 800; font-family: 'JetBrains Mono', monospace;
+      color: #fff; z-index: 1;
+    }
+    .arc-card {
+      background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.06);
+      border-radius: 12px; overflow: hidden;
+    }
+    .arc-card-header {
+      padding: 16px 20px; display: flex; align-items: center; justify-content: space-between;
+      cursor: pointer; border: none; background: none; width: 100%; color: #e2e8f0; font-family: inherit;
+    }
+    .arc-card-header:hover { background: rgba(255,255,255,0.02); }
+    .arc-card-left { display: flex; align-items: center; gap: 12px; text-align: left; }
+    .arc-day-badge {
+      font-family: 'JetBrains Mono', monospace; font-size: 11px; font-weight: 700;
+      padding: 4px 10px; border-radius: 6px; white-space: nowrap;
+    }
+    .arc-stage-title { font-size: 15px; font-weight: 600; }
+    .arc-stage-subtitle { font-size: 12px; color: #64748b; margin-top: 2px; }
+    .arc-card-body { padding: 0 20px 20px; display: none; }
+    .arc-card-body.open { display: block; }
+    .arc-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    .arc-block {
+      background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.05);
+      border-radius: 10px; padding: 14px 16px;
+    }
+    .arc-block-title {
+      font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px;
+      margin-bottom: 8px; display: flex; align-items: center; gap: 6px;
+    }
+    .arc-block-list { list-style: none; padding: 0; margin: 0; }
+    .arc-block-list li {
+      font-size: 12px; color: #cbd5e1; padding: 3px 0; line-height: 1.5;
+      display: flex; align-items: flex-start; gap: 6px;
+    }
+    .arc-block-list li::before { content: '\25B8'; color: #475569; flex-shrink: 0; margin-top: 1px; }
+    .arc-tag-row { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 10px; }
+    .arc-tag {
+      font-size: 10px; font-weight: 600; padding: 2px 8px; border-radius: 4px;
+      font-family: 'JetBrains Mono', monospace;
+    }
+    .arc-bloodmoon {
+      border-left: 3px solid #ef4444 !important;
+      background: rgba(239,68,68,0.04) !important;
+    }
+    @media (max-width: 600px) {
+      .container { padding: 16px 12px; }
+      .header h1 { font-size: 20px; }
+      .task-grid, .milestone-grid, .arc-grid { grid-template-columns: 1fr; }
+      .tabs { flex-direction: column; }
+      .chart-row { gap: 8px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <a href="index.html" class="back-link">&larr; Back to landing page</a>
+
+    <div class="header">
+      <div class="header-row">
+        <div class="header-icon">&#x2694;</div>
+        <h1>BZHS Development History</h1>
+      </div>
+      <p>Brutal Zombie Horde Survival — March 12–17, 2026 — 89 tasks, 6 days of development</p>
+    </div>
+
+    <div class="top-stats">
+      <div class="stat-card"><div class="val" style="color:#22c55e">85</div><div class="lbl">Tasks Merged</div></div>
+      <div class="stat-card"><div class="val" style="color:#f97316">14/39</div><div class="lbl">Milestones Touched</div></div>
+      <div class="stat-card"><div class="val" style="color:#8b5cf6">6</div><div class="lbl">Dev Days</div></div>
+      <div class="stat-card"><div class="val" style="color:#06b6d4">11</div><div class="lbl">Categories</div></div>
+    </div>
+
+    <div class="tabs" id="tabs">
+      <button class="tab-btn active" data-tab="timeline">&#x1F4C5; Timeline</button>
+      <button class="tab-btn" data-tab="milestones">&#x1F3AF; Milestones</button>
+      <button class="tab-btn" data-tab="stats">&#x1F4CA; Stats</button>
+      <button class="tab-btn" data-tab="zombieai">&#x1F9DF; Zombie AI</button>
+      <button class="tab-btn" data-tab="survivalarc">&#x1F30D; Survival Arc</button>
+    </div>
+
+    <div class="section active" id="sec-timeline"></div>
+    <div class="section" id="sec-milestones"></div>
+    <div class="section" id="sec-stats"></div>
+    <div class="section" id="sec-zombieai"></div>
+    <div class="section" id="sec-survivalarc"></div>
+
+    <div class="footer-bar">
+      <span class="footer-left">Brutal Zombie Horde Survival — Minecraft 1.21.4 NeoForge Mod — Built with Replit Agent — <a href="funding.html" style="color:#64748b;text-decoration:none;transition:color 0.2s;" onmouseover="this.style.color='#94a3b8'" onmouseout="this.style.color='#64748b'">Dev Investment</a></span>
+      <span class="footer-right">snapshot: March 17, 2026</span>
+    </div>
+  </div>
+
+<script>
+(function() {
+  var CATEGORIES = {
+    zombies:  { label: "Zombies",            color: "#ef4444", bg: "rgba(239,68,68,0.15)" },
+    survival: { label: "Core Survival",      color: "#22c55e", bg: "rgba(34,197,94,0.15)" },
+    hud:      { label: "HUD / UI",           color: "#3b82f6", bg: "rgba(59,130,246,0.15)" },
+    heatmap:  { label: "Heatmap",            color: "#f97316", bg: "rgba(249,115,22,0.15)" },
+    debuffs:  { label: "Debuffs",            color: "#a855f7", bg: "rgba(168,85,247,0.15)" },
+    daycycle: { label: "Day Cycle / Balance", color: "#eab308", bg: "rgba(234,179,8,0.15)" },
+    loot:     { label: "Loot & Crafting",    color: "#14b8a6", bg: "rgba(20,184,166,0.15)" },
+    xp:       { label: "XP & Perks",         color: "#06b6d4", bg: "rgba(6,182,212,0.15)" },
+    landing:  { label: "Landing Page",       color: "#ec4899", bg: "rgba(236,72,153,0.15)" },
+    docs:     { label: "Documentation",      color: "#94a3b8", bg: "rgba(148,163,184,0.15)" },
+    git:      { label: "Git / Repo",         color: "#78716c", bg: "rgba(120,113,108,0.15)" }
+  };
+
+  var ALL_TASKS = {
+    "March 12": [
+      {id:1,title:"Zombie renderer fix",category:"zombies",status:"merged"},
+      {id:2,title:"Zombie name tags",category:"zombies",status:"merged"},
+      {id:3,title:"Zombie HP display",category:"zombies",status:"merged"},
+      {id:4,title:"Zombie behavior docs",category:"docs",status:"merged"},
+      {id:5,title:"Heatmap system",category:"heatmap",status:"merged"},
+      {id:6,title:"Custom player stats",category:"survival",status:"merged"},
+      {id:7,title:"HUD stat bars",category:"survival",status:"merged"},
+      {id:8,title:"Heatmap guide docs",category:"docs",status:"merged"},
+      {id:9,title:"Edge case testing docs",category:"docs",status:"merged"},
+      {id:10,title:"Repo sync setup",category:"git",status:"merged"},
+      {id:11,title:"Git workflow config",category:"git",status:"merged"},
+      {id:12,title:"Git history cleanup",category:"git",status:"merged"},
+      {id:13,title:"Spec documentation",category:"docs",status:"merged"},
+      {id:14,title:"README updates",category:"docs",status:"merged"},
+      {id:15,title:"Heatmap docs update",category:"docs",status:"merged"}
+    ],
+    "March 13": [
+      {id:16,title:"Wall occlusion system",category:"zombies",status:"merged"},
+      {id:17,title:"Compass & minimap HUD",category:"hud",status:"merged"},
+      {id:18,title:"Sunburn fix for zombies",category:"zombies",status:"merged"},
+      {id:19,title:"Zombie guide update",category:"docs",status:"merged"},
+      {id:20,title:"Loot & crafting system",category:"loot",status:"merged"},
+      {id:21,title:"XP & perks system",category:"xp",status:"merged"},
+      {id:22,title:"Debuff system core",category:"debuffs",status:"merged"},
+      {id:23,title:"Stats HUD overlap fix",category:"hud",status:"merged"},
+      {id:24,title:"Night zombie speed",category:"zombies",status:"merged"},
+      {id:25,title:"Day cycle doubling",category:"daycycle",status:"merged"},
+      {id:26,title:"Debuff persistence fix",category:"debuffs",status:"merged"},
+      {id:27,title:"Debuffs guide & fix #2",category:"debuffs",status:"merged"},
+      {id:28,title:"Clear debuffs command",category:"debuffs",status:"merged"},
+      {id:29,title:"100 HP base health",category:"survival",status:"merged"},
+      {id:30,title:"Project notes update",category:"docs",status:"merged"},
+      {id:31,title:"Spec milestone docs",category:"docs",status:"merged"},
+      {id:32,title:"Cancelled task",category:"docs",status:"cancelled"},
+      {id:33,title:"Status docs update",category:"docs",status:"merged"},
+      {id:34,title:"Vanilla damage scaling",category:"survival",status:"merged"},
+      {id:35,title:"Day cycle sky fix",category:"daycycle",status:"merged"},
+      {id:36,title:"Darkness zombie speed",category:"docs",status:"merged"},
+      {id:37,title:"Coal vein nerf",category:"zombies",status:"merged"},
+      {id:38,title:"Coal balance docs",category:"docs",status:"merged"},
+      {id:39,title:"Gitignore update",category:"git",status:"merged"}
+    ],
+    "March 14": [
+      {id:40,title:"Landing page V1",category:"landing",status:"merged"},
+      {id:41,title:"Landing page publish",category:"landing",status:"merged"},
+      {id:42,title:"Cancelled task",category:"landing",status:"cancelled"},
+      {id:43,title:"BZHS rebrand",category:"landing",status:"merged"},
+      {id:44,title:"README restructure",category:"docs",status:"merged"},
+      {id:45,title:"Landing page V2",category:"landing",status:"merged"},
+      {id:46,title:"Gitignore public/",category:"git",status:"merged"},
+      {id:47,title:"README status section",category:"docs",status:"merged"},
+      {id:48,title:"Project notes update",category:"docs",status:"merged"},
+      {id:49,title:"Docs consolidation",category:"docs",status:"merged"},
+      {id:50,title:"Landing page polish",category:"landing",status:"merged"},
+      {id:51,title:"Spec updates",category:"docs",status:"merged"},
+      {id:52,title:"Download button",category:"landing",status:"merged"},
+      {id:53,title:"Formspree contact",category:"landing",status:"merged"},
+      {id:54,title:"Install tutorial",category:"landing",status:"merged"},
+      {id:55,title:"GitHub Releases API",category:"landing",status:"merged"},
+      {id:56,title:"Pre-release support",category:"landing",status:"merged"},
+      {id:57,title:"JAR rename branding",category:"landing",status:"merged"},
+      {id:58,title:"Download button fix",category:"landing",status:"merged"}
+    ],
+    "March 15": [
+      {id:59,title:"Mixin crash fix",category:"daycycle",status:"merged"},
+      {id:60,title:"Day cycle refactor",category:"daycycle",status:"merged"},
+      {id:61,title:"Mob damage scaling",category:"survival",status:"merged"},
+      {id:62,title:"POI zombie spec",category:"docs",status:"merged"},
+      {id:63,title:"Docs update",category:"docs",status:"merged"},
+      {id:64,title:"Dev Dashboard v1 (React)",category:"landing",status:"cancelled"},
+      {id:65,title:"Dev Dashboard vanilla HTML",category:"landing",status:"merged"},
+      {id:66,title:"Dashboard data + tabs",category:"landing",status:"merged"},
+      {id:67,title:"Reverse damage scaling",category:"survival",status:"merged"},
+      {id:68,title:"Dashboard link in footer",category:"landing",status:"merged"},
+      {id:69,title:"Rename /7dtm to /bzhs commands",category:"survival",status:"merged"},
+      {id:70,title:"Update docs/landing/dashboard",category:"docs",status:"merged"}
+    ],
+    "March 16": [
+      {id:71,title:"Temperature system (env modifiers, hypo/hyperthermia)",category:"survival",status:"merged"},
+      {id:72,title:"Zombie AI behavior tree (block break, investigate, horde)",category:"zombies",status:"merged"},
+      {id:73,title:"Publish app deployment",category:"landing",status:"merged"},
+      {id:74,title:"Dashboard data fix (superseded by #75)",category:"landing",status:"cancelled"},
+      {id:75,title:"Dashboard update (tasks #64\u201372, Zombie AI tab)",category:"landing",status:"merged"},
+      {id:76,title:"Gameplay bugfixes (food/water, XP, HP config, damage)",category:"survival",status:"merged"},
+      {id:77,title:"Textures, models & blockstates for all items/blocks",category:"loot",status:"merged"},
+      {id:78,title:"New world startup fixes (red sky, HP default)",category:"daycycle",status:"merged"},
+      {id:79,title:"Zombie block-break AI fix (stuck detection)",category:"zombies",status:"merged"},
+      {id:80,title:"Fix horizontally flipped minimap",category:"hud",status:"merged"},
+      {id:81,title:"Remove \u00d75 HP display multiplier from HUD",category:"hud",status:"merged"},
+      {id:82,title:"Vanilla health & combat rebalance",category:"survival",status:"merged"},
+      {id:83,title:"Fix player HP to vanilla 10 hearts",category:"survival",status:"merged"},
+      {id:84,title:"Fix hotbar/inventory item textures",category:"loot",status:"merged"},
+      {id:85,title:"Fix container GUI layout and text display",category:"hud",status:"merged"},
+      {id:86,title:"Survival Arc dashboard tab",category:"landing",status:"merged"},
+      {id:87,title:"Crafting guide documentation",category:"docs",status:"merged"},
+      {id:88,title:"Self-host .jar download + deploy script",category:"landing",status:"merged"}
+    ],
+    "March 17": [
+      {id:89,title:"Add en_us.json language file (items/blocks/entities/tabs)",category:"loot",status:"merged"}
+    ]
+  };
+
+  var MILESTONES = [
+    {id:1,title:"Project scaffold + Mixin setup",phase:1,status:"done",complexity:2},
+    {id:2,title:"Custom player stats (HP/Stamina/Food/Water)",phase:1,status:"done",complexity:3},
+    {id:3,title:"Health conditions & debuff system",phase:1,status:"done",complexity:3},
+    {id:4,title:"Temperature system",phase:1,status:"done",complexity:3},
+    {id:5,title:"Vanilla mob removal + base zombie entity",phase:1,status:"done",complexity:3},
+    {id:6,title:"Zombie AI (behavior tree)",phase:1,status:"partial",complexity:5},
+    {id:7,title:"Heatmap system",phase:1,status:"done",complexity:3},
+    {id:8,title:"Blood Moon / Horde Night",phase:1,status:"done",complexity:4},
+    {id:9,title:"Custom HUD",phase:1,status:"done",complexity:3},
+    {id:10,title:"4\u00d74 crafting + quality tiers",phase:1,status:"done",complexity:4},
+    {id:11,title:"Workstations",phase:2,status:"partial",complexity:3},
+    {id:12,title:"XP/Level + Perk system",phase:2,status:"done",complexity:4},
+    {id:13,title:"Melee + ranged weapons",phase:2,status:"done",complexity:3},
+    {id:14,title:"Armor system + clothing",phase:2,status:"not-started",complexity:3},
+    {id:15,title:"World gen (biomes + city/POI)",phase:2,status:"not-started",complexity:5},
+    {id:16,title:"All zombie variants",phase:2,status:"done",complexity:4},
+    {id:17,title:"Building + block upgrades + traps",phase:2,status:"not-started",complexity:3},
+    {id:18,title:"Loot tables + containers",phase:2,status:"partial",complexity:3},
+    {id:19,title:"Traders + quests",phase:2,status:"not-started",complexity:4},
+    {id:20,title:"Vehicles + vehicle mods",phase:2,status:"not-started",complexity:5},
+    {id:21,title:"Electricity system",phase:2,status:"not-started",complexity:4},
+    {id:22,title:"Farming + cooking + Dew Collector",phase:2,status:"not-started",complexity:2},
+    {id:23,title:"Skill book / magazine system",phase:2,status:"not-started",complexity:2},
+    {id:24,title:"Stealth system",phase:2,status:"not-started",complexity:3},
+    {id:25,title:"Inventory UI overhaul",phase:2,status:"not-started",complexity:4},
+    {id:26,title:"Map system",phase:2,status:"not-started",complexity:3},
+    {id:27,title:"Multiplayer sync + balancing",phase:3,status:"not-started",complexity:4},
+    {id:28,title:"Performance optimization",phase:3,status:"not-started",complexity:5},
+    {id:29,title:"Audio overhaul",phase:3,status:"not-started",complexity:2},
+    {id:30,title:"Config GUI (Mod Menu compat)",phase:3,status:"not-started",complexity:2},
+    {id:31,title:"Admin commands",phase:3,status:"not-started",complexity:1},
+    {id:32,title:"QA, bug fixing, balancing pass",phase:3,status:"not-started",complexity:3},
+    {id:33,title:"Sprint animation poses",phase:3,status:"not-started",complexity:3},
+    {id:34,title:"Environmental sprint VFX",phase:3,status:"not-started",complexity:2},
+    {id:35,title:"Third-person body language",phase:3,status:"not-started",complexity:2},
+    {id:36,title:"Debuff vignette + temp overlays",phase:3,status:"not-started",complexity:3},
+    {id:37,title:"Blood Moon atmosphere + camera",phase:3,status:"not-started",complexity:3},
+    {id:38,title:"Zombie variant glow VFX",phase:3,status:"not-started",complexity:3},
+    {id:39,title:"Vehicle camera bob/sway",phase:3,status:"not-started",complexity:2}
+  ];
+
+  var activeTab = "timeline";
+  var activeFilter = null;
+  var expandedDay = null;
+
+  function esc(s) { var d = document.createElement("div"); d.textContent = s; return d.innerHTML; }
+
+  function switchTab(tab) {
+    activeTab = tab;
+    document.querySelectorAll(".tab-btn").forEach(function(b) {
+      b.classList.toggle("active", b.getAttribute("data-tab") === tab);
+    });
+    document.querySelectorAll(".section").forEach(function(s) {
+      s.classList.toggle("active", s.id === "sec-" + tab);
+    });
+  }
+
+  document.getElementById("tabs").addEventListener("click", function(e) {
+    var btn = e.target.closest(".tab-btn");
+    if (btn) switchTab(btn.getAttribute("data-tab"));
+  });
+
+  function renderTimeline() {
+    var el = document.getElementById("sec-timeline");
+    var html = '<div class="cat-legend" id="cat-legend">';
+    html += '<button class="cat-btn' + (activeFilter === null ? " active" : "") + '" data-cat="all" style="' + (activeFilter === null ? "border-color:rgba(255,255,255,0.3);background:rgba(255,255,255,0.1);color:#e2e8f0;font-weight:600" : "") + '">All</button>';
+    for (var key in CATEGORIES) {
+      var c = CATEGORIES[key];
+      var isActive = activeFilter === key;
+      html += '<button class="cat-btn' + (isActive ? " active" : "") + '" data-cat="' + key + '" style="' +
+        (isActive ? "border-color:" + c.color + ";background:" + c.bg + ";color:" + c.color + ";font-weight:600" : "") +
+        '"><span class="cat-dot" style="background:' + c.color + '"></span>' + esc(c.label) + '</button>';
+    }
+    html += '</div>';
+
+    for (var day in ALL_TASKS) {
+      var tasks = ALL_TASKS[day];
+      var filtered = activeFilter ? tasks.filter(function(t) { return t.category === activeFilter; }) : tasks;
+      var merged = tasks.filter(function(t) { return t.status === "merged"; }).length;
+      var cancelled = tasks.filter(function(t) { return t.status === "cancelled"; }).length;
+      var isExp = expandedDay === day;
+
+      html += '<div class="day-card">';
+      html += '<button class="day-header" data-day="' + esc(day) + '">';
+      html += '<div class="day-header-left">';
+      html += '<div class="day-num">' + esc(day.split(" ")[1]) + '</div>';
+      html += '<div class="day-title"><div class="day-title-main">' + esc(day) + ', 2026</div>';
+      html += '<div class="day-title-sub">' + merged + ' merged' + (cancelled > 0 ? ', ' + cancelled + ' cancelled' : '') + ' \u2014 Tasks #' + tasks[0].id + '\u2013#' + tasks[tasks.length - 1].id + '</div></div></div>';
+      html += '<div class="day-header-right"><div class="cat-bars">';
+      for (var ck in CATEGORIES) {
+        var cnt = tasks.filter(function(t) { return t.category === ck; }).length;
+        if (cnt > 0) html += '<div class="cat-bar" style="width:' + Math.max(cnt * 6, 6) + 'px;background:' + CATEGORIES[ck].color + '"></div>';
+      }
+      html += '</div><span class="chevron' + (isExp ? " open" : "") + '">\u25BE</span></div>';
+      html += '</button>';
+
+      html += '<div class="day-tasks' + (isExp ? " open" : "") + '">';
+      if (filtered.length === 0) {
+        html += '<div class="task-empty">No tasks in this category for ' + esc(day) + '</div>';
+      } else {
+        html += '<div class="task-grid">';
+        filtered.forEach(function(t) {
+          var cat = CATEGORIES[t.category];
+          html += '<div class="task-item" style="background:' + cat.bg + ';border:1px solid ' + cat.color + '22;' + (t.status === "cancelled" ? "opacity:0.5" : "") + '">';
+          html += '<span class="task-id">#' + t.id + '</span>';
+          html += '<span class="task-dot" style="background:' + cat.color + '"></span>';
+          html += '<span class="task-name' + (t.status === "cancelled" ? " cancelled" : "") + '">' + esc(t.title) + '</span>';
+          if (t.status === "cancelled") html += '<span class="cancelled-badge">CANCELLED</span>';
+          html += '</div>';
+        });
+        html += '</div>';
+      }
+      html += '</div></div>';
+    }
+
+    el.innerHTML = html;
+
+    el.querySelector("#cat-legend").addEventListener("click", function(e) {
+      var btn = e.target.closest(".cat-btn");
+      if (!btn) return;
+      var cat = btn.getAttribute("data-cat");
+      activeFilter = cat === "all" ? null : (activeFilter === cat ? null : cat);
+      renderTimeline();
+    });
+
+    el.querySelectorAll(".day-header").forEach(function(btn) {
+      btn.addEventListener("click", function() {
+        var d = btn.getAttribute("data-day");
+        expandedDay = expandedDay === d ? null : d;
+        renderTimeline();
+      });
+    });
+  }
+
+  function renderMilestones() {
+    var el = document.getElementById("sec-milestones");
+    var phaseColors = { 1: "#22c55e", 2: "#3b82f6", 3: "#a855f7" };
+    var phaseLabels = { 1: "Core Foundation", 2: "Content & Systems", 3: "Polish & Optimization" };
+    var html = "";
+
+    [1, 2, 3].forEach(function(phase) {
+      var ms = MILESTONES.filter(function(m) { return m.phase === phase; });
+      var done = ms.filter(function(m) { return m.status === "done"; }).length;
+      var pct = Math.round((done / ms.length) * 100);
+      var pc = phaseColors[phase];
+
+      html += '<div class="phase-card">';
+      html += '<div class="phase-header"><div class="phase-label-row">';
+      html += '<span class="phase-tag" style="color:' + pc + ';background:' + pc + '22">PHASE ' + phase + '</span>';
+      html += '<span class="phase-name">' + esc(phaseLabels[phase]) + '</span>';
+      html += '</div><span class="phase-count">' + done + '/' + ms.length + ' (' + pct + '%)</span></div>';
+      html += '<div class="progress-track"><div class="progress-fill" style="width:' + pct + '%;background:linear-gradient(90deg,' + pc + ',' + pc + 'aa)"></div></div>';
+      html += '<div class="milestone-grid">';
+
+      ms.forEach(function(m) {
+        var sc = m.status === "done" ? "#22c55e" : m.status === "partial" ? "#eab308" : "#334155";
+        var si = m.status === "done" ? "\u2713" : m.status === "partial" ? "\u25D0" : "\u25CB";
+        var bg = m.status === "done" ? "rgba(34,197,94,0.06)" : "rgba(255,255,255,0.01)";
+        var bc = m.status === "done" ? "rgba(34,197,94,0.15)" : "rgba(255,255,255,0.04)";
+        html += '<div class="milestone-item" style="background:' + bg + ';border:1px solid ' + bc + '">';
+        html += '<span class="milestone-icon" style="color:' + sc + '">' + si + '</span>';
+        html += '<span class="milestone-id">#' + m.id + '</span>';
+        html += '<span class="milestone-name" style="color:' + (m.status === "done" ? "#e2e8f0" : "#64748b") + ';font-weight:' + (m.status === "done" ? 500 : 400) + '">' + esc(m.title) + '</span>';
+        html += '<div class="stars">';
+        for (var i = 0; i < 5; i++) {
+          html += '<span class="star" style="color:' + (i < m.complexity ? pc : "#1e293b") + '">\u2605</span>';
+        }
+        html += '</div></div>';
+      });
+
+      html += '</div></div>';
+    });
+
+    el.innerHTML = html;
+  }
+
+  function renderStats() {
+    var el = document.getElementById("sec-stats");
+    var allTasks = [];
+    for (var d in ALL_TASKS) allTasks = allTasks.concat(ALL_TASKS[d]);
+    var merged = allTasks.filter(function(t) { return t.status === "merged"; }).length;
+    var cancelled = allTasks.filter(function(t) { return t.status === "cancelled"; }).length;
+    var total = allTasks.length;
+    var msTouched = MILESTONES.filter(function(m) { return m.status === "done" || m.status === "partial"; }).length;
+    var catsUsed = {};
+    allTasks.forEach(function(t) { catsUsed[t.category] = true; });
+
+    var html = '<div class="top-stats" style="margin-bottom:24px">';
+    html += '<div class="stat-card"><div class="val" style="color:#3b82f6">' + total + '</div><div class="lbl">Total Tasks</div></div>';
+    html += '<div class="stat-card"><div class="val" style="color:#22c55e">' + merged + '</div><div class="lbl">Merged</div></div>';
+    html += '<div class="stat-card"><div class="val" style="color:#ef4444">' + cancelled + '</div><div class="lbl">Cancelled</div></div>';
+    html += '<div class="stat-card"><div class="val" style="color:#8b5cf6">6</div><div class="lbl">Dev Days</div></div>';
+    html += '<div class="stat-card"><div class="val" style="color:#f97316">' + msTouched + '/39</div><div class="lbl">Milestones Done</div></div>';
+    html += '<div class="stat-card"><div class="val" style="color:#06b6d4">' + Object.keys(catsUsed).length + '</div><div class="lbl">Categories</div></div>';
+    html += '</div>';
+
+    var catCounts = [];
+    for (var k in CATEGORIES) {
+      catCounts.push({
+        key: k, label: CATEGORIES[k].label, color: CATEGORIES[k].color,
+        count: allTasks.filter(function(t) { return t.category === k; }).length
+      });
+    }
+    catCounts.sort(function(a, b) { return b.count - a.count; });
+    var maxC = catCounts[0].count;
+
+    html += '<div class="stats-bars"><h3>Tasks by Category</h3>';
+    catCounts.forEach(function(c) {
+      html += '<div class="bar-row"><span class="bar-label">' + esc(c.label) + '</span>';
+      html += '<div class="bar-track"><div class="bar-fill" style="width:' + ((c.count / maxC) * 100) + '%;background:linear-gradient(90deg,' + c.color + ',' + c.color + '88)">';
+      html += '<span class="bar-val">' + c.count + '</span></div></div></div>';
+    });
+    html += '</div>';
+
+    var days = Object.keys(ALL_TASKS);
+    var dailyMerged = days.map(function(d) { return ALL_TASKS[d].filter(function(t) { return t.status === "merged"; }).length; });
+    var maxDaily = Math.max.apply(null, dailyMerged);
+
+    html += '<div class="daily-chart"><h3>Daily Output</h3><div class="chart-row">';
+    days.forEach(function(d, i) {
+      var m = dailyMerged[i];
+      var h = (m / maxDaily) * 140;
+      html += '<div class="chart-col"><span class="chart-val">' + m + '</span>';
+      html += '<div class="chart-bar" style="height:' + h + 'px"></div>';
+      html += '<span class="chart-label">' + d.split(" ")[1] + '</span></div>';
+    });
+    html += '</div><div class="chart-footer">March 2026</div></div>';
+
+    el.innerHTML = html;
+  }
+
+  function renderZombieAI() {
+    var el = document.getElementById("sec-zombieai");
+    var done = [
+      {title:"Block Breaking Goal",desc:"ZombieBreakBlockGoal — Zombies destroy blocks in their path to reach players, using vanilla break animation. Respects mobGriefing gamerule."},
+      {title:"Block HP Registry",desc:"BlockHPRegistry — Maps block types to HP values: glass=3, wood=10, stone=30, cobblestone=50, iron=200, obsidian=500. Configurable global multiplier."},
+      {title:"Heatmap Investigation Goal",desc:"ZombieInvestigateGoal — Idle zombies query HeatmapData for highest-heat chunk within 32 blocks and path toward it. Local patrol on arrival."},
+      {title:"Horde Pathfinding Goal",desc:"ZombieHordePathGoal — During Blood Moon, horde zombies actively path toward nearest survival player within 64 blocks (128 on day 21+)."},
+      {title:"Config Entries",desc:"blockBreakEnabled, blockBreakSpeedMultiplier, investigateRange, hordePathRange, hordePathRangeDay21, blockHPMultiplier added to ZombieConfig."}
+    ];
+    var remaining = [
+      {title:"Custom A* Pathfinder",desc:"Block-break cost weighting: cost = baseCost + (blockHP / zombieDamage) x 0.5. Zombies prefer paths through weakest blocks (doors > windows > drywall > concrete)."},
+      {title:"Spider Zombie Wall Climbing",desc:"Add vertical edges to pathfinding graph for SpiderZombie variant. Enables climbing walls and navigating vertical surfaces."},
+      {title:"Group Coordination",desc:"When 3+ zombies target the same block, damage stacks to simulate coordinated bashing. Faster block destruction in groups."},
+      {title:"Charged Zombie Chain Lightning",desc:"On melee hit, scan 3-block radius for additional LivingEntity targets (max 3 chains). Each chain deals 5 HP + Electrocuted debuff (1.5s stun)."},
+      {title:"Infernal Zombie Fire Trail",desc:"Every 20 ticks while moving, place a fire trail block at current position. Burns for 5 sec, deals 2 HP/sec. Melee hit applies Burn debuff (5s)."},
+      {title:"Screamer Flee AI",desc:"After screaming to summon reinforcements, Screamer flees from player when within 5 blocks. Priority 1 behavior in the behavior tree."},
+      {title:"Smell System Placeholder Hooks",desc:"Register SmellCapability on players. Zombies within 20 blocks detect smell > 15. Gated behind config smell.enabled (default false). Deferred to 3.0."},
+      {title:"Spawn Rule Enforcement",desc:"Day/night spawn rates (night = x3), spawn cap formula: maxZombies = baseMax + (dayNumber x 2), capped at config max (default 64 per player)."},
+      {title:"POI Zombie Population",desc:"Fill percentage by POI tier (Tier 1: 20-40% to Tier 5: 70-100%), scaled by game day bonus and biome density multiplier per spec section 3.2.1."}
+    ];
+    var total = done.length + remaining.length;
+    var pct = Math.round((done.length / total) * 100);
+
+    var html = '';
+    html += '<div class="roadmap-progress">';
+    html += '<div class="roadmap-progress-header">';
+    html += '<span class="roadmap-progress-label">Milestone #6 — Zombie AI (Behavior Tree)</span>';
+    html += '<span class="roadmap-progress-pct">' + done.length + '/' + total + ' (' + pct + '%)</span>';
+    html += '</div>';
+    html += '<div class="progress-track"><div class="progress-fill" style="width:' + pct + '%;background:linear-gradient(90deg,#22c55e,#22c55eaa)"></div></div>';
+    html += '<div style="font-size:12px;color:#64748b">Spec reference: section 3.2 — Priority-based behavior tree with destructive pathfinding</div>';
+    html += '</div>';
+
+    html += '<div class="roadmap-section">';
+    html += '<h3 style="color:#22c55e"><span class="roadmap-count" style="color:#22c55e;background:rgba(34,197,94,0.15)">' + done.length + ' DONE</span> Completed (Task #72)</h3>';
+    done.forEach(function(item) {
+      html += '<div class="roadmap-item" style="background:rgba(34,197,94,0.06);border:1px solid rgba(34,197,94,0.12)">';
+      html += '<span class="roadmap-icon" style="color:#22c55e">\u2713</span>';
+      html += '<div class="roadmap-content"><div class="roadmap-title" style="color:#e2e8f0">' + esc(item.title) + '</div>';
+      html += '<div class="roadmap-desc">' + esc(item.desc) + '</div></div></div>';
+    });
+    html += '</div>';
+
+    html += '<div class="roadmap-section">';
+    html += '<h3 style="color:#f97316"><span class="roadmap-count" style="color:#f97316;background:rgba(249,115,22,0.15)">' + remaining.length + ' REMAINING</span> Still Needed</h3>';
+    remaining.forEach(function(item) {
+      html += '<div class="roadmap-item" style="background:rgba(255,255,255,0.01);border:1px solid rgba(255,255,255,0.06)">';
+      html += '<span class="roadmap-icon" style="color:#475569">\u25CB</span>';
+      html += '<div class="roadmap-content"><div class="roadmap-title" style="color:#94a3b8">' + esc(item.title) + '</div>';
+      html += '<div class="roadmap-desc">' + esc(item.desc) + '</div></div></div>';
+    });
+    html += '</div>';
+
+    el.innerHTML = html;
+  }
+
+  var SURVIVAL_ARC = [
+    {
+      days: "Day 1",
+      title: "First Light",
+      subtitle: "Spawn into a hostile world",
+      color: "#ef4444",
+      bloodmoon: false,
+      description: "You wake up with nothing. The clock is ticking \u2014 find shelter before nightfall or face the horde in the open.",
+      goals: [
+        "Punch trees, gather wood and stone for basic tools",
+        "Scavenge nearby structures for food and supplies",
+        "Craft a stone axe, pickaxe, and club",
+        "Build or claim a basic shelter before dark",
+        "Find a water source and craft glass jars"
+      ],
+      threats: [
+        "Roaming walker zombies (slow, low HP)",
+        "Nightfall brings faster, more aggressive zombies",
+        "Hunger and thirst drain constantly",
+        "Fall damage with no healing items is deadly"
+      ],
+      systems: ["Food & Water", "Stamina", "Temperature", "Heatmap", "Day/Night Cycle"],
+      crafting: ["Stone Tools", "Wood Frames", "Plant Fiber Clothing", "Campfire"]
+    },
+    {
+      days: "Days 2\u20133",
+      title: "Early Survival",
+      subtitle: "Establish a foothold",
+      color: "#f97316",
+      bloodmoon: false,
+      description: "With basic shelter secured, it's time to fortify, craft, and prepare. Every noise you make raises the heatmap.",
+      goals: [
+        "Upgrade shelter walls from wood to cobblestone",
+        "Craft a Workbench for better recipes",
+        "Set up a Campfire and Grill for cooking",
+        "Stockpile food, water, and medical supplies",
+        "Start earning XP from zombie kills"
+      ],
+      threats: [
+        "Night zombies move faster and deal more damage",
+        "Sprains and fractures from falls slow movement",
+        "Infection from zombie hits if untreated",
+        "Heatmap activity begins attracting scouts"
+      ],
+      systems: ["Debuffs (Bleeding, Sprain, Fracture)", "XP Gain", "Heatmap Activity Tracking"],
+      crafting: ["Workbench", "Grill", "Forged Iron Tools", "First Aid Bandages", "Wooden Spikes"]
+    },
+    {
+      days: "Days 4\u20136",
+      title: "Fortification",
+      subtitle: "Prepare for the first Blood Moon",
+      color: "#eab308",
+      bloodmoon: false,
+      description: "Day 7 is coming. The first Blood Moon horde will test everything you've built. Upgrade, stockpile, and plan your defense.",
+      goals: [
+        "Upgrade base to cobblestone/concrete walls",
+        "Craft ranged weapons and stockpile ammo",
+        "Build spike traps and chokepoints around your base",
+        "Explore POIs for valuable loot and schematics",
+        "Level up and invest in combat perks"
+      ],
+      threats: [
+        "Bloated Walkers appear (high HP, area damage on death)",
+        "Spider Zombies can climb walls",
+        "Heatmap is rising \u2014 Screamer scouts may appear",
+        "Temperature extremes cause hypothermia or heatstroke"
+      ],
+      systems: ["Perk Unlocks", "Quality Tiers on Crafted Items", "Temperature Extremes"],
+      crafting: ["Forge Station", "Iron Armor", "9mm Pistol", "Concrete Mix", "Spike Traps"]
+    },
+    {
+      days: "Day 7",
+      title: "First Blood Moon",
+      subtitle: "Survive the horde or die trying",
+      color: "#dc2626",
+      bloodmoon: true,
+      description: "The sky turns red. A massive horde of zombies descends on your position. They will break through walls, climb obstacles, and swarm from every direction. Survive until dawn.",
+      goals: [
+        "Defend your base from waves of attacking zombies",
+        "Use traps, ranged weapons, and melee as last resort",
+        "Repair breaches in real-time between waves",
+        "Survive until dawn \u2014 the horde disperses at sunrise"
+      ],
+      threats: [
+        "Zombie block-breaking AI \u2014 they smash through walls",
+        "Bloated Walkers, Spider Zombies, Cop Zombies in the mix",
+        "Group coordination \u2014 multiple zombies focus weak points",
+        "Screamer Zombies call reinforcements before fleeing",
+        "Running out of ammo or stamina mid-fight"
+      ],
+      systems: ["Blood Moon Horde", "Block Breaking AI", "Zombie Variants", "Horde Pathfinding"],
+      crafting: ["Ammo Reserves", "Repair Materials", "Medical Supplies", "Backup Weapons"]
+    },
+    {
+      days: "Days 8\u201313",
+      title: "Expansion",
+      subtitle: "Rebuild, explore, grow stronger",
+      color: "#22c55e",
+      bloodmoon: false,
+      description: "You survived. Now expand your territory, repair the damage, and push into more dangerous areas for better loot.",
+      goals: [
+        "Repair and upgrade base defenses post-horde",
+        "Explore farther for Tier 2\u20133 POIs",
+        "Craft firearms and advanced melee weapons",
+        "Unlock workstation upgrades (Chemistry Station, Cement Mixer)",
+        "Discover Trader locations and start quests"
+      ],
+      threats: [
+        "Soldier Zombies (armored, high damage)",
+        "Feral Wight (fast, 60 HP, relentless pursuit)",
+        "Nurse Zombies heal nearby undead",
+        "POI interiors are dark and densely populated"
+      ],
+      systems: ["Trader Quests", "Advanced Workstations", "Perk Tree Depth"],
+      crafting: ["Chemistry Station", "Cement Mixer", "AK-47", "Steel Tools", "Antibiotics"]
+    },
+    {
+      days: "Day 14",
+      title: "Second Blood Moon",
+      subtitle: "The horde returns, stronger",
+      color: "#dc2626",
+      bloodmoon: true,
+      description: "Twice as many zombies, with deadlier variants in the mix. Your Day 7 defenses won't cut it anymore.",
+      goals: [
+        "Hold an upgraded, multi-layered defense perimeter",
+        "Manage ammo economy across extended waves",
+        "Deploy advanced traps (electric fences, blade traps)",
+        "Keep escape routes open in case defenses fall"
+      ],
+      threats: [
+        "Charged Zombies \u2014 chain lightning hits multiple targets",
+        "Infernal Zombies leave fire trails that deal damage over time",
+        "Larger horde size with more variant diversity",
+        "Zombie group coordination focuses on weakest wall sections"
+      ],
+      systems: ["Scaled Horde Size", "Chain Lightning Mechanic", "Fire Trail Hazards"],
+      crafting: ["Steel Armor", "AP Ammo", "Electric Fence Posts", "Turrets"]
+    },
+    {
+      days: "Days 15\u201320",
+      title: "Mid-Game",
+      subtitle: "Master the wasteland",
+      color: "#3b82f6",
+      bloodmoon: false,
+      description: "You're no longer just surviving \u2014 you're building an empire. Vehicles, electricity, and advanced tech open new possibilities.",
+      goals: [
+        "Build and fuel vehicles for fast travel",
+        "Set up an electricity grid (generators, lights, turrets)",
+        "Clear high-tier POIs for rare schematics and loot",
+        "Max out key perk trees for your playstyle",
+        "Establish farming for sustainable food and medicine"
+      ],
+      threats: [
+        "Frozen Lumberjack Zombies (30 HP, cold biome ambush)",
+        "Cop Zombies vomit acid at range",
+        "Mutated Chuck (50 HP, area slam attack)",
+        "Stealth detection \u2014 zombies can smell careless players"
+      ],
+      systems: ["Vehicles", "Electricity", "Stealth System", "Farming & Cooking"],
+      crafting: ["Minibike/4x4 Truck", "Generator Bank", "Auto Turrets", "Advanced Mods"]
+    },
+    {
+      days: "Day 21+",
+      title: "Endgame",
+      subtitle: "Every Blood Moon is a war",
+      color: "#8b5cf6",
+      bloodmoon: true,
+      description: "The world is at maximum danger. Behemoths and Demolishers join the horde. Detection range extends to 128 blocks. Only the best-prepared bases survive.",
+      goals: [
+        "Maintain a fortress-grade base with layered defenses",
+        "Stockpile massive ammo reserves for extended sieges",
+        "Achieve max-tier perks and equipment",
+        "Coordinate multiplayer defense strategies",
+        "Push into Tier 5 POIs for legendary loot"
+      ],
+      threats: [
+        "Behemoth Zombie (400 HP, devastating melee, extreme knockback)",
+        "Demolisher Zombie (160 HP, explosive charge destroys structures)",
+        "Extended horde range \u2014 128-block detection radius",
+        "All zombie variants active simultaneously",
+        "Horde waves last longer and hit harder"
+      ],
+      systems: ["Max Horde Scaling", "Extended Detection (128 blocks)", "All Variants Active"],
+      crafting: ["Max-Tier Weapons", "Military Armor", "Rocket Launcher", "Automated Base Defense"]
+    }
+  ];
+
+  var expandedArc = null;
+
+  function renderSurvivalArc() {
+    var el = document.getElementById("sec-survivalarc");
+    var html = '';
+    html += '<div class="arc-intro">';
+    html += '<div class="arc-intro-title">Predicted Gameplay Progression</div>';
+    html += '<div class="arc-intro-desc">A chronological walkthrough of the player experience from spawn to endgame. ';
+    html += 'Each stage shows what systems activate, what threats emerge, and what the player should be doing to survive. ';
+    html += 'Blood Moon hordes arrive every 7 days with escalating difficulty.</div>';
+    html += '</div>';
+
+    html += '<div class="arc-timeline">';
+    SURVIVAL_ARC.forEach(function(stage, idx) {
+      var isExp = expandedArc === idx;
+      var isBM = stage.bloodmoon;
+      html += '<div class="arc-stage">';
+      html += '<div class="arc-marker" style="background:' + stage.color + '">' + (idx + 1) + '</div>';
+      html += '<div class="arc-card' + (isBM ? ' arc-bloodmoon' : '') + '">';
+      html += '<button class="arc-card-header" data-arc="' + idx + '">';
+      html += '<div class="arc-card-left">';
+      html += '<span class="arc-day-badge" style="color:' + stage.color + ';background:' + stage.color + '22">' + esc(stage.days) + '</span>';
+      html += '<div><div class="arc-stage-title">' + esc(stage.title) + '</div>';
+      html += '<div class="arc-stage-subtitle">' + esc(stage.subtitle) + '</div></div>';
+      html += '</div>';
+      if (isBM) html += '<span class="arc-tag" style="color:#ef4444;background:rgba(239,68,68,0.15)">BLOOD MOON</span>';
+      html += '<span class="chevron' + (isExp ? ' open' : '') + '">\u25BE</span>';
+      html += '</button>';
+
+      html += '<div class="arc-card-body' + (isExp ? ' open' : '') + '">';
+      html += '<div style="font-size:13px;color:#94a3b8;margin-bottom:16px;line-height:1.6">' + esc(stage.description) + '</div>';
+      html += '<div class="arc-grid">';
+
+      html += '<div class="arc-block">';
+      html += '<div class="arc-block-title" style="color:#22c55e"><span style="font-size:14px">&#x1F3AF;</span> Player Goals</div>';
+      html += '<ul class="arc-block-list">';
+      stage.goals.forEach(function(g) { html += '<li>' + esc(g) + '</li>'; });
+      html += '</ul></div>';
+
+      html += '<div class="arc-block">';
+      html += '<div class="arc-block-title" style="color:#ef4444"><span style="font-size:14px">&#x26A0;</span> Threats</div>';
+      html += '<ul class="arc-block-list">';
+      stage.threats.forEach(function(t) { html += '<li>' + esc(t) + '</li>'; });
+      html += '</ul></div>';
+
+      html += '<div class="arc-block">';
+      html += '<div class="arc-block-title" style="color:#3b82f6"><span style="font-size:14px">&#x2699;</span> Active Systems</div>';
+      html += '<div class="arc-tag-row">';
+      stage.systems.forEach(function(s) {
+        html += '<span class="arc-tag" style="color:#3b82f6;background:rgba(59,130,246,0.12)">' + esc(s) + '</span>';
+      });
+      html += '</div></div>';
+
+      html += '<div class="arc-block">';
+      html += '<div class="arc-block-title" style="color:#f97316"><span style="font-size:14px">&#x1F528;</span> Crafting Tier</div>';
+      html += '<div class="arc-tag-row">';
+      stage.crafting.forEach(function(c) {
+        html += '<span class="arc-tag" style="color:#f97316;background:rgba(249,115,22,0.12)">' + esc(c) + '</span>';
+      });
+      html += '</div></div>';
+
+      html += '</div></div></div></div>';
+    });
+    html += '</div>';
+
+    el.innerHTML = html;
+
+    el.querySelectorAll('.arc-card-header').forEach(function(btn) {
+      btn.addEventListener('click', function() {
+        var i = parseInt(btn.getAttribute('data-arc'));
+        expandedArc = expandedArc === i ? null : i;
+        renderSurvivalArc();
+      });
+    });
+  }
+
+  renderTimeline();
+  renderMilestones();
+  renderStats();
+  renderZombieAI();
+  renderSurvivalArc();
+})();
+</script>
+</body>
+</html>
