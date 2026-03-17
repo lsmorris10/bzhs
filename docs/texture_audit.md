@@ -38,7 +38,7 @@
 
 ## Placeholder Textures Needing Replacement (349 total)
 
-### Item Textures — Weapons (28)
+### Item Textures — Weapons (57)
 
 #### Melee
 - `baseball_bat.png`, `fists.png`, `hunting_knife.png`, `iron_spear.png`
@@ -65,7 +65,7 @@
 - `paint_job.png`, `reflex_sight.png`, `scope_4x.png`, `scope_8x.png`
 - `silencer.png`, `weighted_head.png`
 
-### Item Textures — Armor (30)
+### Item Textures — Armor & Armor Mods (42)
 - `cloth_boots.png`, `cloth_chestplate.png`, `cloth_gloves.png`, `cloth_helmet.png`, `cloth_leggings.png`
 - `iron_boots.png`, `iron_chestplate.png`, `iron_gloves.png`, `iron_helmet.png`, `iron_leggings.png`
 - `leather_boots.png`, `leather_chestplate.png`, `leather_gloves.png`, `leather_helmet.png`, `leather_leggings.png`
@@ -76,7 +76,7 @@
 - `armor_plating.png`, `heavy_armor_plating.png`
 - `insulation_mod.png`, `mobility_mod.png`, `padded_mod.png`, `plating_mod.png`, `pocket_mod.png`, `spiked_mod.png`, `cooling_mesh.png`
 
-### Item Textures — Food & Drink (28)
+### Item Textures — Food & Drink (30)
 - `aloe.png`, `blueberry.png`, `chrysanthemum.png`, `coffee_beans.png`, `corn.png`
 - `goldenrod.png`, `hops.png`, `mushroom.png`, `potato.png`, `pumpkin.png`, `super_corn.png`
 - `charred_meat.png`, `corn_bread.png`, `grilled_meat.png`, `meat_stew.png`, `vegetable_stew.png`
@@ -85,12 +85,12 @@
 - `beer.png`, `coffee_cup.png`, `goldenrod_tea.png`, `red_tea.png`
 - `egg.png`, `honey.png`
 
-### Item Textures — Medical (10)
+### Item Textures — Medical (11)
 - `aloe_cream.png`, `antibiotics.png`, `bandage.png`, `first_aid_bandage.png`, `first_aid_kit.png`
 - `herbal_antibiotics.png`, `painkillers.png`, `plaster_cast.png`, `splint.png`, `vitamins.png`
 - `rad_away.png`
 
-### Item Textures — Materials & Resources (38)
+### Item Textures — Materials & Resources (42)
 - `acid.png`, `animal_fat.png`, `animal_hide.png`, `bear_hide.png`, `bone.png`
 - `clay.png`, `clay_lump.png`, `cloth.png`, `coal.png`, `concrete_mix.png`
 - `duct_tape.png`, `duke_coin.png`, `dukes_casino_token.png`, `electrical_parts.png`
@@ -110,13 +110,13 @@
 ### Item Textures — Raw Meat (5)
 - `raw_chicken.png`, `raw_meat.png`, `raw_pork.png`, `raw_rabbit.png`, `raw_venison.png`
 
-### Item Textures — Vehicles (14)
+### Item Textures — Vehicles (17)
 - `gyrocopter_chassis.png`, `handlebars.png`, `headlight.png`, `headlight_upgrade.png`
 - `medium_engine.png`, `nos_tank.png`, `offroad_tires.png`, `reinforced_wheels.png`
 - `rotor.png`, `small_engine.png`, `structural_brace.png`, `truck_chassis.png`
 - `v8_engine.png`, `vehicle_battery.png`, `vehicle_chassis.png`, `vehicle_seat.png`, `wheel.png`
 
-### Item Textures — Other (9)
+### Item Textures — Other (6)
 - `junk_turret.png`, `repair_kit.png`, `schematic.png`, `storage_rack.png`
 - `turret_mount.png`, `wire_tool.png`
 
