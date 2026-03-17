@@ -112,7 +112,11 @@ public class WorkstationBlockEntity extends BlockEntity {
                     if (fuelTime > 0) {
                         burnTimeTotal = fuelTime;
                         burnTime = burnTimeTotal;
-                        fuel.shrink(1);
+                        if (fuel.is(Items.LAVA_BUCKET)) {
+                            items.set(fuelSlot, new ItemStack(Items.BUCKET));
+                        } else {
+                            fuel.shrink(1);
+                        }
                         setChanged();
                     }
                 }
