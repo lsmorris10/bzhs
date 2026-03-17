@@ -48,6 +48,9 @@ sourceSets.main.resources { srcDir 'src/generated/resources' }
 dependencies {
     implementation "net.neoforged:neoforge:${neo_version}"
     implementation "software.bernie.geckolib:geckolib-neoforge-1.21.4:4.8.5"
+    jarJar(group: 'software.bernie.geckolib', name: 'geckolib-neoforge-1.21.4', version: '[4.8,5.0)') {
+        version { prefer '4.8.5' }
+    }
 }
 
 tasks.withType(ProcessResources).configureEach {

@@ -8,7 +8,10 @@ INITIAL_VERSION="0.1.0-alpha"
 if [ -n "$1" ]; then
   jar_file="$1"
 else
-  jar_file=$(ls -t build/libs/BrutalZombieHordeSurvival-*.jar 2>/dev/null | head -1)
+  jar_file=$(ls -t build/libs/BrutalZombieHordeSurvival-*-all.jar 2>/dev/null | head -1)
+  if [ -z "$jar_file" ]; then
+    jar_file=$(ls -t build/libs/BrutalZombieHordeSurvival-*.jar 2>/dev/null | head -1)
+  fi
 fi
 
 if [ -z "$jar_file" ] || [ ! -f "$jar_file" ]; then
@@ -16,15 +19,16 @@ if [ -z "$jar_file" ] || [ ! -f "$jar_file" ]; then
   exit 1
 fi
 
-jar_name=$(basename "$jar_file")
-new_version=$(echo "$jar_name" | sed 's/BrutalZombieHordeSurvival-\(.*\)\.jar/\1/')
+src_jar_name=$(basename "$jar_file")
+new_version=$(echo "$src_jar_name" | sed 's/BrutalZombieHordeSurvival-\(.*\)-all\.jar/\1/' | sed 's/BrutalZombieHordeSurvival-\(.*\)\.jar/\1/')
+jar_name="BrutalZombieHordeSurvival-${new_version}.jar"
 
 echo "Found: $jar_name (version: $new_version)"
 
 if [ "$new_version" = "$INITIAL_VERSION" ]; then
   echo "Version is $INITIAL_VERSION — replacing old jar(s)..."
   rm -f "$PUBLIC_DIR"/BrutalZombieHordeSurvival-*.jar
-  cp "$jar_file" "$PUBLIC_DIR/"
+  cp "$jar_file" "$PUBLIC_DIR/$jar_name"
 
   sed -i "s|href=\"\./BrutalZombieHordeSurvival-[^\"]*\.jar\"|href=\"./$jar_name\"|g" "$HTML_FILE"
   sed -i "s|⬇ Download v[^<]*|⬇ Download v$new_version|g" "$HTML_FILE"
@@ -39,7 +43,7 @@ with open('$HTML_FILE', 'w') as f:
 "
 else
   echo "New version detected — keeping all versions..."
-  cp "$jar_file" "$PUBLIC_DIR/"
+  cp "$jar_file" "$PUBLIC_DIR/$jar_name"
 
   sed -i "s|href=\"\./BrutalZombieHordeSurvival-[^\"]*\.jar\"|href=\"./$jar_name\"|g" "$HTML_FILE"
   sed -i "s|⬇ Download v[^<]*|⬇ Download v$new_version|g" "$HTML_FILE"

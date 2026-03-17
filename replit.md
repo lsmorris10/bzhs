@@ -307,6 +307,8 @@ src/main/java/com/sevendaystominecraft/
 - **Geckolib 4.8.5**: Added as dependency (`software.bernie.geckolib:geckolib-neoforge-1.21.4:4.8.5`)
   - Maven: `https://dl.cloudsmith.io/public/geckolib3/geckolib/maven/`
   - Item JSON files for weapons use `{"model":{"type":"geckolib:geo_item"}}`
+  - **Bundled via Jar-in-Jar**: `jarJar` dependency in `build.gradle` embeds GeckoLib inside the BZHS JAR at `META-INF/jarjar/`; players need only the single BZHS JAR
+  - Deploy script (`scripts/deploy-jar.sh`) prefers the `-all.jar` (JiJ bundle) and renames to clean filename
   - 3D voxel-style `.geo.json` models at `assets/sevendaystominecraft/geo/item/`
   - Keyframe animations at `assets/sevendaystominecraft/animations/item/`
   - Placeholder textures at `assets/sevendaystominecraft/textures/item/`
