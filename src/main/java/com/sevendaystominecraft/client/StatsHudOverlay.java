@@ -139,7 +139,7 @@ public class StatsHudOverlay {
 
         float hp = player.getHealth();
         float maxHp = player.getMaxHealth();
-        int totalHearts = (int) Math.ceil(maxHp / 5.0);
+        int totalHearts = (int) Math.ceil(maxHp / 2.0);
         int heartRows = (int) Math.ceil(totalHearts / (double) ICONS_PER_ROW);
         float hpPct = (maxHp > 0) ? hp / maxHp : 0f;
         boolean heartLow = hpPct < LOW_THRESHOLD;
@@ -151,13 +151,13 @@ public class StatsHudOverlay {
             int heartsInRow = Math.min(ICONS_PER_ROW, totalHearts - row * ICONS_PER_ROW);
             for (int i = 0; i < heartsInRow; i++) {
                 int heartIndex = row * ICONS_PER_ROW + i;
-                float heartMinHp = heartIndex * 5.0f;
+                float heartMinHp = heartIndex * 2.0f;
                 int iconX = leftBaseX + i * ICON_STEP;
 
                 ResourceLocation icon;
-                if (hp >= heartMinHp + 5.0f) {
+                if (hp >= heartMinHp + 2.0f) {
                     icon = heartFlash ? HEART_LOW : HEART_FULL;
-                } else if (hp >= heartMinHp + 2.5f) {
+                } else if (hp >= heartMinHp + 1.0f) {
                     icon = heartFlash ? HEART_LOW : HEART_HALF;
                 } else {
                     icon = HEART_EMPTY;
