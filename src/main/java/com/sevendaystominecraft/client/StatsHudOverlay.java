@@ -89,11 +89,6 @@ public class StatsHudOverlay {
         float staminaPct = (stats.getMaxStamina() > 0) ? stats.getStamina() / stats.getMaxStamina() : 0f;
         drawStatBar(graphics, x, y, "Stamina", staminaPct, stats.getStamina(), stats.getMaxStamina(),
                 staminaPct < LOW_THRESHOLD ? STAMINA_LOW_COLOR : STAMINA_COLOR);
-        y += BAR_HEIGHT + BAR_SPACING;
-
-        int xpNeeded = LevelManager.xpToNextLevel(stats.getLevel());
-        float xpPct = (xpNeeded > 0) ? (float) stats.getXp() / xpNeeded : 0f;
-        drawXpBar(graphics, x, y, xpPct, stats.getXp(), xpNeeded);
         y += BAR_HEIGHT + BAR_SPACING + 2;
 
         float temp = stats.getCoreTemperature();
@@ -118,6 +113,29 @@ public class StatsHudOverlay {
         int screenHeight = mc.getWindow().getGuiScaledHeight();
 
         int hotbarTop = screenHeight - 22 - 1;
+
+        int vanillaXpBarY = screenHeight - 29;
+        int skillXpBarHeight = 3;
+        int skillXpY = vanillaXpBarY - skillXpBarHeight - 1;
+        int xpBarWidth = 182;
+        int xpBarX = (screenWidth - xpBarWidth) / 2;
+
+        int xpNeeded = LevelManager.xpToNextLevel(stats.getLevel());
+        float xpPct = (xpNeeded > 0) ? (float) stats.getXp() / xpNeeded : 0f;
+
+        graphics.fill(xpBarX, skillXpY, xpBarX + xpBarWidth, skillXpY + skillXpBarHeight, 0xFF111111);
+        int filledWidth = Math.round(xpBarWidth * Math.max(0f, Math.min(1f, xpPct)));
+        if (filledWidth > 0) {
+            graphics.fill(xpBarX, skillXpY, xpBarX + filledWidth, skillXpY + skillXpBarHeight, XP_COLOR);
+        }
+
+        String skillLabel = String.format("Skill XP: %d/%d", stats.getXp(), xpNeeded);
+        int skillLabelWidth = mc.font.width(skillLabel);
+        graphics.drawString(mc.font, skillLabel, (screenWidth - skillLabelWidth) / 2, skillXpY - 10, XP_COLOR, true);
+
+        String enchLabel = "Enchanting XP";
+        int enchLabelWidth = mc.font.width(enchLabel);
+        graphics.drawString(mc.font, enchLabel, (screenWidth - enchLabelWidth) / 2, vanillaXpBarY + 5, 0xFF88FF88, true);
 
         int rightBaseX = screenWidth / 2 + 91;
 
@@ -163,24 +181,5 @@ public class StatsHudOverlay {
         graphics.drawString(mc.font, pctText, barX + BAR_WIDTH + 4, y, TEXT_COLOR, true);
     }
 
-    private static void drawXpBar(GuiGraphics graphics, int x, int y,
-                                   float pct, int current, int needed) {
-        Minecraft mc = Minecraft.getInstance();
-
-        graphics.drawString(mc.font, "XP:", x, y, TEXT_COLOR, true);
-
-        int barX = x + LABEL_WIDTH;
-
-        graphics.fill(barX - 1, y - 1, barX + BAR_WIDTH + 1, y + BAR_HEIGHT + 1, BORDER_COLOR);
-        graphics.fill(barX, y, barX + BAR_WIDTH, y + BAR_HEIGHT, 0xFF111111);
-
-        int filledWidth = Math.round(BAR_WIDTH * Math.max(0f, Math.min(1f, pct)));
-        if (filledWidth > 0) {
-            graphics.fill(barX, y, barX + filledWidth, y + BAR_HEIGHT, XP_COLOR);
-        }
-
-        String xpText = String.format("%d/%d", current, needed);
-        graphics.drawString(mc.font, xpText, barX + BAR_WIDTH + 4, y, TEXT_COLOR, true);
-    }
 
 }
