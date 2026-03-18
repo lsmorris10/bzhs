@@ -1,0 +1,44 @@
+{
+  "temperature": 0.9,
+  "downfall": 0.1,
+  "has_precipitation": false,
+  "creature_spawn_probability": 0.02,
+  "effects": {
+    "sky_color": 6052956,
+    "fog_color": 8355711,
+    "water_color": 4159204,
+    "water_fog_color": 329011,
+    "grass_color": 5197377,
+    "foliage_color": 4934475,
+    "mood_sound": {
+      "sound": "minecraft:ambient.cave",
+      "tick_delay": 6000,
+      "block_search_extent": 8,
+      "offset": 2.0
+    }
+  },
+  "spawners": {},
+  "spawn_costs": {},
+  "carvers": {
+    "air": [
+      "minecraft:cave",
+      "minecraft:cave_extra_underground",
+      "minecraft:canyon"
+    ]
+  },
+  "features": [
+    [],
+    [],
+    [],
+    [],
+    [],
+    [],
+    [],
+    [],
+    [
+      "minecraft:patch_dead_bush_2"
+    ],
+    [],
+    []
+  ]
+}
