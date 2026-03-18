@@ -54,12 +54,6 @@ public class StatsHudOverlay {
     private static final ResourceLocation ARMOR_HALF = guiTexture("armor_half");
     private static final ResourceLocation ARMOR_EMPTY = guiTexture("armor_empty");
 
-    private static final ResourceLocation FOOD_FULL = guiTexture("food_full");
-    private static final ResourceLocation FOOD_HALF = guiTexture("food_half");
-    private static final ResourceLocation FOOD_EMPTY = guiTexture("food_empty");
-    private static final ResourceLocation FOOD_LOW = guiTexture("food_low");
-    private static final ResourceLocation FOOD_HALF_LOW = guiTexture("food_half_low");
-
     private static final ResourceLocation WATER_FULL = guiTexture("water_full");
     private static final ResourceLocation WATER_HALF = guiTexture("water_half");
     private static final ResourceLocation WATER_EMPTY = guiTexture("water_empty");
@@ -185,32 +179,11 @@ public class StatsHudOverlay {
             }
         }
 
-        float food = stats.getFood();
-        float maxFood = stats.getMaxFood();
-        float foodPct = (maxFood > 0) ? food / maxFood : 0f;
-        boolean foodLow = foodPct < LOW_THRESHOLD;
-        int foodY = hotbarTop - 2 - (ICON_SIZE + 1);
-        for (int i = 0; i < ICONS_PER_ROW; i++) {
-            int iconIndex = ICONS_PER_ROW - 1 - i;
-            int iconX = rightBaseX - (i + 1) * ICON_STEP;
-            float iconMinPct = iconIndex * 0.1f;
-
-            ResourceLocation icon;
-            if (foodPct >= iconMinPct + 0.1f) {
-                icon = foodLow ? FOOD_LOW : FOOD_FULL;
-            } else if (foodPct >= iconMinPct + 0.05f) {
-                icon = foodLow ? FOOD_HALF_LOW : FOOD_HALF;
-            } else {
-                icon = FOOD_EMPTY;
-            }
-            blitIcon(graphics, icon, iconX, foodY);
-        }
-
         float water = stats.getWater();
         float maxWater = stats.getMaxWater();
         float waterPct = (maxWater > 0) ? water / maxWater : 0f;
         boolean waterLow = waterPct < LOW_THRESHOLD;
-        int waterY = foodY + ICON_SIZE + 1;
+        int waterY = hotbarTop - 2 - (ICON_SIZE + 1);
         for (int i = 0; i < ICONS_PER_ROW; i++) {
             int iconIndex = ICONS_PER_ROW - 1 - i;
             int iconX = rightBaseX - (i + 1) * ICON_STEP;
