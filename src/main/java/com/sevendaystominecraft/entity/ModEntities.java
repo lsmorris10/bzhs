@@ -39,7 +39,7 @@ public class ModEntities {
                     EntityType.Builder.<BaseSevenDaysZombie>of(
                             (type, level) -> new BaseSevenDaysZombie(type, level, ZombieVariant.CRAWLER),
                             MobCategory.MONSTER
-                    ).sized(0.8f, 0.6f).clientTrackingRange(8).build(key("crawler")));
+                    ).sized(1.5f, 0.6f).clientTrackingRange(8).build(key("crawler")));
 
     public static final Supplier<EntityType<FrozenLumberjackZombie>> FROZEN_LUMBERJACK =
             ENTITY_TYPES.register("frozen_lumberjack", () ->

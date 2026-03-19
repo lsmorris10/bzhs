@@ -1,0 +1,56 @@
+This part of the mod is the "Advanced Attribute System" (also called the Attribute Profiles system or layered attribute pipeline).
+It's the core feature in ZombieApocalypseAddon (a server-side mod on Modrinth that turns vanilla Minecraft into a full zombie apocalypse with hordes, blood moons, continuous spawning, and progressive difficulty).
+Your exact approach—rebalancing all zombie stats proportionally with vanilla Minecraft as the fixed anchor point (20 HP base zombie, standard attack damage/speed/etc.), then extrapolating HP, damage, and other stats to fit each zombie "type" description—is precisely how this system is designed and documented. It keeps everything feeling like an enhanced vanilla experience instead of arbitrary new numbers.
+How the System Works (the Pipeline)
+Every spawned zombie-class mob (regular zombie, husk, drowned, zombie villager) goes through this exact layered flow:
+
+Start from vanilla base value (the anchor you mentioned—e.g., zombie health = 20 HP, attack damage = ~3 on normal difficulty, speed = 0.23, follow range = 35, etc.).
+Apply Base Profile (global multipliers/bonuses for all spawned zombies).
+Apply Variant Profile (per-type tweaks—exactly where you extrapolate for each zombie description).
+Apply Context Profiles (biome/dimension multipliers that stack multiplicatively).
+Apply day-scaling (progressive difficulty over in-game days).
+Legacy compatibility layer (old scaling values).
+Final safety clamp (min/max bounds to prevent broken values).
+
+All Adjustable Aspects & Stats
+You can tweak these via config files, in-game /zattr commands, or /zdayspawn commands. Everything supports:
+
+Multipliers (proportional scaling: 1.0 = vanilla, 1.5 = +50%, 0.75 = -25%)
+Bonuses (flat add/subtract after multipliers)
+
+Core attributes you rebalance (all centered on vanilla):
+
+Health (HP)
+Attack damage
+Movement speed
+Armor
+Follow range
+Knockback resistance
+
+Profile Layers in Detail
+
+Base Profile (base.* keys) — Global for every spawned zombie (e.g., base.health.multiplier).
+Variant Profiles (variant.<type>.* keys) — This is the main spot for "extrapolating to match the description of the type of zombie":
+variant.zombie.*, variant.husk.*, variant.drowned.*, variant.zombie_villager.*
+Example: A tanky "brute" husk might get variant.husk.health.multiplier = 2.0 + variant.husk.armor.bonus = 4 to match a tough description while staying proportional to vanilla 20 HP.
+
+Context Profiles (context.<biome>.* keys) — Location-specific (desert, water, mushroom, nether, end). Stack multiplicatively (e.g., desert 1.1× + nether 1.2× = 1.32× total).
+Day Scaling (scale.* keys) — Gets stronger over time (toggleable; configurable start/max days and scaling factor 0–1.0).
+
+Extra Config & Control Aspects
+
+Toggles (master switches):
+attributes.enabled
+attributes.scaling (day progression)
+attributes.variantProfiles
+attributes.contextProfiles
+
+Legacy keys for backward compatibility (e.g., legacy.healthBonus, legacy.speedMultiplier).
+In-game commands for live testing/rebalancing (super useful for what you described):
+/zattr set <key> <value> (e.g., /zattr set variant.husk.attack.multiplier 1.3)
+/zattr get <key>, /zattr toggle <key> <true|false>, /zattr status, /zattr keys all
+
+Over 40 total config options total. Everything is server-side only (no client mods needed).
+
+This system is exactly why you "had to" rebalance proportionally around vanilla—it forces consistent, lore-friendly scaling so a "fast crawler" zombie feels like a faster vanilla one (not a random new mob), while a "tank zombie" stays believable.
+If you're looking at a specific config screenshot, in-game command output, or a particular variant (e.g., a new custom zombie type you're adding), drop more details and I can give the exact config keys or balancing math! This setup already does everything you described perfectly.
