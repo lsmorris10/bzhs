@@ -12,7 +12,7 @@ public class ModEntityRenderers {
 
     public static void onRegisterRenderers(EntityRenderersEvent.RegisterRenderers event) {
         event.registerEntityRenderer(ModEntities.WALKER.get(), ctx -> new ScaledZombieRenderer(ctx, 1.0f, NAME_TAG_EXTRA_HEIGHT));
-        event.registerEntityRenderer(ModEntities.CRAWLER.get(), ctx -> new ScaledZombieRenderer(ctx, 1.0f, NAME_TAG_EXTRA_HEIGHT));
+        event.registerEntityRenderer(ModEntities.CRAWLER.get(), ctx -> new CrawlerZombieRenderer(ctx, 1.0f, -0.5f));
         event.registerEntityRenderer(ModEntities.FROZEN_LUMBERJACK.get(), ctx -> new ScaledZombieRenderer(ctx, 1.0f, NAME_TAG_EXTRA_HEIGHT));
         event.registerEntityRenderer(ModEntities.BLOATED_WALKER.get(), ctx -> new ScaledZombieRenderer(ctx, 1.1f, NAME_TAG_EXTRA_HEIGHT));
         event.registerEntityRenderer(ModEntities.SPIDER_ZOMBIE.get(), ctx -> new ScaledZombieRenderer(ctx, 0.5f, NAME_TAG_EXTRA_HEIGHT));
