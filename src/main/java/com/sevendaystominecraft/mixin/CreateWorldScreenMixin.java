@@ -63,7 +63,7 @@ public abstract class CreateWorldScreenMixin extends Screen {
         int screenWidth = this.width;
         int buttonWidth = 150;
         int buttonX = screenWidth / 2 - buttonWidth / 2;
-        int buttonY = 8;
+        int buttonY = 33;
 
         sevendaystominecraft$toggleButton = this.addRenderableWidget(Button.builder(
                 Component.literal("World Type: Generated"),
@@ -77,7 +77,7 @@ public abstract class CreateWorldScreenMixin extends Screen {
 
         List<PremadeWorldInfo> worlds = PremadeWorldManager.getAvailableWorlds();
 
-        int listY = 55;
+        int listY = 80;
         int listHeight = this.height - 100;
         sevendaystominecraft$worldListWidget = this.addRenderableWidget(
                 new PremadeWorldListWidget(Minecraft.getInstance(), screenWidth, listHeight, listY, 30)
@@ -95,7 +95,7 @@ public abstract class CreateWorldScreenMixin extends Screen {
 
         sevendaystominecraft$worldNameBox = this.addRenderableWidget(new EditBox(
                 Minecraft.getInstance().font,
-                screenWidth / 2 - 100, 33, 200, 18,
+                screenWidth / 2 - 100, 58, 200, 18,
                 Component.literal("World Name")
         ));
         sevendaystominecraft$worldNameBox.setMaxLength(64);
