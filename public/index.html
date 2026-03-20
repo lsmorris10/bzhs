@@ -479,7 +479,7 @@
       <span class="badge">NeoForge 21.4.140</span>
       <span class="badge">No Dependencies</span>
       <span class="badge">Java 21</span>
-      <span class="badge">108 Tasks Merged</span>
+      <span class="badge">115 Tasks Merged</span>
     </div>
   </section>
 
@@ -527,7 +527,7 @@
   <div class="section">
     <h2>Development Status</h2>
     <div class="status-card">
-      <p class="status-version"><strong>Alpha v0.1.0</strong> — Active development &middot; Updated March 17, 2026</p>
+      <p class="status-version"><strong>Alpha v0.1.0</strong> — Active development &middot; Updated March 20, 2026</p>
 
       <ul class="milestone-list">
         <li><span class="check">✓</span> Project scaffold &amp; architecture</li>
@@ -570,8 +570,10 @@
         <h3>Coming Next</h3>
         <ul class="coming-list">
           <li>Overworld biome placement — surface builder and noise router for custom biomes</li>
-          <li>Replace placeholder textures with real pixel art</li>
+          <li>Replace 349 placeholder textures with real pixel art</li>
+          <li>Full world generation pipeline (city grid, POI templates)</li>
           <li>Trader NPCs and quest system</li>
+          <li>Vehicle system</li>
         </ul>
       </div>
     </div>
@@ -580,11 +582,13 @@
   <div class="section recent-section">
     <h2>Recent Changes</h2>
     <ul class="recent-list">
+      <li><span class="dot">●</span> Perk icon renames (#117) — texture filenames updated to match renamed perk IDs from trademark sweep</li>
+      <li><span class="dot">●</span> Registry crash fix (#118) — fixed startup crash caused by stale registry references after trademark name sweep</li>
       <li><span class="dot">●</span> Magazine / Skill Book system — 6 series (Steady Steve, Block Brawler, Sharpshot Sam, The Tinkerer, Overworld Chef, Dungeon Tactician), 36 items with per-issue bonuses and series mastery tracking</li>
       <li><span class="dot">●</span> Custom biomes — 7 biome definitions (Pine Forest, Forest, Plains, Desert, Snowy Tundra, Burned Forest, Wasteland) with temperature ranges, zombie density multipliers, and loot tier bonuses</li>
       <li><span class="dot">●</span> Trademark name sweep — zombie display names (Feral Wraith, Banshee, Riot Husk, Wrecking Husk, etc.), 12 perk IDs renamed, currency changed to Survivor's Coin</li>
-      <li><span class="dot">●</span> 3D weapon animations via GeckoLib — AK-47 bolt action, 9mm Pistol slide, Grenade pull/throw with Jar-in-Jar bundling</li>
       <li><span class="dot">●</span> Context-aware gameplay music — day, night, combat, and blood moon tracks with smooth crossfading</li>
+      <li><span class="dot">●</span> 3D weapon animations via GeckoLib — AK-47 bolt action, 9mm Pistol slide, Grenade pull/throw with Jar-in-Jar bundling</li>
       <li><span class="dot">●</span> Territory POI system — star-rated points of interest with procedural structures and difficulty tiers</li>
       <li><span class="dot">●</span> Sprint fix — client-side LocalPlayer.aiStep() Mixin prevents rubber-banding</li>
     </ul>

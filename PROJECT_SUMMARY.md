@@ -22,25 +22,29 @@ A total conversion mod inspired by 7 Days to Die 2.6. One full JAR, no dependenc
 - **XP, leveling, 45 perks** — 5 attribute trees, kill/mine XP, perk unlocks
 - **Extended day cycle** — TIME_SCALE=2 slower-tick; one day = ~40 real minutes, vanilla 24k dayTime preserved
 - **20 HP vanilla player base** — zombie stats proportionally balanced for vanilla 20 HP scale
+- **Sound system** — 8 custom sound events with gated playback and subtitles
+- **Context-aware gameplay music** — day/night/combat/blood moon tracks with crossfading
+- **Territory POIs** — star-rated points of interest with procedural structures
+- **3D weapon animations** — GeckoLib-powered AK-47, 9mm Pistol, Grenade with full animations; bundled via Jar-in-Jar
+- **Sprint fix** — client-side `LocalPlayer.aiStep()` Mixin prevents rubber-banding
+- **Skill books / magazines** — 6 series (36 items), per-issue bonuses, series mastery tracking
+- **Custom biomes** — 7 biome definitions with per-biome temperature ranges, zombie density multipliers, loot tier bonuses
+- **Trademark name sweep** — zombie display names, perk IDs, and currency renamed to avoid trademark conflicts
 - **Landing page** — published with GitHub Releases download button and Ko-fi/Patreon funding page
 
 ---
 
 ## In Progress
 
-- **Sound system** — zombie, combat, and ambient sound events
-- **Territory POIs** — location-specific world generation points of interest
-- **Geckolib animations** — 3D animated weapon and zombie models
+- **Overworld biome placement** — surface builder / noise router for custom biome definitions (definitions exist, placement pending)
 
 ---
 
 ## What's Next
 
 - Replace 349 placeholder textures (full audit in `docs/texture_audit.md`; HUD icons, weapons, workstations highest priority)
-- Sprint bug fix (client-side Mixin on `LocalPlayer.aiStep()`)
-- World generation — custom biomes, structures, and POIs
-- Skill books
-- Trader NPCs
+- Full world generation pipeline (city grid, POI templates)
+- Trader NPCs and quest system
 - Vehicle system
 
 ---

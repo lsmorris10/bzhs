@@ -56,6 +56,10 @@
 - Custom biome system (#110) — 7 biomes (Pine Forest, Forest, Plains, Desert, Snowy Tundra, Burned Forest, Wasteland) with per-biome temperature ranges, zombie density multipliers, loot tier bonuses; integrated into PlayerStatsHandler, LootStageCalculator, TerritoryZombieSpawner
 - Trademark name sweep (#111) — Duke's Casino Token → Survivor's Coin; 8 zombie display names renamed (Feral Wight→Feral Wraith, Frozen Lumberjack→Frostbitten Woodsman, Cop→Riot Husk, Screamer→Banshee, Demolisher→Wrecking Husk, Mutated Chuck→Mutated Brute, Spider Zombie→Wall Creeper, Bloated Walker→Bloated Shambler); 12 perk IDs+names renamed
 
+**March 18 Completed Work:**
+- Perk icon renames (#117) — perk icon texture filenames updated to match renamed perk IDs from trademark sweep
+- Registry crash fix (#118) — fixed startup crash caused by stale registry references after the trademark name sweep
+
 **Current Focus / In Progress:**
 - Overworld biome placement — surface builder / noise router for custom biome definitions (definitions exist, placement pending)
 
@@ -80,27 +84,34 @@
 
 ---
 
-## Next Session — Debug & Test Checklist (March 17+)
+## Next Session — Debug & Test Checklist (March 20+)
 
-- **P1 — Build & Launch:** Does the mod build cleanly? Any Mixin or registry errors on startup?
+- **P1 — Build & Launch:** Does the mod build cleanly? Any Mixin or registry errors on startup? (Registry crash fix #118 should resolve previous startup issues.)
 - **P2 — Basic Weapons (melee):** Stone Axe, Wooden Club, Baseball Bat, Sledgehammer — do they deal correct damage with quality scaling? Attack speed correct?
 - **P3 — Basic Weapons (ranged):** Pipe Pistol, Primitive Bow — do they fire? Ammo consumption correct? Hit detection working?
 - **P4 — Workstation Recipe Processing:** Campfire, Forge, Workbench — do recipes process with correct fuel consumption and output? Does Forge smelting take the right time?
-- **P5 — Zombie AI Special Abilities:** Cop acid spit, Demolisher ground pound, Spider climbing, Charged chain lightning — do variant abilities trigger correctly? Does block breaking AI activate on targeted blocks?
+- **P5 — Zombie AI Special Abilities:** Riot Husk acid spit, Wrecking Husk ground pound, Wall Creeper climbing, Charged chain lightning — do variant abilities trigger correctly? Does block breaking AI activate on targeted blocks?
 - **P6 — Icon-Based HUD:** Hearts, food, water, armor shown as icon rows (not stat bars)? Icons update correctly as values change? No overlap with compass or minimap?
 - **P7 — Heatmap + Zombie Investigation:** Does horde pathfinding respond to heat? Do zombies investigate high-heat areas?
 - **P8 — Container GUIs:** Open all workstation and loot container GUIs — do they render correctly and accept/process items?
 - **P9 — World Startup:** Does a fresh new world generate and load without errors or crashes?
 - **P10 — Blood Moon:** Every 7th night still triggers correctly with the rebalanced zombie HP/damage?
-- **P11 — Territory POIs (once merged):** Do POI structures spawn in expected locations and biomes?
-- **P12 — Sound System (once merged):** Do zombie sounds, combat sounds, and ambient sounds play correctly? Any missing sound events?
-- **P13 — Geckolib Animations (once merged):** Do animated weapon and zombie models render without errors?
-- **P14 — Sprint Bug (deferred):** Sprint still broken? (Expected — not fixed yet.)
-- **P15 — Landing Page + Funding:** Funding page loads? Ko-fi/Patreon links work?
+- **P11 — Territory POIs:** Do POI structures spawn in expected locations and biomes?
+- **P12 — Sound & Music:** Do zombie sounds, combat sounds, ambient sounds, and context-aware music tracks play correctly? Day/night/combat/blood moon crossfading working?
+- **P13 — Geckolib Animations:** Do animated weapon models (AK-47, 9mm Pistol, Grenade) render without errors?
+- **P14 — Sprint Fix:** Sprint rubber-banding resolved? (Fixed in #106 via LocalPlayerSprintMixin.)
+- **P15 — Skill Books:** Do magazine/skill book items drop, read correctly, and grant per-issue bonuses? Series mastery tracking working?
+- **P16 — Custom Biomes:** Do biome temperature ranges, zombie density multipliers, and loot tier bonuses apply correctly?
+- **P17 — Perk Icons:** Do renamed perk icon textures load and display correctly in the perk UI? (Fixed in #117.)
+- **P18 — Landing Page + Funding:** Funding page loads? Ko-fi/Patreon links work?
 
 ---
 
 ## Recent Completed Work
+
+**March 18 Session (Tasks #117–#118)**
+- Perk icon renames (#117) — texture filenames updated to match renamed perk IDs
+- Registry crash fix (#118) — fixed startup crash from stale registry references after trademark sweep
 
 **March 16–17 Session (Tasks #72–#111)**
 - Zombie AI behavior tree refactored (#72)

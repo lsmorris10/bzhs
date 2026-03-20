@@ -196,5 +196,5 @@ Copy the JAR into your Minecraft `mods/` folder (requires NeoForge 21.4.140 for 
 - Overworld biome placement (custom biome definitions exist, surface builder / noise router pending)
 - Replace placeholder textures with real pixel art (prioritize HUD icons, weapons, workstations)
 - Full world generation pipeline (city grid, POI templates)
-- Trader NPCs
+- Trader NPCs and quest system
 - Vehicle system
