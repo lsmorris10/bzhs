@@ -323,16 +323,6 @@ public class PlayerStatsHandler {
             changed = true;
         }
 
-        if (stack.is(Items.POTION)) {
-            var potionContents = stack.get(net.minecraft.core.component.DataComponents.POTION_CONTENTS);
-            boolean isWaterBottle = potionContents != null
-                    && potionContents.potion().isPresent()
-                    && potionContents.potion().get().is(net.minecraft.world.item.alchemy.Potions.WATER);
-            if (isWaterBottle) {
-                stats.addDebuff(SevenDaysPlayerStats.DEBUFF_DYSENTERY, cfg.dysenteryDuration.get());
-                changed = true;
-            }
-        }
 
         if (stack.is(Items.MILK_BUCKET)) {
             stats.removeDebuff(SevenDaysPlayerStats.DEBUFF_DYSENTERY);

@@ -29,7 +29,7 @@ public final class WorkstationRecipes {
         recipes.add(recipe(List.of(ing(Items.COD, 1)), new ItemStack(Items.COOKED_COD), 200));
         recipes.add(recipe(List.of(ing(Items.SALMON, 1)), new ItemStack(Items.COOKED_SALMON), 200));
         recipes.add(recipe(List.of(ing(Items.POTATO, 1)), new ItemStack(Items.BAKED_POTATO), 200));
-        recipes.add(recipe(List.of(ing(ModItems.MURKY_WATER.get(), 1), ing(ModItems.GLASS_JAR.get(), 1)), new ItemStack(ModItems.BOILED_WATER.get()), 200));
+        recipes.add(recipe(List.of(ing(ModItems.MURKY_WATER.get(), 1), ing(Items.GLASS_BOTTLE, 1)), new ItemStack(ModItems.BOILED_WATER.get()), 200));
         recipes.add(recipe(List.of(ing(Items.RABBIT, 1)), new ItemStack(ModItems.CHARRED_MEAT.get()), 100));
         recipes.add(recipe(List.of(ing(ModItems.GOLDENROD.get(), 1), ing(ModItems.BOILED_WATER.get(), 1)), new ItemStack(ModItems.GOLDENROD_TEA.get()), 200));
         recipes.add(recipe(List.of(ing(ModItems.CHRYSANTHEMUM.get(), 1), ing(ModItems.BOILED_WATER.get(), 1)), new ItemStack(ModItems.RED_TEA.get()), 200));
@@ -54,7 +54,6 @@ public final class WorkstationRecipes {
         recipes.add(recipe(List.of(ing(ModItems.IRON_SCRAP.get(), 1)), new ItemStack(Items.IRON_INGOT), 200));
         recipes.add(recipe(List.of(ing(Items.IRON_INGOT, 1)), new ItemStack(ModItems.FORGED_IRON.get()), 300));
         recipes.add(recipe(List.of(ing(ModItems.LEAD.get(), 1)), new ItemStack(ModItems.FORGED_LEAD.get()), 250));
-        recipes.add(recipe(List.of(ing(Items.SAND, 2), ing(Items.CLAY_BALL, 1)), new ItemStack(ModItems.GLASS_JAR.get(), 3), 200));
         recipes.add(recipe(List.of(ing(ModItems.FORGED_IRON.get(), 2)), new ItemStack(ModItems.NAIL.get(), 4), 100));
         recipes.add(recipe(List.of(ing(ModItems.FORGED_IRON.get(), 1)), new ItemStack(ModItems.SPRING.get(), 1), 150));
         RECIPES.put(WorkstationType.FORGE, recipes);
@@ -88,12 +87,12 @@ public final class WorkstationRecipes {
         recipes.add(recipe(List.of(ing(ModItems.OIL_SHALE.get(), 2)), new ItemStack(ModItems.POLYMER.get(), 1), 250));
         recipes.add(recipe(List.of(ing(ModItems.NITRATE.get(), 2), ing(Items.COAL, 1)), new ItemStack(Items.GUNPOWDER, 2), 200));
         recipes.add(recipe(List.of(ing(ModItems.OIL_SHALE.get(), 3)), new ItemStack(ModItems.GAS_CAN.get(), 1), 400));
-        recipes.add(recipe(List.of(ing(ModItems.NITRATE.get(), 1), ing(ModItems.GLASS_JAR.get(), 1)), new ItemStack(ModItems.ACID.get(), 1), 300));
-        recipes.add(recipe(List.of(ing(ModItems.NITRATE.get(), 3), ing(ModItems.GLASS_JAR.get(), 1), ing(ModItems.POLYMER.get(), 1)), new ItemStack(ModItems.ANTIBIOTICS.get(), 1), 400));
+        recipes.add(recipe(List.of(ing(ModItems.NITRATE.get(), 1), ing(Items.GLASS_BOTTLE, 1)), new ItemStack(ModItems.ACID.get(), 1), 300));
+        recipes.add(recipe(List.of(ing(ModItems.NITRATE.get(), 3), ing(Items.GLASS_BOTTLE, 1), ing(ModItems.POLYMER.get(), 1)), new ItemStack(ModItems.ANTIBIOTICS.get(), 1), 400));
         recipes.add(recipe(List.of(ing(Items.GUNPOWDER, 1), ing(ModItems.FORGED_LEAD.get(), 1)), new ItemStack(ModItems.AMMO_9MM.get(), 8), 150));
         recipes.add(recipe(List.of(ing(Items.GUNPOWDER, 2), ing(ModItems.FORGED_LEAD.get(), 1), ing(ModItems.FORGED_IRON.get(), 1)), new ItemStack(ModItems.AMMO_762.get(), 8), 200));
-        recipes.add(recipe(List.of(ing(ModItems.GLASS_JAR.get(), 1), ing(ModItems.NITRATE.get(), 1)), new ItemStack(ModItems.PAINKILLER.get(), 1), 200));
-        recipes.add(recipe(List.of(ing(Items.VINE, 2), ing(ModItems.GLASS_JAR.get(), 1)), new ItemStack(ModItems.ALOE_CREAM.get(), 1), 200));
+        recipes.add(recipe(List.of(ing(Items.GLASS_BOTTLE, 1), ing(ModItems.NITRATE.get(), 1)), new ItemStack(ModItems.PAINKILLER.get(), 1), 200));
+        recipes.add(recipe(List.of(ing(Items.VINE, 2), ing(Items.GLASS_BOTTLE, 1)), new ItemStack(ModItems.ALOE_CREAM.get(), 1), 200));
         recipes.add(recipe(List.of(ing(ModItems.BANDAGE.get(), 1), ing(ModItems.ANTIBIOTICS.get(), 1)), new ItemStack(ModItems.FIRST_AID_KIT.get(), 1), 300));
         RECIPES.put(WorkstationType.CHEMISTRY_STATION, recipes);
     }

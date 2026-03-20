@@ -26,6 +26,7 @@ src/main/java/com/sevendaystominecraft/
 │   ├── PlayerStatsHandler.java     — Event handlers for player stats
 │   ├── FallDamageHandler.java      — Fall damage event handler (sprain/fracture triggers)
 │   ├── ExplosionHandler.java       — Explosion proximity handler (concussion trigger)
+│   ├── WaterBottleConversionHandler.java — Converts vanilla water bottles to Murky Water Bottle on inventory tick
 │   └── SevenDaysPlayerStats.java   — Player stats implementation (Food, Water, Stamina, etc.)
 ├── client/
 │   ├── StatsHudOverlay.java        — HUD overlay for player stats + blood moon indicator

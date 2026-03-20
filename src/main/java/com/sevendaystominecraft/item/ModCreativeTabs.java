@@ -39,7 +39,6 @@ public class ModCreativeTabs {
                         output.accept(ModItems.OIL_SHALE.get());
                         output.accept(Items.CLAY_BALL);
                         output.accept(Items.SAND);
-                        output.accept(ModItems.GLASS_JAR.get());
                         output.accept(ModItems.MECHANICAL_PARTS.get());
                         output.accept(ModItems.ELECTRICAL_PARTS.get());
                         output.accept(ModItems.DUCT_TAPE.get());

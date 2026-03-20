@@ -193,7 +193,7 @@ public class LootContainerBlockEntity extends BlockEntity {
                     ModItems.IRON_SCRAP, ModItems.MECHANICAL_PARTS, ModItems.FORGED_IRON,
                     ModItems.NAIL, ModItems.SPRING, ModItems.DUCT_TAPE);
             case FUEL_CACHE -> pickRandom(random, lootStage,
-                    ModItems.GAS_CAN, ModItems.OIL_SHALE, ModItems.GLASS_JAR);
+                    ModItems.GAS_CAN, ModItems.OIL_SHALE, () -> Items.GLASS_BOTTLE);
             case VENDING_MACHINE -> pickRandomVanilla(random,
                     Items.BREAD, Items.APPLE, Items.PAPER, Items.GLASS_BOTTLE);
             case MAILBOX -> pickRandomVanilla(random,

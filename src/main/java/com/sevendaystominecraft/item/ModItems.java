@@ -41,9 +41,6 @@ public class ModItems {
     public static final Supplier<Item> OIL_SHALE = ITEMS.register("oil_shale",
             () -> new Item(new Item.Properties().setId(key("oil_shale")).stacksTo(64)));
 
-    public static final Supplier<Item> GLASS_JAR = ITEMS.register("glass_jar",
-            () -> new Item(new Item.Properties().setId(key("glass_jar")).stacksTo(64)));
-
     public static final Supplier<Item> MECHANICAL_PARTS = ITEMS.register("mechanical_parts",
             () -> new Item(new Item.Properties().setId(key("mechanical_parts")).stacksTo(64)));
 
