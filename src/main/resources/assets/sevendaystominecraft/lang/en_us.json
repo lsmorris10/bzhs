@@ -30,7 +30,6 @@
   "item.sevendaystominecraft.ammo_9mm": "9mm Ammo",
   "item.sevendaystominecraft.ammo_762": "7.62mm Ammo",
   "item.sevendaystominecraft.grenade": "Grenade",
-  "block.sevendaystominecraft.campfire_station": "Campfire",
   "block.sevendaystominecraft.grill": "Grill",
   "block.sevendaystominecraft.workbench": "Workbench",
   "block.sevendaystominecraft.forge_station": "Forge",
@@ -121,5 +120,12 @@
   "item.sevendaystominecraft.splint": "Splint",
   "item.sevendaystominecraft.painkiller": "Painkiller",
   "item.sevendaystominecraft.aloe_cream": "Aloe Cream",
-  "item.sevendaystominecraft.first_aid_kit": "First Aid Kit"
+  "item.sevendaystominecraft.first_aid_kit": "First Aid Kit",
+  "item.sevendaystominecraft.murky_water": "Murky Water",
+  "item.sevendaystominecraft.boiled_water": "Boiled Water",
+  "item.sevendaystominecraft.goldenrod": "Goldenrod",
+  "item.sevendaystominecraft.chrysanthemum": "Chrysanthemum",
+  "item.sevendaystominecraft.charred_meat": "Charred Meat",
+  "item.sevendaystominecraft.goldenrod_tea": "Goldenrod Tea",
+  "item.sevendaystominecraft.red_tea": "Red Tea"
 }

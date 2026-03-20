@@ -56,7 +56,10 @@ src/main/java/com/sevendaystominecraft/
 │   │   ├── WorkstationBlock.java   — BaseEntityBlock for all workstation types
 │   │   ├── WorkstationBlockEntity.java — Block entity with fuel, crafting progress, input/output slots
 │   │   ├── WorkstationMenu.java    — Container menu for workstation GUI
-│   │   └── WorkstationScreen.java  — Client-side GUI screen for workstations
+│   │   ├── WorkstationScreen.java  — Client-side GUI screen for workstations
+│   │   ├── VanillaCampfireHandler.java — Event handler: intercepts right-click on vanilla campfire to open workstation GUI
+│   │   ├── CampfireWorkstationSavedData.java — SavedData storing per-position campfire workstation inventory/fuel/progress
+│   │   └── CampfireDataBlockEntity.java — Adapter bridging CampfireData to WorkstationBlockEntity for menu compatibility
 │   └── loot/
 │       ├── LootContainerType.java  — Enum: Trash Pile, Cardboard Box, Gun Safe, Munitions Box, etc.
 │       ├── LootContainerBlock.java — BaseEntityBlock for loot containers
@@ -121,6 +124,7 @@ src/main/java/com/sevendaystominecraft/
 │   ├── ModItems.java               — DeferredRegister for all items (materials, melee weapons, ranged weapons, ammo, treatment items)
 │   ├── ModCreativeTabs.java        — Creative tabs: Materials, Workstations, Weapons, Loot Containers, Magazines
 │   ├── TreatmentItem.java          — Single-use right-click consumable that removes specific debuffs
+│   ├── ConsumableStatItem.java     — Consumable item that modifies food/water stats, applies/cures debuffs, grants regen
 │   ├── QualityTier.java            — Quality tier enum (T1-T6: Poor → Legendary) with stat multipliers
 │   └── weapon/
 │       └── RangedWeaponItem.java   — Right-click-to-fire ranged weapon (ammo consumption, cooldown, durability)

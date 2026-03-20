@@ -159,4 +159,30 @@ public class ModItems {
     public static final Supplier<Item> GRENADE = ITEMS.register("grenade",
             () -> new GrenadeItem(
                     new Item.Properties().setId(key("grenade")).stacksTo(16)));
+
+    public static final Supplier<Item> MURKY_WATER = ITEMS.register("murky_water",
+            () -> new ConsumableStatItem(new Item.Properties().setId(key("murky_water")).stacksTo(64),
+                    0f, 10f, new String[]{SevenDaysPlayerStats.DEBUFF_DYSENTERY}, new String[]{}, 0));
+
+    public static final Supplier<Item> BOILED_WATER = ITEMS.register("boiled_water",
+            () -> new ConsumableStatItem(new Item.Properties().setId(key("boiled_water")).stacksTo(64),
+                    0f, 20f, new String[]{}, new String[]{}, 0));
+
+    public static final Supplier<Item> GOLDENROD = ITEMS.register("goldenrod",
+            () -> new Item(new Item.Properties().setId(key("goldenrod")).stacksTo(64)));
+
+    public static final Supplier<Item> CHRYSANTHEMUM = ITEMS.register("chrysanthemum",
+            () -> new Item(new Item.Properties().setId(key("chrysanthemum")).stacksTo(64)));
+
+    public static final Supplier<Item> CHARRED_MEAT = ITEMS.register("charred_meat",
+            () -> new ConsumableStatItem(new Item.Properties().setId(key("charred_meat")).stacksTo(64),
+                    12f, -5f, new String[]{}, new String[]{}, 0, 0.10f));
+
+    public static final Supplier<Item> GOLDENROD_TEA = ITEMS.register("goldenrod_tea",
+            () -> new ConsumableStatItem(new Item.Properties().setId(key("goldenrod_tea")).stacksTo(64),
+                    2f, 25f, new String[]{}, new String[]{SevenDaysPlayerStats.DEBUFF_DYSENTERY}, 0));
+
+    public static final Supplier<Item> RED_TEA = ITEMS.register("red_tea",
+            () -> new ConsumableStatItem(new Item.Properties().setId(key("red_tea")).stacksTo(64),
+                    2f, 20f, new String[]{}, new String[]{}, 1200));
 }

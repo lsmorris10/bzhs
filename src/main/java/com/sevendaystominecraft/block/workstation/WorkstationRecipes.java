@@ -29,6 +29,10 @@ public final class WorkstationRecipes {
         recipes.add(recipe(List.of(ing(Items.COD, 1)), new ItemStack(Items.COOKED_COD), 200));
         recipes.add(recipe(List.of(ing(Items.SALMON, 1)), new ItemStack(Items.COOKED_SALMON), 200));
         recipes.add(recipe(List.of(ing(Items.POTATO, 1)), new ItemStack(Items.BAKED_POTATO), 200));
+        recipes.add(recipe(List.of(ing(ModItems.MURKY_WATER.get(), 1), ing(ModItems.GLASS_JAR.get(), 1)), new ItemStack(ModItems.BOILED_WATER.get()), 200));
+        recipes.add(recipe(List.of(ing(Items.RABBIT, 1)), new ItemStack(ModItems.CHARRED_MEAT.get()), 100));
+        recipes.add(recipe(List.of(ing(ModItems.GOLDENROD.get(), 1), ing(ModItems.BOILED_WATER.get(), 1)), new ItemStack(ModItems.GOLDENROD_TEA.get()), 200));
+        recipes.add(recipe(List.of(ing(ModItems.CHRYSANTHEMUM.get(), 1), ing(ModItems.BOILED_WATER.get(), 1)), new ItemStack(ModItems.RED_TEA.get()), 200));
         RECIPES.put(WorkstationType.CAMPFIRE, recipes);
     }
 

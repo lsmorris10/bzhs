@@ -100,12 +100,20 @@ public class WorkstationMenu extends AbstractContainerMenu {
 
     public static WorkstationMenu fromNetwork(int containerId, Inventory playerInv, RegistryFriendlyByteBuf buf) {
         BlockPos pos = buf.readBlockPos();
+        WorkstationType type = WorkstationType.WORKBENCH;
+        if (buf.readableBytes() >= 4) {
+            int ordinal = buf.readInt();
+            WorkstationType[] values = WorkstationType.values();
+            if (ordinal >= 0 && ordinal < values.length) {
+                type = values[ordinal];
+            }
+        }
         BlockEntity be = playerInv.player.level().getBlockEntity(pos);
         if (be instanceof WorkstationBlockEntity wbe) {
             return new WorkstationMenu(containerId, playerInv, wbe);
         }
         return new WorkstationMenu(containerId, playerInv, new WorkstationBlockEntity(pos,
-                playerInv.player.level().getBlockState(pos)));
+                playerInv.player.level().getBlockState(pos), type));
     }
 
     public WorkstationBlockEntity getBlockEntity() {

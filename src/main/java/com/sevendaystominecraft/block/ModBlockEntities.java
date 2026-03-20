@@ -18,7 +18,6 @@ public class ModBlockEntities {
     public static final Supplier<BlockEntityType<WorkstationBlockEntity>> WORKSTATION_BE =
             BLOCK_ENTITY_TYPES.register("workstation", () ->
                     new BlockEntityType<>(WorkstationBlockEntity::new,
-                            ModBlocks.CAMPFIRE_BLOCK.get(),
                             ModBlocks.GRILL_BLOCK.get(),
                             ModBlocks.WORKBENCH_BLOCK.get(),
                             ModBlocks.FORGE_BLOCK.get(),

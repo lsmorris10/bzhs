@@ -61,6 +61,13 @@ public class ModCreativeTabs {
                         output.accept(ModItems.NAIL.get());
                         output.accept(ModItems.SPRING.get());
                         output.accept(ModItems.CEMENT.get());
+                        output.accept(ModItems.MURKY_WATER.get());
+                        output.accept(ModItems.BOILED_WATER.get());
+                        output.accept(ModItems.GOLDENROD.get());
+                        output.accept(ModItems.CHRYSANTHEMUM.get());
+                        output.accept(ModItems.CHARRED_MEAT.get());
+                        output.accept(ModItems.GOLDENROD_TEA.get());
+                        output.accept(ModItems.RED_TEA.get());
                     })
                     .build());
 
@@ -69,7 +76,6 @@ public class ModCreativeTabs {
                     .title(Component.translatable("creativetab.sevendaystominecraft.workstations"))
                     .icon(() -> new ItemStack(ModBlocks.WORKBENCH_BLOCK.get()))
                     .displayItems((params, output) -> {
-                        output.accept(ModBlocks.CAMPFIRE_BLOCK.get());
                         output.accept(ModBlocks.GRILL_BLOCK.get());
                         output.accept(ModBlocks.WORKBENCH_BLOCK.get());
                         output.accept(ModBlocks.FORGE_BLOCK.get());

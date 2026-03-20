@@ -68,7 +68,10 @@ public class WorkstationBlock extends BaseEntityBlock {
                     public AbstractContainerMenu createMenu(int containerId, Inventory playerInv, Player p) {
                         return new WorkstationMenu(containerId, playerInv, workstationBE);
                     }
-                }, pos);
+                }, buf -> {
+                    buf.writeBlockPos(pos);
+                    buf.writeInt(workstationType.ordinal());
+                });
             }
         }
         return InteractionResult.SUCCESS;

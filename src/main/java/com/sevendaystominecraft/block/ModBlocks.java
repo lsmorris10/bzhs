@@ -68,9 +68,6 @@ public class ModBlocks {
                 .requiresCorrectToolForDrops();
     }
 
-    public static final Supplier<Block> CAMPFIRE_BLOCK = registerWithItem("campfire_station",
-            () -> new WorkstationBlock(workstationProps("campfire_station"), WorkstationType.CAMPFIRE));
-
     public static final Supplier<Block> GRILL_BLOCK = registerWithItem("grill",
             () -> new WorkstationBlock(metalWorkstationProps("grill"), WorkstationType.GRILL));
 
