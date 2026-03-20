@@ -3,6 +3,7 @@ package com.sevendaystominecraft.block;
 import com.sevendaystominecraft.SevenDaysToMinecraft;
 import com.sevendaystominecraft.block.loot.LootContainerBlock;
 import com.sevendaystominecraft.block.loot.LootContainerType;
+import com.sevendaystominecraft.block.vehicle.VehicleWreckageBlock;
 import com.sevendaystominecraft.block.workstation.WorkstationBlock;
 import com.sevendaystominecraft.block.workstation.WorkstationType;
 
@@ -111,6 +112,30 @@ public class ModBlocks {
 
     public static final Supplier<Block> BOOKSHELF_CONTAINER_BLOCK = registerWithItem("bookshelf_container",
             () -> new LootContainerBlock(containerProps("bookshelf_container"), LootContainerType.BOOKSHELF));
+
+    public static final Supplier<Block> TOOL_CRATE_BLOCK = registerWithItem("tool_crate",
+            () -> new LootContainerBlock(metalContainerProps("tool_crate"), LootContainerType.TOOL_CRATE));
+
+    public static final Supplier<Block> FUEL_CACHE_BLOCK = registerWithItem("fuel_cache",
+            () -> new LootContainerBlock(metalContainerProps("fuel_cache"), LootContainerType.FUEL_CACHE));
+
+    public static final Supplier<Block> VENDING_MACHINE_BLOCK = registerWithItem("vending_machine",
+            () -> new LootContainerBlock(metalContainerProps("vending_machine"), LootContainerType.VENDING_MACHINE));
+
+    public static final Supplier<Block> MAILBOX_BLOCK = registerWithItem("mailbox",
+            () -> new LootContainerBlock(containerProps("mailbox"), LootContainerType.MAILBOX));
+
+    public static final Supplier<Block> FARM_CRATE_BLOCK = registerWithItem("farm_crate",
+            () -> new LootContainerBlock(containerProps("farm_crate"), LootContainerType.FARM_CRATE));
+
+    public static final Supplier<Block> BURNT_CAR_BLOCK = registerWithItem("burnt_car",
+            () -> new VehicleWreckageBlock(metalContainerProps("burnt_car")));
+
+    public static final Supplier<Block> BROKEN_TRUCK_BLOCK = registerWithItem("broken_truck",
+            () -> new VehicleWreckageBlock(metalContainerProps("broken_truck")));
+
+    public static final Supplier<Block> WRECKED_CAMPER_BLOCK = registerWithItem("wrecked_camper",
+            () -> new VehicleWreckageBlock(metalContainerProps("wrecked_camper")));
 
     private static Supplier<Block> registerWithItem(String name, Supplier<Block> blockSupplier) {
         Supplier<Block> block = BLOCKS.register(name, blockSupplier);

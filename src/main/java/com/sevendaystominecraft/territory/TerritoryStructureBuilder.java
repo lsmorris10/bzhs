@@ -145,7 +145,7 @@ public class TerritoryStructureBuilder {
         }
     }
 
-    private static net.minecraft.world.level.block.Block getLootBlock(LootContainerType type) {
+    static net.minecraft.world.level.block.Block getLootBlock(LootContainerType type) {
         return switch (type) {
             case KITCHEN_CABINET -> ModBlocks.KITCHEN_CABINET_BLOCK.get();
             case BOOKSHELF -> ModBlocks.BOOKSHELF_CONTAINER_BLOCK.get();
@@ -155,6 +155,11 @@ public class TerritoryStructureBuilder {
             case GUN_SAFE -> ModBlocks.GUN_SAFE_BLOCK.get();
             case MEDICINE_CABINET -> ModBlocks.MEDICINE_CABINET_BLOCK.get();
             case TRASH_PILE -> ModBlocks.TRASH_PILE_BLOCK.get();
+            case TOOL_CRATE -> ModBlocks.TOOL_CRATE_BLOCK.get();
+            case FUEL_CACHE -> ModBlocks.FUEL_CACHE_BLOCK.get();
+            case VENDING_MACHINE -> ModBlocks.VENDING_MACHINE_BLOCK.get();
+            case MAILBOX -> ModBlocks.MAILBOX_BLOCK.get();
+            case FARM_CRATE -> ModBlocks.FARM_CRATE_BLOCK.get();
         };
     }
 

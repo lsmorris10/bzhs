@@ -47,8 +47,10 @@ src/main/java/com/sevendaystominecraft/
 │       ├── PremadeWorldListWidget.java  — Scrollable list widget for premade world selection
 │       └── CreateWorldScreenHandler.java — ScreenEvent listener injecting World Type toggle
 ├── block/
-│   ├── ModBlocks.java              — DeferredRegister for all custom blocks (workstations + loot containers)
+│   ├── ModBlocks.java              — DeferredRegister for all custom blocks (workstations + loot containers + vehicle wreckage)
 │   ├── ModBlockEntities.java       — Block entity type registration
+│   ├── vehicle/
+│   │   └── VehicleWreckageBlock.java — Decorative vehicle blocks (burnt car, broken truck, wrecked camper) that drop scrap materials
 │   ├── workstation/
 │   │   ├── WorkstationType.java    — Enum: Campfire, Grill, Workbench, Forge, Cement Mixer, Chemistry Station, Advanced Workbench
 │   │   ├── WorkstationBlock.java   — BaseEntityBlock for all workstation types
@@ -77,12 +79,18 @@ src/main/java/com/sevendaystominecraft/
 │   ├── TerritoryType.java          — Category enum (Residential/Commercial/Industrial/Military/Wilderness/Medical) with loot type mapping
 │   ├── TerritoryRecord.java        — Per-territory instance: origin, tier, type, cleared status, zombie count
 │   ├── TerritoryData.java          — SavedData: persists all territories by ID, chunk-to-territory index, spatial lookup
-│   ├── TerritoryStructureBuilder.java — Procedural placeholder structure generator (floor/walls/roof/loot placement per tier)
-│   ├── TerritoryZombieSpawner.java — Tier-appropriate zombie population at interior spawn positions
-│   ├── TerritoryWorldGenerator.java — ChunkEvent.Load hook: probabilistic territory placement with minimum spacing
-│   ├── TerritoryBroadcaster.java   — @EventBusSubscriber: 60-tick server tick broadcasts nearby territories (≤512 blocks) to clients
+│   ├── TerritoryStructureBuilder.java — Legacy procedural structure generator (kept as fallback)
+│   ├── TerritoryZombieSpawner.java — Legacy zombie spawner (kept for compatibility)
+│   ├── TerritoryWorldGenerator.java — ChunkEvent.Load hook: village cluster generation with biome-based difficulty
+│   ├── TerritoryBroadcaster.java   — @EventBusSubscriber: 60-tick broadcasts + sleeper zombie awakening
 │   ├── TerritoryCompassRenderer.java — Client-side compass marker rendering for nearby territories (color by tier)
-│   └── TerritoryLabelEntity.java   — Entity with synced label text + tier, persisted, updates on clear
+│   ├── TerritoryLabelEntity.java   — Entity with synced label text + tier, persisted, updates on clear
+│   ├── VillageBuildingType.java    — 8 building type enum with materials, loot pools, zombie counts, weights
+│   ├── VillageBuildingBuilder.java — Improved procedural builder: windows, doors, peaked roofs, dividers, porches
+│   ├── VillageClusterGenerator.java — 4-12 building cluster generator with paths, props, vehicle wreckage
+│   ├── NBTTemplateLoader.java      — NBT structure template system (loads .nbt from data/bzhs/structures/village/)
+│   ├── SleeperZombieManager.java   — Dormant zombie spawn + awakening system
+│   └── VillagerSuppressionHandler.java — Cancels vanilla villager spawns
 ├── entity/
 │   ├── ModEntities.java            — DeferredRegister for all custom entity types + attribute events
 │   └── zombie/
@@ -231,19 +239,30 @@ src/main/java/com/sevendaystominecraft/
 
 #### Territory POI System (Spec §2.2 — First Version) — DONE
 - **TerritoryTier** (1-5): Star ratings (★ to ★★★★★), size ranges (5×5 to 15×15), zombie pools, loot counts, spawn weights (Tier 1-2 common, Tier 4-5 rare)
-- **TerritoryType**: 6 categories (Residential, Commercial, Industrial, Military, Wilderness, Medical) each mapped to appropriate loot container types
-- **TerritoryRecord**: Per-instance data (origin, tier, type, cleared status, zombie count) serialized to NBT
+- **TerritoryType**: 13 categories (Residential, Commercial, Industrial, Military, Wilderness, Medical, Crack-a-Book, Working Stiffs, Pass-n-Gas, Pop-n-Pills, Farm, Utility, Trader Outpost) each mapped to appropriate loot container types
+- **TerritoryRecord**: Per-instance data (origin, tier, type, cleared status, awakened status, zombie count) serialized to NBT
 - **TerritoryData** (SavedData): Persists all territories across server restarts; spatial hasNearby check for minimum spacing (16-chunk min separation); getNearby for client sync
-- **TerritoryStructureBuilder**: Procedural structure generation (floor/walls/roof) using tier-appropriate vanilla blocks (oak planks → cobblestone → stone bricks → iron blocks for military); places loot containers inside; collects interior zombie spawn positions
-- **TerritoryZombieSpawner**: Spawns tier-appropriate zombies at interior positions on chunk load; marks territory zombie count for cleared detection; zombies tagged `bzhs_territory_<id>` for tracking
-- **TerritoryWorldGenerator**: `ChunkEvent.Load` hook; 1-in-40 chance per chunk in Overworld; deterministic per-chunk seed (so re-loading doesn't re-generate); 16-chunk minimum spacing enforced via data check
+- **TerritoryStructureBuilder**: Legacy procedural structure generation (floor/walls/roof); kept as fallback and utility
+- **TerritoryZombieSpawner**: Legacy spawner kept for compatibility
+- **TerritoryWorldGenerator**: `ChunkEvent.Load` hook; 1-in-40 chance per chunk in Overworld; deterministic per-chunk seed; now generates village clusters instead of single buildings; biome-based tier cap
 - **TerritoryLabelEntity**: Custom entity with synced `LABEL_TEXT`/`TIER` data; floating custom name renders via EntityRenderer name tag system; updates to cleared state every 100 ticks; persisted between sessions; implements `hurtServer` → false (immune)
 - **TerritoryLabelRenderer**: Extends `EntityRenderer<TerritoryLabelEntity, EntityRenderState>` using NeoForge 1.21.4's two-type-param pattern; relies on base class `renderNameTag()` for label display
-- **TerritoryBroadcaster**: `@EventBusSubscriber` server tick handler sends `SyncTerritoryPayload` to each player every 60 ticks with all territories within 512 blocks
+- **TerritoryBroadcaster**: `@EventBusSubscriber` server tick handler sends `SyncTerritoryPayload` to each player every 60 ticks with all territories within 512 blocks; now handles sleeper zombie awakening on player proximity
 - **TerritoryClientState**: Thread-safe `CopyOnWriteArrayList` storing nearby territories for compass rendering
 - **TerritoryCompassRenderer**: Draws tier-colored markers on the compass strip (green Tier 1-2, yellow Tier 3, red Tier 4-5) pointing toward territory direction; renders star rating above each marker
 - **TerritoryCommand**: `/bzhs territory list` shows nearby territories (256 block radius) with coords/status; `/bzhs territory listall` (op-only) shows all territories on the level
 - **SyncTerritoryPayload**: Network packet with list of `TerritoryEntry` records (id, pos, tier, label string) using manual ByteBuf codec
+
+#### Village Overhaul (7DTD-style Settlements) — DONE
+- **VillageBuildingType**: 8 building types (Residential, Crack-a-Book, Working Stiffs, Pass-n-Gas, Pop-n-Pills, Farm, Utility, Trader Outpost) with weighted random selection, per-type wall/floor/roof/frame materials, loot pools, zombie counts
+- **VillageBuildingBuilder**: Improved procedural building generation with windows (glass panes), doors, peaked roofs, interior room dividers, porches, material variety per building type
+- **VillageClusterGenerator**: Generates 4-12 building clusters connected by gravel paths; scatters exterior props (trash piles, mailboxes, vending machines, vehicle wreckage) between buildings
+- **NBTTemplateLoader**: Checks `data/bzhs/structures/village/` for `.nbt` files matching building types (e.g., `residential_1.nbt`); falls back to procedural if no template exists; supports up to 10 variants per type
+- **SleeperZombieManager**: Spawns dormant zombies (noAI=true) inside buildings at generation time; awakens them when player enters trigger radius via TerritoryBroadcaster
+- **VillagerSuppressionHandler**: `EntityJoinLevelEvent` handler that cancels all vanilla Villager spawns
+- **Vehicle wreckage blocks**: 3 decorative blocks (Burnt Car, Broken Truck, Wrecked Camper) that drop scrap iron, mechanical parts, and fuel when broken
+- **New loot container types**: TOOL_CRATE (tools/iron/mechanical parts), FUEL_CACHE (fuel/water), VENDING_MACHINE (misc), MAILBOX (junk), FARM_CRATE (seeds/food)
+- **Biome-based difficulty**: Village tier capped by both distance from spawn AND biome lootTierMax from BiomeProperties (Forest=3, Desert/Snow=5, Wasteland=6)
 
 ## Known Bugs / Issues
 1. **Sprint bug (FIXED)**: Added `LocalPlayerSprintMixin` targeting `LocalPlayer.aiStep()` (client-side mixin in `sevendaystominecraft.mixins.json` "client" array). Cancels sprinting client-side when stamina exhausted, fracture, electrocuted, or stunned — prevents rubber-banding.

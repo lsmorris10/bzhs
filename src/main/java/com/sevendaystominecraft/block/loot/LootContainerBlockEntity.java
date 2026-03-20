@@ -162,6 +162,11 @@ public class LootContainerBlockEntity extends BlockEntity {
             case KITCHEN_CABINET -> 3;
             case MEDICINE_CABINET -> 2;
             case BOOKSHELF -> 2;
+            case TOOL_CRATE -> 4;
+            case FUEL_CACHE -> 3;
+            case VENDING_MACHINE -> 3;
+            case MAILBOX -> 2;
+            case FARM_CRATE -> 3;
         };
     }
 
@@ -184,6 +189,18 @@ public class LootContainerBlockEntity extends BlockEntity {
                     Items.GOLDEN_APPLE, Items.GLISTERING_MELON_SLICE);
             case BOOKSHELF -> pickRandomVanilla(random,
                     Items.BOOK, Items.PAPER, Items.WRITABLE_BOOK);
+            case TOOL_CRATE -> pickRandom(random, lootStage,
+                    ModItems.IRON_SCRAP, ModItems.MECHANICAL_PARTS, ModItems.FORGED_IRON,
+                    ModItems.NAIL, ModItems.SPRING, ModItems.DUCT_TAPE);
+            case FUEL_CACHE -> pickRandom(random, lootStage,
+                    ModItems.GAS_CAN, ModItems.OIL_SHALE, ModItems.GLASS_JAR);
+            case VENDING_MACHINE -> pickRandomVanilla(random,
+                    Items.BREAD, Items.APPLE, Items.PAPER, Items.GLASS_BOTTLE);
+            case MAILBOX -> pickRandomVanilla(random,
+                    Items.PAPER, Items.MAP, Items.BOOK);
+            case FARM_CRATE -> pickRandomVanilla(random,
+                    Items.WHEAT_SEEDS, Items.WHEAT, Items.CARROT, Items.POTATO,
+                    Items.BEETROOT_SEEDS, Items.PUMPKIN_SEEDS, Items.MELON_SEEDS);
         };
     }
 

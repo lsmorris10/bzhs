@@ -37,6 +37,11 @@ public class ModBlockEntities {
                             ModBlocks.SUPPLY_CRATE_BLOCK.get(),
                             ModBlocks.KITCHEN_CABINET_BLOCK.get(),
                             ModBlocks.MEDICINE_CABINET_BLOCK.get(),
-                            ModBlocks.BOOKSHELF_CONTAINER_BLOCK.get()
+                            ModBlocks.BOOKSHELF_CONTAINER_BLOCK.get(),
+                            ModBlocks.TOOL_CRATE_BLOCK.get(),
+                            ModBlocks.FUEL_CACHE_BLOCK.get(),
+                            ModBlocks.VENDING_MACHINE_BLOCK.get(),
+                            ModBlocks.MAILBOX_BLOCK.get(),
+                            ModBlocks.FARM_CRATE_BLOCK.get()
                     ));
 }

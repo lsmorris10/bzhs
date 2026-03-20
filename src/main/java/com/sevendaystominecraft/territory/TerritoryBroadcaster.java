@@ -21,6 +21,7 @@ public class TerritoryBroadcaster {
 
     private static int tickCounter = 0;
     private static final int TICK_INTERVAL = 60;
+    private static final double BUILDING_TRIGGER_RANGE = 12.0;
 
     @SubscribeEvent
     public static void onLevelTick(LevelTickEvent.Post event) {
@@ -43,7 +44,7 @@ public class TerritoryBroadcaster {
 
             List<TerritoryEntry> entries = new ArrayList<>(nearby.size());
             for (TerritoryRecord record : nearby) {
-                checkEntryTrigger(level, player, playerPos, record, data, entryRange);
+                checkSleeperAwakening(level, player, playerPos, record, entryRange);
 
                 entries.add(new TerritoryEntry(
                         record.getId(),
@@ -59,11 +60,11 @@ public class TerritoryBroadcaster {
         }
     }
 
-    private static void checkEntryTrigger(ServerLevel level, ServerPlayer player,
-                                           BlockPos playerPos, TerritoryRecord record,
-                                           TerritoryData data, double entryRange) {
+    private static void checkSleeperAwakening(ServerLevel level, ServerPlayer player,
+                                               BlockPos playerPos, TerritoryRecord record,
+                                               double entryRange) {
         if (record.isCleared()) return;
-        if (record.getZombiesRemaining() > 0) return;
+        if (record.getZombiesRemaining() <= 0) return;
 
         BlockPos origin = record.getOrigin();
         double dx = playerPos.getX() - origin.getX();
@@ -72,14 +73,43 @@ public class TerritoryBroadcaster {
 
         if (distSq > entryRange * entryRange) return;
 
-        SevenDaysToMinecraft.LOGGER.info(
-                "[BZHS Territory] Player {} entered territory #{} ({} {}) — spawning zombies",
-                player.getName().getString(), record.getId(),
-                record.getType().getDisplayName(), record.getTier().getStars());
+        List<BlockPos> buildingCenters = record.getBuildingCenters();
+        if (buildingCenters.isEmpty()) {
+            if (!record.isAwakened()) {
+                SevenDaysToMinecraft.LOGGER.info(
+                        "[BZHS Territory] Player {} entered territory #{} ({} {}) — awakening all sleeper zombies (legacy)",
+                        player.getName().getString(), record.getId(),
+                        record.getType().getDisplayName(), record.getTier().getStars());
 
-        List<BlockPos> spawnPositions = TerritoryStructureBuilder
-                .generateInteriorSpawnPositions(origin, record.getTier());
-        TerritoryZombieSpawner.populate(level, record, spawnPositions);
-        data.markDirtyRecord();
+                SleeperZombieManager.awakenSleepers(level, record);
+                record.setAwakened(true);
+                TerritoryData.getOrCreate(level).markDirtyRecord();
+            }
+            return;
+        }
+
+        boolean anyAwakened = false;
+        for (int i = 0; i < buildingCenters.size(); i++) {
+            if (record.isBuildingAwakened(i)) continue;
+
+            BlockPos buildingCenter = buildingCenters.get(i);
+            double bdx = playerPos.getX() - buildingCenter.getX();
+            double bdz = playerPos.getZ() - buildingCenter.getZ();
+            double bDistSq = bdx * bdx + bdz * bdz;
+
+            if (bDistSq <= BUILDING_TRIGGER_RANGE * BUILDING_TRIGGER_RANGE) {
+                SevenDaysToMinecraft.LOGGER.info(
+                        "[BZHS Territory] Player {} entered building #{} of territory #{} — awakening sleepers",
+                        player.getName().getString(), i, record.getId());
+
+                SleeperZombieManager.awakenSleepersForBuilding(level, record, i);
+                record.setBuildingAwakened(i);
+                anyAwakened = true;
+            }
+        }
+
+        if (anyAwakened) {
+            TerritoryData.getOrCreate(level).markDirtyRecord();
+        }
     }
 }

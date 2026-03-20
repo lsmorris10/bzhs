@@ -2,6 +2,13 @@ package com.sevendaystominecraft.territory;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.ListTag;
+import net.minecraft.nbt.Tag;
+
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 public class TerritoryRecord {
 
@@ -10,7 +17,10 @@ public class TerritoryRecord {
     private final TerritoryTier tier;
     private final TerritoryType type;
     private boolean cleared;
+    private boolean awakened;
     private int zombiesRemaining;
+    private final List<BlockPos> buildingCenters = new ArrayList<>();
+    private final Set<Integer> awakenedBuildings = new HashSet<>();
 
     public TerritoryRecord(int id, BlockPos origin, TerritoryTier tier, TerritoryType type) {
         this.id = id;
@@ -18,6 +28,7 @@ public class TerritoryRecord {
         this.tier = tier;
         this.type = type;
         this.cleared = false;
+        this.awakened = false;
         this.zombiesRemaining = 0;
     }
 
@@ -26,14 +37,33 @@ public class TerritoryRecord {
     public TerritoryTier getTier() { return tier; }
     public TerritoryType getType() { return type; }
     public boolean isCleared() { return cleared; }
+    public boolean isAwakened() { return awakened; }
     public int getZombiesRemaining() { return zombiesRemaining; }
+    public List<BlockPos> getBuildingCenters() { return buildingCenters; }
 
     public void setCleared(boolean cleared) { this.cleared = cleared; }
+    public void setAwakened(boolean awakened) { this.awakened = awakened; }
     public void setZombiesRemaining(int count) { this.zombiesRemaining = count; }
     public void decrementZombies() {
         zombiesRemaining = Math.max(0, zombiesRemaining - 1);
         if (zombiesRemaining == 0 && !cleared) {
             cleared = true;
+        }
+    }
+
+    public void setBuildingCenters(List<BlockPos> centers) {
+        this.buildingCenters.clear();
+        this.buildingCenters.addAll(centers);
+    }
+
+    public boolean isBuildingAwakened(int buildingIndex) {
+        return awakenedBuildings.contains(buildingIndex);
+    }
+
+    public void setBuildingAwakened(int buildingIndex) {
+        awakenedBuildings.add(buildingIndex);
+        if (awakenedBuildings.size() >= buildingCenters.size()) {
+            this.awakened = true;
         }
     }
 
@@ -50,7 +80,22 @@ public class TerritoryRecord {
         tag.putInt("tier", tier.getTier());
         tag.putString("type", type.name());
         tag.putBoolean("cleared", cleared);
+        tag.putBoolean("awakened", awakened);
         tag.putInt("zombiesRemaining", zombiesRemaining);
+
+        ListTag buildingsTag = new ListTag();
+        for (BlockPos pos : buildingCenters) {
+            CompoundTag bTag = new CompoundTag();
+            bTag.putInt("bx", pos.getX());
+            bTag.putInt("by", pos.getY());
+            bTag.putInt("bz", pos.getZ());
+            buildingsTag.add(bTag);
+        }
+        tag.put("buildings", buildingsTag);
+
+        int[] awakenedArr = awakenedBuildings.stream().mapToInt(Integer::intValue).toArray();
+        tag.putIntArray("awakenedBuildings", awakenedArr);
+
         return tag;
     }
 
@@ -66,7 +111,25 @@ public class TerritoryRecord {
         }
         TerritoryRecord record = new TerritoryRecord(id, origin, tier, type);
         record.cleared = tag.getBoolean("cleared");
+        record.awakened = tag.getBoolean("awakened");
         record.zombiesRemaining = tag.getInt("zombiesRemaining");
+
+        if (tag.contains("buildings", Tag.TAG_LIST)) {
+            ListTag buildingsTag = tag.getList("buildings", Tag.TAG_COMPOUND);
+            for (int i = 0; i < buildingsTag.size(); i++) {
+                CompoundTag bTag = buildingsTag.getCompound(i);
+                record.buildingCenters.add(new BlockPos(
+                        bTag.getInt("bx"), bTag.getInt("by"), bTag.getInt("bz")));
+            }
+        }
+
+        if (tag.contains("awakenedBuildings")) {
+            int[] arr = tag.getIntArray("awakenedBuildings");
+            for (int idx : arr) {
+                record.awakenedBuildings.add(idx);
+            }
+        }
+
         return record;
     }
 }

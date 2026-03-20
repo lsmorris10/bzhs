@@ -9,7 +9,14 @@ public enum TerritoryType {
     INDUSTRIAL("Ruined Factory",         LootContainerType.SUPPLY_CRATE, LootContainerType.MUNITIONS_BOX),
     MILITARY("Military Bunker",          LootContainerType.MUNITIONS_BOX, LootContainerType.GUN_SAFE),
     WILDERNESS("Wilderness Camp",        LootContainerType.TRASH_PILE, LootContainerType.CARDBOARD_BOX),
-    MEDICAL("Abandoned Clinic",          LootContainerType.MEDICINE_CABINET, LootContainerType.SUPPLY_CRATE);
+    MEDICAL("Abandoned Clinic",          LootContainerType.MEDICINE_CABINET, LootContainerType.SUPPLY_CRATE),
+    CRACK_A_BOOK("Crack-a-Book",         LootContainerType.BOOKSHELF, LootContainerType.CARDBOARD_BOX),
+    WORKING_STIFFS("Working Stiffs",     LootContainerType.TOOL_CRATE, LootContainerType.SUPPLY_CRATE),
+    PASS_N_GAS("Pass-n-Gas",             LootContainerType.FUEL_CACHE, LootContainerType.VENDING_MACHINE),
+    POP_N_PILLS("Pop-n-Pills",           LootContainerType.MEDICINE_CABINET, LootContainerType.CARDBOARD_BOX),
+    FARM("Farm",                         LootContainerType.FARM_CRATE, LootContainerType.KITCHEN_CABINET),
+    UTILITY("Utility Building",          LootContainerType.SUPPLY_CRATE, LootContainerType.TOOL_CRATE),
+    TRADER_OUTPOST("Trader Outpost",     LootContainerType.SUPPLY_CRATE, LootContainerType.VENDING_MACHINE);
 
     private final String displayName;
     private final LootContainerType primaryLoot;

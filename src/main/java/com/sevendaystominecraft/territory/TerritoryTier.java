@@ -82,18 +82,22 @@ public enum TerritoryTier {
     }
 
     public static TerritoryTier roll(net.minecraft.util.RandomSource random, int maxTier) {
+        return roll(random, 1, maxTier);
+    }
+
+    public static TerritoryTier roll(net.minecraft.util.RandomSource random, int minTier, int maxTier) {
         float r = random.nextFloat();
         float cumulative = 0f;
         float total = 0f;
         for (TerritoryTier t : values()) {
-            if (t.tier <= maxTier) total += t.spawnWeight;
+            if (t.tier >= minTier && t.tier <= maxTier) total += t.spawnWeight;
         }
-        if (total <= 0f) return TIER_1;
+        if (total <= 0f) return fromNumber(minTier);
         for (TerritoryTier t : values()) {
-            if (t.tier > maxTier) continue;
+            if (t.tier < minTier || t.tier > maxTier) continue;
             cumulative += t.spawnWeight / total;
             if (r <= cumulative) return t;
         }
-        return TIER_1;
+        return fromNumber(minTier);
     }
 }

@@ -8,7 +8,12 @@ public enum LootContainerType {
     SUPPLY_CRATE("supply_crate", "Supply Crate", 0, 27),
     KITCHEN_CABINET("kitchen_cabinet", "Kitchen Cabinet", 5, 9),
     MEDICINE_CABINET("medicine_cabinet", "Medicine Cabinet", 5, 9),
-    BOOKSHELF("bookshelf", "Bookshelf", 5, 9);
+    BOOKSHELF("bookshelf", "Bookshelf", 5, 9),
+    TOOL_CRATE("tool_crate", "Tool Crate", 5, 12),
+    FUEL_CACHE("fuel_cache", "Fuel Cache", 7, 9),
+    VENDING_MACHINE("vending_machine", "Vending Machine", 5, 9),
+    MAILBOX("mailbox", "Mailbox", 5, 6),
+    FARM_CRATE("farm_crate", "Farm Crate", 5, 9);
 
     private final String id;
     private final String displayName;

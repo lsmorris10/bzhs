@@ -3,13 +3,16 @@ package com.sevendaystominecraft.territory;
 import com.sevendaystominecraft.SevenDaysToMinecraft;
 import com.sevendaystominecraft.config.TerritoryConfig;
 import com.sevendaystominecraft.entity.ModEntities;
-import com.sevendaystominecraft.territory.TerritoryStructureBuilder.BuildResult;
+import com.sevendaystominecraft.worldgen.BiomeProperties;
+import com.sevendaystominecraft.worldgen.ModBiomes;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Holder;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.EntitySpawnReason;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.tags.BiomeTags;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.levelgen.Heightmap;
 import net.neoforged.neoforge.event.level.ChunkEvent;
 
@@ -45,8 +48,16 @@ public class TerritoryWorldGenerator {
         var biome = serverLevel.getBiome(candidate);
         if (biome.is(BiomeTags.IS_OCEAN) || biome.is(BiomeTags.IS_RIVER)) return;
 
-        int maxTier = getMaxTierForDistance(blockX, blockZ);
-        TerritoryTier tier = TerritoryTier.roll(serverLevel.random, maxTier);
+        int distanceMaxTier = getMaxTierForDistance(blockX, blockZ);
+        int[] biomeTierRange = getVillageBiomeTierRange(biome);
+        int biomeMin = biomeTierRange[0];
+        int biomeMax = biomeTierRange[1];
+
+        if (distanceMaxTier < biomeMin) return;
+
+        int maxTier = Math.min(distanceMaxTier, biomeMax);
+
+        TerritoryTier tier = TerritoryTier.roll(serverLevel.random, biomeMin, maxTier);
         TerritoryType type = TerritoryType.random(serverLevel.random);
 
         int surfaceY = serverLevel.getHeight(Heightmap.Types.WORLD_SURFACE_WG, blockX, blockZ);
@@ -55,23 +66,29 @@ public class TerritoryWorldGenerator {
         BlockPos origin = new BlockPos(blockX, surfaceY, blockZ);
 
         try {
+            VillageClusterGenerator.VillageResult villageResult =
+                    VillageClusterGenerator.generate(serverLevel, origin, tier, serverLevel.random);
+
+            if (villageResult == null) return;
+
             TerritoryRecord record = data.addTerritory(origin, tier, type);
 
-            BuildResult result = TerritoryStructureBuilder.build(
-                    serverLevel, origin, tier, type, serverLevel.random);
+            spawnLabelEntity(serverLevel, record, origin.above(tier.getLabelHeight() + 5));
 
-            spawnLabelEntity(serverLevel, record, result.labelPos);
+            record.setBuildingCenters(villageResult.buildingCenters);
+            SleeperZombieManager.spawnSleepers(serverLevel, record, villageResult.perBuildingZombieSpawns);
 
             data.markDirtyRecord();
 
             double distFromSpawn = Math.sqrt((double) blockX * blockX + (double) blockZ * blockZ);
             SevenDaysToMinecraft.LOGGER.info(
-                    "[BZHS Territory] Placed {} {} structure at ({}, {}, {}). Distance from spawn: {}, max tier allowed: {}. Zombies spawn on player entry.",
-                    type.getDisplayName(), tier.getStars(), blockX, surfaceY, blockZ,
-                    String.format("%.0f", distFromSpawn), maxTier);
+                    "[BZHS Village] Placed village ({} buildings, {} type) at ({}, {}, {}). Tier: {} Distance: {} Biome tier: {}-{}",
+                    villageResult.buildingCount, type.getDisplayName(), blockX, surfaceY, blockZ,
+                    tier.getStars(), String.format("%.0f", distFromSpawn),
+                    biomeMin, biomeMax);
 
         } catch (Exception e) {
-            SevenDaysToMinecraft.LOGGER.error("[BZHS Territory] Error generating territory at {}: {}",
+            SevenDaysToMinecraft.LOGGER.error("[BZHS Village] Error generating village at {}: {}",
                     origin, e.getMessage());
         }
     }
@@ -90,6 +107,32 @@ public class TerritoryWorldGenerator {
             return TerritoryConfig.INSTANCE.farRangeMaxTier.get();
         }
         return 5;
+    }
+
+    static int getBiomeMaxTier(Holder<Biome> biome) {
+        BiomeProperties.BiomeStats stats = BiomeProperties.getStats(biome);
+        float density = stats.zombieDensityMultiplier();
+
+        if (density <= 0.6f) return 2;
+        if (density <= 1.0f) return 3;
+        if (density <= 1.2f) return 4;
+        if (density <= 1.5f) return 4;
+        return 5;
+    }
+
+    static int[] getVillageBiomeTierRange(Holder<Biome> biome) {
+        if (biome.is(ModBiomes.PINE_FOREST) || biome.is(ModBiomes.FOREST)) return new int[]{1, 2};
+        if (biome.is(ModBiomes.PLAINS)) return new int[]{2, 3};
+        if (biome.is(ModBiomes.DESERT) || biome.is(ModBiomes.SNOWY_TUNDRA)) return new int[]{3, 4};
+        if (biome.is(ModBiomes.BURNED_FOREST)) return new int[]{4, 5};
+        if (biome.is(ModBiomes.WASTELAND)) return new int[]{4, 5};
+
+        float baseTemp = biome.value().getBaseTemperature();
+        if (baseTemp < 0.3f) return new int[]{1, 2};
+        if (baseTemp < 0.7f) return new int[]{1, 2};
+        if (baseTemp < 1.0f) return new int[]{2, 3};
+        if (baseTemp < 1.5f) return new int[]{3, 4};
+        return new int[]{4, 5};
     }
 
     public static boolean isInSafeZone(int blockX, int blockZ) {
