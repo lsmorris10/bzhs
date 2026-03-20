@@ -5,6 +5,7 @@ import com.sevendaystominecraft.config.HeatmapConfig;
 import com.sevendaystominecraft.entity.ModEntities;
 import com.sevendaystominecraft.entity.zombie.BaseSevenDaysZombie;
 import com.sevendaystominecraft.horde.BloodMoonTracker;
+import com.sevendaystominecraft.territory.TerritoryWorldGenerator;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
@@ -109,15 +110,29 @@ public class HeatmapSpawner {
         spawnZombieNear(level, player, ModEntities.SCREAMER, false);
     }
 
-    private static void spawnHorde(ServerLevel level, ServerPlayer player, int count) {
-        @SuppressWarnings("unchecked")
-        Supplier<EntityType<? extends BaseSevenDaysZombie>>[] waveTypes = new Supplier[] {
+    @SuppressWarnings("unchecked")
+    private static Supplier<EntityType<? extends BaseSevenDaysZombie>>[] getSafeZonePool() {
+        return new Supplier[] {
                 ModEntities.WALKER, ModEntities.WALKER, ModEntities.WALKER,
                 ModEntities.CRAWLER,
-                ModEntities.FERAL_WIGHT,
-                ModEntities.SPIDER_ZOMBIE,
                 ModEntities.BLOATED_WALKER
         };
+    }
+
+    private static void spawnHorde(ServerLevel level, ServerPlayer player, int count) {
+        boolean inSafeZone = TerritoryWorldGenerator.isInSafeZone(
+                player.blockPosition().getX(), player.blockPosition().getZ());
+
+        @SuppressWarnings("unchecked")
+        Supplier<EntityType<? extends BaseSevenDaysZombie>>[] waveTypes = inSafeZone
+                ? getSafeZonePool()
+                : new Supplier[] {
+                        ModEntities.WALKER, ModEntities.WALKER, ModEntities.WALKER,
+                        ModEntities.CRAWLER,
+                        ModEntities.FERAL_WIGHT,
+                        ModEntities.SPIDER_ZOMBIE,
+                        ModEntities.BLOATED_WALKER
+                };
 
         for (int i = 0; i < count; i++) {
             Supplier<EntityType<? extends BaseSevenDaysZombie>> type =
@@ -127,15 +142,20 @@ public class HeatmapSpawner {
     }
 
     private static void spawnWave(ServerLevel level, ServerPlayer player, int count) {
+        boolean inSafeZone = TerritoryWorldGenerator.isInSafeZone(
+                player.blockPosition().getX(), player.blockPosition().getZ());
+
         @SuppressWarnings("unchecked")
-        Supplier<EntityType<? extends BaseSevenDaysZombie>>[] waveTypes = new Supplier[] {
-                ModEntities.WALKER, ModEntities.WALKER,
-                ModEntities.CRAWLER,
-                ModEntities.FERAL_WIGHT,
-                ModEntities.SPIDER_ZOMBIE,
-                ModEntities.BLOATED_WALKER,
-                ModEntities.COP
-        };
+        Supplier<EntityType<? extends BaseSevenDaysZombie>>[] waveTypes = inSafeZone
+                ? getSafeZonePool()
+                : new Supplier[] {
+                        ModEntities.WALKER, ModEntities.WALKER,
+                        ModEntities.CRAWLER,
+                        ModEntities.FERAL_WIGHT,
+                        ModEntities.SPIDER_ZOMBIE,
+                        ModEntities.BLOATED_WALKER,
+                        ModEntities.COP
+                };
 
         for (int i = 0; i < count; i++) {
             Supplier<EntityType<? extends BaseSevenDaysZombie>> type =

@@ -20,6 +20,14 @@ public class TerritoryConfig {
     public final ModConfigSpec.IntValue syncRangeBlocks;
     public final ModConfigSpec.IntValue entryTriggerRangeBlocks;
 
+    public final ModConfigSpec.IntValue safeZoneRadius;
+    public final ModConfigSpec.IntValue midRangeRadius;
+    public final ModConfigSpec.IntValue farRangeRadius;
+    public final ModConfigSpec.IntValue safeZoneMaxTier;
+    public final ModConfigSpec.IntValue midRangeMaxTier;
+    public final ModConfigSpec.IntValue farRangeMaxTier;
+    public final ModConfigSpec.BooleanValue enforceMinSpawnDay;
+
     TerritoryConfig(ModConfigSpec.Builder builder) {
 
         builder.comment("Brutal Zombie Horde Survival — Territory Configuration",
@@ -45,6 +53,44 @@ public class TerritoryConfig {
                 .comment("Radius in blocks within which approaching a territory triggers zombie population.",
                          "Zombies are only spawned when a player first enters this range.")
                 .defineInRange("entryTriggerRangeBlocks", 64, 16, 256);
+
+        builder.pop();
+
+        builder.comment("Spawn Protection — Distance-based difficulty scaling around world spawn (0,0)",
+                       "Controls the difficulty curve so early-game areas near spawn are survivable.")
+               .push("spawnProtection");
+
+        safeZoneRadius = builder
+                .comment("Radius in blocks around world spawn (0,0) where only easy territories generate.",
+                         "Default 200 = ~12 chunks. Only tiers up to safeZoneMaxTier spawn here.")
+                .defineInRange("safeZoneRadius", 200, 0, 2000);
+
+        midRangeRadius = builder
+                .comment("Radius in blocks for the mid-range zone (between safe zone and this value).",
+                         "Territories up to midRangeMaxTier can generate in this band.")
+                .defineInRange("midRangeRadius", 500, 0, 5000);
+
+        farRangeRadius = builder
+                .comment("Radius in blocks for the far-range zone (between mid-range and this value).",
+                         "Territories up to farRangeMaxTier can generate. Beyond this, all tiers are allowed.")
+                .defineInRange("farRangeRadius", 1000, 0, 10000);
+
+        safeZoneMaxTier = builder
+                .comment("Maximum territory tier allowed in the safe zone. Default 1 (Walkers/Crawlers only).")
+                .defineInRange("safeZoneMaxTier", 1, 1, 5);
+
+        midRangeMaxTier = builder
+                .comment("Maximum territory tier allowed in the mid-range zone. Default 2.")
+                .defineInRange("midRangeMaxTier", 2, 1, 5);
+
+        farRangeMaxTier = builder
+                .comment("Maximum territory tier allowed in the far-range zone. Default 3.")
+                .defineInRange("farRangeMaxTier", 3, 1, 5);
+
+        enforceMinSpawnDay = builder
+                .comment("If true, territory zombie spawner checks each zombie type's minSpawnDay.",
+                         "Zombies that require a later day are replaced with easier types.")
+                .define("enforceMinSpawnDay", true);
 
         builder.pop();
     }

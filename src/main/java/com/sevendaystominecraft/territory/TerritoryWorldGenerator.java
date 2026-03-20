@@ -45,7 +45,8 @@ public class TerritoryWorldGenerator {
         var biome = serverLevel.getBiome(candidate);
         if (biome.is(BiomeTags.IS_OCEAN) || biome.is(BiomeTags.IS_RIVER)) return;
 
-        TerritoryTier tier = TerritoryTier.roll(serverLevel.random);
+        int maxTier = getMaxTierForDistance(blockX, blockZ);
+        TerritoryTier tier = TerritoryTier.roll(serverLevel.random, maxTier);
         TerritoryType type = TerritoryType.random(serverLevel.random);
 
         int surfaceY = serverLevel.getHeight(Heightmap.Types.WORLD_SURFACE_WG, blockX, blockZ);
@@ -63,14 +64,37 @@ public class TerritoryWorldGenerator {
 
             data.markDirtyRecord();
 
+            double distFromSpawn = Math.sqrt((double) blockX * blockX + (double) blockZ * blockZ);
             SevenDaysToMinecraft.LOGGER.info(
-                    "[BZHS Territory] Placed {} {} structure at ({}, {}, {}). Zombies spawn on player entry.",
-                    type.getDisplayName(), tier.getStars(), blockX, surfaceY, blockZ);
+                    "[BZHS Territory] Placed {} {} structure at ({}, {}, {}). Distance from spawn: {}, max tier allowed: {}. Zombies spawn on player entry.",
+                    type.getDisplayName(), tier.getStars(), blockX, surfaceY, blockZ,
+                    String.format("%.0f", distFromSpawn), maxTier);
 
         } catch (Exception e) {
             SevenDaysToMinecraft.LOGGER.error("[BZHS Territory] Error generating territory at {}: {}",
                     origin, e.getMessage());
         }
+    }
+
+    static int getMaxTierForDistance(int blockX, int blockZ) {
+        double dist = Math.sqrt((double) blockX * blockX + (double) blockZ * blockZ);
+        int safeZone = TerritoryConfig.INSTANCE.safeZoneRadius.get();
+        int midRange = Math.max(TerritoryConfig.INSTANCE.midRangeRadius.get(), safeZone);
+        int farRange = Math.max(TerritoryConfig.INSTANCE.farRangeRadius.get(), midRange);
+
+        if (dist <= safeZone) {
+            return TerritoryConfig.INSTANCE.safeZoneMaxTier.get();
+        } else if (dist <= midRange) {
+            return TerritoryConfig.INSTANCE.midRangeMaxTier.get();
+        } else if (dist <= farRange) {
+            return TerritoryConfig.INSTANCE.farRangeMaxTier.get();
+        }
+        return 5;
+    }
+
+    public static boolean isInSafeZone(int blockX, int blockZ) {
+        double dist = Math.sqrt((double) blockX * blockX + (double) blockZ * blockZ);
+        return dist <= TerritoryConfig.INSTANCE.safeZoneRadius.get();
     }
 
     private static void spawnLabelEntity(ServerLevel level, TerritoryRecord record, BlockPos labelPos) {

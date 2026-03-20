@@ -1,6 +1,9 @@
 package com.sevendaystominecraft.territory;
 
+import com.sevendaystominecraft.SevenDaysConstants;
 import com.sevendaystominecraft.SevenDaysToMinecraft;
+import com.sevendaystominecraft.config.TerritoryConfig;
+import com.sevendaystominecraft.entity.ModEntities;
 import com.sevendaystominecraft.entity.zombie.BaseSevenDaysZombie;
 import com.sevendaystominecraft.worldgen.BiomeProperties;
 import net.minecraft.core.BlockPos;
@@ -32,6 +35,14 @@ public class TerritoryZombieSpawner {
         int count = Math.max(1, Math.round(baseCount * densityMult));
         int spawned = 0;
 
+        int currentDay = (int) (level.getDayTime() / SevenDaysConstants.DAY_LENGTH) + 1;
+        boolean checkMinDay = TerritoryConfig.INSTANCE.enforceMinSpawnDay.get();
+
+        @SuppressWarnings("unchecked")
+        Supplier<EntityType<? extends BaseSevenDaysZombie>>[] fallbackPool = new Supplier[] {
+                ModEntities.WALKER, ModEntities.CRAWLER
+        };
+
         for (int i = 0; i < spawnPositions.size() && spawned < count; i++) {
             BlockPos rawPos = spawnPositions.get(i);
             BlockPos spawnPos = findSafeInteriorY(level, rawPos);
@@ -42,6 +53,13 @@ public class TerritoryZombieSpawner {
 
             BaseSevenDaysZombie zombie = typeSupplier.get().create(level, EntitySpawnReason.STRUCTURE);
             if (zombie == null) continue;
+
+            if (checkMinDay && zombie.getVariant().getMinSpawnDay() > currentDay) {
+                zombie.discard();
+                typeSupplier = fallbackPool[level.random.nextInt(fallbackPool.length)];
+                zombie = typeSupplier.get().create(level, EntitySpawnReason.STRUCTURE);
+                if (zombie == null) continue;
+            }
 
             zombie.moveTo(spawnPos.getX() + 0.5, spawnPos.getY(), spawnPos.getZ() + 0.5,
                     level.random.nextFloat() * 360f, 0f);
