@@ -12,7 +12,8 @@
         "FractureJumpMixin"
     ],
     "client": [
-        "LocalPlayerSprintMixin"
+        "LocalPlayerSprintMixin",
+        "CreateWorldScreenMixin"
     ],
     "injectors": {
         "defaultRequire": 1

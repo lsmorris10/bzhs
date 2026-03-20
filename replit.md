@@ -40,7 +40,12 @@ src/main/java/com/sevendaystominecraft/
 │   ├── MusicManager.java           — Context-aware music system (Day/Night/Combat/BloodMoon priority)
 │   ├── ModEntityRenderers.java     — Entity renderer registration for all 18 zombie types + territory label
 │   ├── ScaledZombieRenderer.java   — ZombieRenderer subclass with configurable scale factor
-│   └── TerritoryLabelRenderer.java — Entity renderer for territory floating label (uses EntityRenderState)
+│   ├── TerritoryLabelRenderer.java — Entity renderer for territory floating label (uses EntityRenderState)
+│   └── premade/
+│       ├── PremadeWorldInfo.java        — Record: id, name, description, source, path
+│       ├── PremadeWorldManager.java     — Scans bundled+external premade worlds, copies to saves
+│       ├── PremadeWorldListWidget.java  — Scrollable list widget for premade world selection
+│       └── CreateWorldScreenHandler.java — ScreenEvent listener injecting World Type toggle
 ├── block/
 │   ├── ModBlocks.java              — DeferredRegister for all custom blocks (workstations + loot containers)
 │   ├── ModBlockEntities.java       — Block entity type registration
@@ -144,7 +149,8 @@ src/main/java/com/sevendaystominecraft/
 │   ├── FoodDataMixin.java          — Cancels vanilla food saturation
 │   ├── LivingEntityHurtMixin.java  — Custom damage handling
 │   ├── PlayerHealMixin.java        — Blocks vanilla passive regen
-│   └── SprintBlockMixin.java       — Sprint blocked when low stamina
+│   ├── SprintBlockMixin.java       — Sprint blocked when low stamina
+│   └── CreateWorldScreenMixin.java — Intercepts Create World to handle premade world creation
 └── network/
     ├── ModNetworking.java          — Packet channel registration (stats + blood moon + nearby players + chunk heat + territory)
     ├── SyncPlayerStatsPayload.java — Client/server stats sync packet
